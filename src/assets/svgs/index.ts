@@ -1,0 +1,1 @@
+export { NoonLogo } from './NoonLogo'

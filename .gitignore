@@ -53,3 +53,7 @@ coverage
 # Misc
 .turbo
 .cache
+
+# Large design masters (serve optimized PNGs instead)
+public/assets/ogp.svg
+public/assets/x-card.svg

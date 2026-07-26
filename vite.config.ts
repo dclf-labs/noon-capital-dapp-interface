@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 3000,
     host: true,
   },
   build: {
@@ -25,11 +25,22 @@ export default defineConfig({
           if (id.includes('react-dom') || id.includes('/react/') || id.includes('react-router')) {
             return 'react'
           }
-          if (id.includes('wagmi') || id.includes('viem') || id.includes('@tanstack')) {
-            return 'web3'
+          if (
+            id.includes('@reown') ||
+            id.includes('wagmi') ||
+            id.includes('viem') ||
+            id.includes('ethers')
+          ) {
+            return 'evm'
           }
-          if (id.includes('@reduxjs') || id.includes('react-redux')) {
-            return 'redux'
+          if (id.includes('starknet') || id.includes('starknetkit')) {
+            return 'starknet'
+          }
+          if (id.includes('@mysten')) {
+            return 'sui'
+          }
+          if (id.includes('@tanstack')) {
+            return 'query'
           }
         },
       },
@@ -45,13 +56,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: [
-        'src/main.tsx',
-        'src/vite-env.d.ts',
-        'src/components/ui/**',
-        'src/**/*.d.ts',
-        'src/test/**',
-      ],
+      exclude: ['src/main.tsx', 'src/App.tsx', 'src/vite-env.d.ts', 'src/**/*.d.ts', 'src/test/**'],
     },
   },
 })

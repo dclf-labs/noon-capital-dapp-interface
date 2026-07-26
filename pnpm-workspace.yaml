@@ -1,3 +1,3 @@
 allowBuilds:
-  '@reown/appkit': set this to true or false
-  cbor-extract: set this to true or false
+  '@reown/appkit': true
+  cbor-extract: true

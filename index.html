@@ -2,28 +2,94 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#6C77E9" />
+
+    <title>Noon: Web3's most intelligent stablecoin</title>
     <meta
       name="description"
-      content="Noon Capital — multichain capital markets protocol interface"
+      content="Noon is a yield-generating stablecoin using delta-neutral strategies. Earn with USN and sUSN across Ethereum, zkSync, Base, and Sophon."
     />
-    <meta name="theme-color" content="#1e3a5f" />
-    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="keywords"
+      content="Noon, USN, sUSN, yield-generating stablecoin, delta-neutral stablecoin, DeFi yield, Ethereum stablecoin, zkSync, Base, Sophon, Noon Capital"
+    />
+    <meta name="application-name" content="Noon Capital" />
+    <link rel="canonical" href="https://app.noon.capital/" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Noon Capital" />
-    <meta property="og:description" content="Deploy capital across chains from one interface." />
     <meta property="og:site_name" content="Noon Capital" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Noon Capital" />
-    <meta name="twitter:description" content="Deploy capital across chains from one interface." />
-    <title>Noon Capital</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://app.noon.capital/" />
+    <meta property="og:title" content="Noon: Web3's most intelligent stablecoin" />
+    <meta
+      property="og:description"
+      content="The intelligent and fair yield-generating stablecoin. Noon allocates collateral across battle-tested delta-neutral strategies for through-cycle yield, returning more raw yield (>90%) and governance rewards (65–80%) to users."
     />
+    <meta property="og:image" content="https://app.noon.capital/assets/ogp.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Noon — Web3's most intelligent stablecoin" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Noon: Web3's most intelligent stablecoin" />
+    <meta
+      name="twitter:description"
+      content="The intelligent and fair yield-generating stablecoin. Noon allocates collateral across battle-tested delta-neutral strategies for through-cycle yield, returning more raw yield (>90%) and governance rewards (65–80%) to users."
+    />
+    <meta name="twitter:image" content="https://app.noon.capital/assets/x-card.png" />
+    <meta name="twitter:image:alt" content="Noon — Web3's most intelligent stablecoin" />
+
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/favicon.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/assets/favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Google Analytics (gtag.js): hardened, skipped on localhost -->
+    <script>
+      ;(function () {
+        var host = location.hostname
+        if (host === 'localhost' || host === '127.0.0.1') return
+
+        var measurementId = 'G-Z4ZG8KW8CG'
+
+        var preconnect = document.createElement('link')
+        preconnect.rel = 'preconnect'
+        preconnect.href = 'https://www.googletagmanager.com'
+        document.head.appendChild(preconnect)
+
+        window.dataLayer = window.dataLayer || []
+        function gtag() {
+          dataLayer.push(arguments)
+        }
+        window.gtag = gtag
+
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'granted',
+          functionality_storage: 'denied',
+          personalization_storage: 'denied',
+          security_storage: 'granted',
+        })
+
+        gtag('js', new Date())
+        gtag('config', measurementId, {
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false,
+          cookie_flags: 'SameSite=Strict;Secure',
+        })
+
+        var script = document.createElement('script')
+        script.async = true
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + measurementId
+        document.head.appendChild(script)
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

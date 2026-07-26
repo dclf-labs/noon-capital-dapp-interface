@@ -1,0 +1,36 @@
+{
+  "name": "Noon: Web3's most intelligent stablecoin",
+  "short_name": "Noon Capital",
+  "description": "The intelligent and fair yield-generating stablecoin built for Web3.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#6C77E9",
+  "theme_color": "#6C77E9",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

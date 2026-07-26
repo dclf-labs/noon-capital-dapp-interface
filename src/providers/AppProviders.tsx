@@ -1,25 +1,25 @@
 import { type ReactNode } from 'react'
 
-import { Provider as ReduxProvider } from 'react-redux'
-
-import { Toaster } from '@/components/ui/sonner'
-import { ThemeProvider } from '@/providers/ThemeProvider'
-import { Web3Provider } from '@/providers/Web3Provider'
-import { store } from '@/store'
+import { EvmProvider } from '@/wallet/evm/provider'
+import { StarknetWalletProvider } from '@/wallet/starknet/provider'
+import { SuiWalletProvider } from '@/wallet/sui/provider'
 
 interface AppProvidersProps {
   children: ReactNode
 }
 
+/**
+ * Provider order:
+ * 1. EVM (AppKit/wagmi + shared QueryClient)
+ * 2. Starknet (reuses QueryClient)
+ * 3. Sui (independent dApp Kit)
+ */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <ReduxProvider store={store}>
-      <ThemeProvider>
-        <Web3Provider>
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
-        </Web3Provider>
-      </ThemeProvider>
-    </ReduxProvider>
+    <EvmProvider>
+      <StarknetWalletProvider>
+        <SuiWalletProvider>{children}</SuiWalletProvider>
+      </StarknetWalletProvider>
+    </EvmProvider>
   )
 }

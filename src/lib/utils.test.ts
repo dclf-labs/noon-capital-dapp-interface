@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cn, formatNumber, isTheme, sleep, truncateAddress } from '@/lib/utils'
+import { cn, formatNumber, sleep, truncateAddress } from '@/lib/utils'
 
 describe('cn', () => {
   it('merges class names and resolves tailwind conflicts', () => {
@@ -32,16 +32,6 @@ describe('formatNumber', () => {
     expect(formatNumber('not-a-number')).toBe('—')
     expect(formatNumber(Number.POSITIVE_INFINITY)).toBe('—')
     expect(formatNumber(Number.NaN)).toBe('—')
-  })
-})
-
-describe('isTheme', () => {
-  it('accepts valid theme values only', () => {
-    expect(isTheme('light')).toBe(true)
-    expect(isTheme('dark')).toBe(true)
-    expect(isTheme('system')).toBe(true)
-    expect(isTheme('neon')).toBe(false)
-    expect(isTheme(null)).toBe(false)
   })
 })
 

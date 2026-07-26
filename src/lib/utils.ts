@@ -2,8 +2,6 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { isAddress } from 'viem'
 
-import type { Theme } from '@/types'
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -30,8 +28,4 @@ export function formatNumber(
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export function isTheme(value: unknown): value is Theme {
-  return value === 'light' || value === 'dark' || value === 'system'
 }

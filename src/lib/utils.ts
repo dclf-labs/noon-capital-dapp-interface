@@ -1,16 +1,19 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { isAddress } from 'viem'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Truncate a wallet address for display (EVM, Starknet, or Sui).
+ * Empty / short values are returned unchanged.
+ */
 export function truncateAddress(address: string, chars = 4): string {
   if (!address) return ''
-  if (!isAddress(address)) return address
-  const minLength = chars * 2 + 2
-  if (address.length <= minLength) return address
+  // Avoid mangling labels or short strings; real addresses are much longer.
+  const minLength = Math.max(20, chars * 2 + 2)
+  if (address.length < minLength) return address
   return `${address.slice(0, chars + 2)}…${address.slice(-chars)}`
 }
 

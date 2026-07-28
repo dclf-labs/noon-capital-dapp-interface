@@ -1,20 +1,18 @@
 # Noon Capital DApp Interface
 
-Multichain Web3 protocol frontend built with React, TypeScript, Vite, Tailwind CSS, shadcn/ui, Redux Toolkit, and wagmi/viem.
+Multichain wallet foundation for the Noon Capital protocol — React, TypeScript, Vite, and EVM / Starknet / Sui connectors.
 
 ## Stack
 
-| Layer      | Choice                                                              |
-| ---------- | ------------------------------------------------------------------- |
-| Framework  | React 19 + TypeScript + Vite                                        |
-| Styling    | Tailwind CSS v4 + shadcn/ui (New York)                              |
-| Motion     | `motion` (ready for motion-primitives / Aceternity)                 |
-| State      | Redux Toolkit + React Query                                         |
-| Web3       | wagmi + viem (Ethereum, Arbitrum, Base, Optimism, Polygon, Sepolia) |
-| Routing    | React Router                                                        |
-| Validation | Zod (env)                                                           |
-| Quality    | ESLint + Prettier + Husky + lint-staged + commitlint + Vitest       |
-| CI         | GitHub Actions + Dependabot                                         |
+| Layer      | Choice                                                        |
+| ---------- | ------------------------------------------------------------- |
+| Framework  | React 19 + TypeScript + Vite                                  |
+| Styling    | Tailwind CSS v4 (UI kit / design system to be layered on)     |
+| State      | TanStack Query (chain/server reads)                           |
+| Web3       | EVM: AppKit + wagmi + viem + ethers · Starknet · Sui dApp Kit |
+| Validation | Zod (env)                                                     |
+| Quality    | ESLint + Prettier + Husky + lint-staged + commitlint + Vitest |
+| CI         | GitHub Actions + Dependabot                                   |
 
 ## Requirements
 
@@ -49,7 +47,7 @@ bun install
 bun run dev
 ```
 
-Set `VITE_WALLETCONNECT_PROJECT_ID` in `.env` for WalletConnect (optional — injected wallets work without it).
+Set `VITE_WALLETCONNECT_PROJECT_ID` in `.env` (required for production builds/deploys — https://dashboard.reown.com). Optionally set `VITE_GA_MEASUREMENT_ID` to enable analytics.
 
 ## Scripts
 
@@ -98,48 +96,39 @@ ESLint enforces:
 
 ```text
 src/
-  app/              # Router and app-level wiring
-  assets/svgs/      # React SVG components
+  chains/             # Chain registry (EVM / Starknet / Sui metadata)
   components/
-    ui/             # shadcn primitives
-    common/         # Shared UI (theme toggle, error boundary)
-    layout/         # Shell / header / footer
-    web3/           # Connect button, chain switcher
-    motion/         # Motion primitives
-  constants/        # Routes, storage keys, app meta
-  contexts/         # React context definitions
-  features/         # Domain modules (markets, vaults, …)
-  hooks/            # Shared hooks (+ hooks/web3)
-  lib/              # utils, env, web3 config/abis/chains
-  pages/            # Route-level screens
-  providers/        # Theme, Web3, Redux composition
-  store/            # Redux store + slices
-  styles/           # Global CSS / design tokens
-  test/             # Test setup + helpers
-  types/            # Shared TypeScript types
+    wallet/           # Wallet connect / status UI
+  constants/          # App meta + route constants
+  lib/                # env (Zod), utils, shared query client
+  providers/          # AppProviders composition
+  styles/             # Global CSS / design tokens
+  test/               # Test setup + helpers
+  wallet/
+    evm/              # AppKit + wagmi config, provider, readers, ethers
+    starknet/         # starknet-react provider, reader, hooks
+    sui/              # dApp Kit config, provider, reader
+    types.ts          # Multi-chain client types
+    readers.ts        # Cross-family ChainReader factory
+    useMultiChainClient.ts
 docs/
-  ARCHITECTURE.md   # State / feature conventions
+  ARCHITECTURE.md     # State / feature conventions
 ```
 
-## Adding shadcn components
-
-```bash
-npx shadcn@latest add <component>
-```
-
-Configured via `components.json` with `@/` path aliases.
+Planned (add when product UI lands): `features/`, `pages/` (+ router), `components/ui/` (shadcn), `store/` only if cross-route client state needs Redux.
 
 ## Extending for protocol work
 
-1. Add ABIs under `src/lib/web3/abis/`
-2. Add feature modules under `src/features/<domain>/`
-3. Prefer React Query for server/chain reads; Redux for cross-route UI + portfolio state
-4. Keep wallet UI in `components/web3` and reusable chain logic in `hooks/web3`
+1. Keep chain metadata in `src/chains/`
+2. Add ABIs / contract helpers under `src/lib/` (e.g. `lib/abis/`) as needed
+3. Add feature modules under `src/features/<domain>/` when product domains appear
+4. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
 5. See `docs/ARCHITECTURE.md` for state ownership rules
 
 ## Security notes
 
 - Never commit `.env` or private keys / mnemonics
+- All `VITE_*` values are embedded in the client bundle — treat them as public
 - Review new dependencies before merging Dependabot PRs
 - Prefer `npm ci` in CI and clean installs from the lockfile
 - `npm audit` runs in CI at high severity

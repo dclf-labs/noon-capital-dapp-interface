@@ -2,13 +2,12 @@ import { ConnectButton } from '@mysten/dapp-kit-react/ui'
 import { AppKitButton } from '@reown/appkit/react'
 
 import { chainList } from '@/chains'
+import { truncateAddress } from '@/lib/utils'
 import { useMultiChainClient } from '@/wallet'
 import { useStarknetWallet } from '@/wallet/starknet/useStarknetWallet'
 
-function truncate(value: string | undefined) {
-  if (!value) return '—'
-  if (value.length < 12) return value
-  return `${value.slice(0, 6)}…${value.slice(-4)}`
+function displayAddress(value: string | undefined) {
+  return value ? truncateAddress(value) : '—'
 }
 
 export function WalletStatusPanel() {
@@ -32,7 +31,7 @@ export function WalletStatusPanel() {
         <h2 style={{ margin: 0, fontSize: 16 }}>EVM (AppKit + wagmi + viem + ethers)</h2>
         <AppKitButton />
         <p style={{ margin: 0, fontSize: 14 }}>
-          Connected: {truncate(evm.address)} {evm.networkLabel ? `(${evm.networkLabel})` : ''}
+          Connected: {displayAddress(evm.address)} {evm.networkLabel ? `(${evm.networkLabel})` : ''}
         </p>
       </section>
 
@@ -48,7 +47,7 @@ export function WalletStatusPanel() {
           </button>
         )}
         <p style={{ margin: 0, fontSize: 14 }}>
-          Connected: {truncate(sn.address)} {sn.networkLabel ? `(${sn.networkLabel})` : ''}
+          Connected: {displayAddress(sn.address)} {sn.networkLabel ? `(${sn.networkLabel})` : ''}
         </p>
       </section>
 
@@ -56,7 +55,7 @@ export function WalletStatusPanel() {
         <h2 style={{ margin: 0, fontSize: 16 }}>Sui (@mysten/dapp-kit-react)</h2>
         <ConnectButton />
         <p style={{ margin: 0, fontSize: 14 }}>
-          Connected: {truncate(sui.address)} {sui.networkLabel ? `(${sui.networkLabel})` : ''}
+          Connected: {displayAddress(sui.address)} {sui.networkLabel ? `(${sui.networkLabel})` : ''}
         </p>
       </section>
 

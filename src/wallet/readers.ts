@@ -1,7 +1,7 @@
 import { type ChainKey, getChain } from '@/chains'
 import { getEvmNativeBalance } from '@/wallet/evm/reader'
 import { getStarknetNativeBalance } from '@/wallet/starknet/reader'
-import { getSuiNativeBalance } from '@/wallet/sui/config'
+import { getSuiNativeBalance } from '@/wallet/sui/reader'
 import type { ChainReader } from '@/wallet/types'
 
 /**

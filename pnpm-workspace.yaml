@@ -1,3 +1,5 @@
+# pnpm build-script allowlist (not a monorepo workspace).
+# See https://pnpm.io/settings#allowbuilds — npm CI ignores this file.
 allowBuilds:
   '@reown/appkit': true
   cbor-extract: true

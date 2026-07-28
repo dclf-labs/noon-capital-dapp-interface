@@ -19,16 +19,3 @@ declare module '@mysten/dapp-kit-react' {
     dAppKit: typeof suiDAppKit
   }
 }
-
-export function getSuiClient(network: typeof suiMainnet.network = suiMainnet.network) {
-  return new SuiJsonRpcClient({
-    url: getJsonRpcFullnodeUrl(network),
-    network,
-  })
-}
-
-export async function getSuiNativeBalance(address: string): Promise<bigint> {
-  const client = getSuiClient()
-  const balance = await client.getBalance({ owner: address })
-  return BigInt(balance.totalBalance)
-}

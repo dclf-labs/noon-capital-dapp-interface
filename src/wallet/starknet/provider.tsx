@@ -9,7 +9,7 @@ import {
   StarknetConfig,
 } from '@starknet-react/core'
 
-import { queryClient } from '@/wallet/evm/provider'
+import { queryClient } from '@/lib/query'
 
 interface StarknetWalletProviderProps {
   children: ReactNode

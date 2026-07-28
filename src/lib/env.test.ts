@@ -10,7 +10,7 @@ const validEnv = {
   BASE_URL: '/',
   VITE_APP_ENV: 'development' as const,
   VITE_WALLETCONNECT_PROJECT_ID: '',
-  VITE_ALCHEMY_API_KEY: '',
+  VITE_GA_MEASUREMENT_ID: '',
 }
 
 describe('parseEnv', () => {
@@ -19,6 +19,7 @@ describe('parseEnv', () => {
     expect(env.MODE).toBe('test')
     expect(env.BASE_URL).toBe('/')
     expect(env.VITE_WALLETCONNECT_PROJECT_ID).toBe('')
+    expect(env.VITE_GA_MEASUREMENT_ID).toBe('')
   })
 
   it('throws on invalid configuration', () => {

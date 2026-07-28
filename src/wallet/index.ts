@@ -8,6 +8,7 @@ export {
 export { createChainReader, getChainReader } from '@/wallet/readers'
 export { getStarknetRpcProvider } from '@/wallet/starknet/reader'
 export { useStarknetWallet } from '@/wallet/starknet/useStarknetWallet'
-export { getSuiClient, getSuiNativeBalance, suiDAppKit } from '@/wallet/sui/config'
+export { suiDAppKit } from '@/wallet/sui/config'
+export { getSuiClient, getSuiNativeBalance } from '@/wallet/sui/reader'
 export type { ChainReader, EvmWriteClient, MultiChainClient, WalletSession } from '@/wallet/types'
 export { useMultiChainClient } from '@/wallet/useMultiChainClient'

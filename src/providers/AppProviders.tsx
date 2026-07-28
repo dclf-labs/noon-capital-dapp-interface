@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 
-import { EvmProvider } from '@/wallet/evm/provider'
+import { EvmWalletProvider } from '@/wallet/evm/provider'
 import { StarknetWalletProvider } from '@/wallet/starknet/provider'
 import { SuiWalletProvider } from '@/wallet/sui/provider'
 
@@ -16,10 +16,10 @@ interface AppProvidersProps {
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <EvmProvider>
+    <EvmWalletProvider>
       <StarknetWalletProvider>
         <SuiWalletProvider>{children}</SuiWalletProvider>
       </StarknetWalletProvider>
-    </EvmProvider>
+    </EvmWalletProvider>
   )
 }

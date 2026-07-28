@@ -19,3 +19,5 @@ This repository is a frontend interface. Especially sensitive areas:
 - Never commit secrets, private keys, seed phrases, or production API keys
 - Prefer wallet extensions / WalletConnect — never ask users to paste private keys
 - Treat new npm packages as untrusted until reviewed (publisher, age, downloads, advisories)
+- Remember every `VITE_*` variable is public in the browser bundle; restrict third-party API keys by HTTP referrer / domain when the provider supports it
+- Production deploys must set a real `VITE_WALLETCONNECT_PROJECT_ID` (empty values fail closed at runtime)

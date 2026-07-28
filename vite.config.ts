@@ -22,7 +22,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return
-          if (id.includes('react-dom') || id.includes('/react/') || id.includes('react-router')) {
+          if (id.includes('react-dom') || id.includes('/react/')) {
             return 'react'
           }
           if (

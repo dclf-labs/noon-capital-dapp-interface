@@ -8,7 +8,7 @@ export const envSchema = z.object({
   BASE_URL: z.string(),
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
   VITE_WALLETCONNECT_PROJECT_ID: z.string().optional().default(''),
-  VITE_ALCHEMY_API_KEY: z.string().optional().default(''),
+  VITE_GA_MEASUREMENT_ID: z.string().optional().default(''),
 })
 
 export type AppEnv = z.infer<typeof envSchema>
@@ -32,7 +32,7 @@ export const env = parseEnv({
   BASE_URL: import.meta.env.BASE_URL,
   VITE_APP_ENV: import.meta.env.VITE_APP_ENV || 'development',
   VITE_WALLETCONNECT_PROJECT_ID: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? '',
-  VITE_ALCHEMY_API_KEY: import.meta.env.VITE_ALCHEMY_API_KEY ?? '',
+  VITE_GA_MEASUREMENT_ID: import.meta.env.VITE_GA_MEASUREMENT_ID ?? '',
 })
 
 export const isProd = env.PROD

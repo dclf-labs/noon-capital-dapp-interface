@@ -9,7 +9,7 @@ describe('cn', () => {
 })
 
 describe('truncateAddress', () => {
-  it('truncates a valid ethereum address', () => {
+  it('truncates a long address', () => {
     expect(truncateAddress('0x1234567890abcdef1234567890abcdef12345678')).toBe('0x1234…5678')
   })
 
@@ -17,7 +17,7 @@ describe('truncateAddress', () => {
     expect(truncateAddress('')).toBe('')
   })
 
-  it('returns invalid short values unchanged', () => {
+  it('returns short values unchanged', () => {
     expect(truncateAddress('0x12')).toBe('0x12')
     expect(truncateAddress('not-an-address')).toBe('not-an-address')
   })

@@ -57,10 +57,7 @@ export default defineConfig([
         'error',
         { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true, allowExportNames: ['buttonVariants'] },
-      ],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
   {

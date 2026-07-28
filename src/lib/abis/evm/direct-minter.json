@@ -1,0 +1,697 @@
+[
+  {
+    "inputs": [{ "internalType": "address", "name": "_usnToken", "type": "address" }],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "AccessControlBadConfirmation", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" },
+      { "internalType": "bytes32", "name": "neededRole", "type": "bytes32" }
+    ],
+    "name": "AccessControlUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "CannotSetZero", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "CollateralAlreadyWhitelisted",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "CollateralNotWhitelisted",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "usnAmount", "type": "uint256" }
+    ],
+    "name": "CollateralUsnMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "limit", "type": "uint256" },
+      { "internalType": "uint256", "name": "requested", "type": "uint256" }
+    ],
+    "name": "DirectMintLimitExceeded",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ECDSAInvalidSignature", "type": "error" },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "length", "type": "uint256" }],
+    "name": "ECDSAInvalidSignatureLength",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "s", "type": "bytes32" }],
+    "name": "ECDSAInvalidSignatureS",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "int256", "name": "price", "type": "int256" }],
+    "name": "InvalidPrice",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidShortString", "type": "error" },
+  { "inputs": [], "name": "InvalidSignature", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "limit", "type": "uint256" },
+      { "internalType": "uint256", "name": "requested", "type": "uint256" }
+    ],
+    "name": "MintLimitExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+    ],
+    "name": "NonceAlreadyUsed",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "PriceFeedNotSet",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "limit", "type": "uint256" },
+      { "internalType": "uint256", "name": "requested", "type": "uint256" }
+    ],
+    "name": "RebaseLimitExceeded",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  { "inputs": [], "name": "SUSNVaultNotSet", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+      { "internalType": "uint256", "name": "currentTime", "type": "uint256" }
+    ],
+    "name": "SignatureExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "updatedAt", "type": "uint256" },
+      { "internalType": "uint256", "name": "currentTime", "type": "uint256" }
+    ],
+    "name": "StalePrice",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "str", "type": "string" }],
+    "name": "StringTooLong",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "UserAlreadyWhitelisted",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "UserNotWhitelisted",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ZeroAddress", "type": "error" },
+  { "inputs": [], "name": "ZeroAmount", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "custodialWallet", "type": "address" }
+    ],
+    "name": "CustodialWalletSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collateralAmount",
+        "type": "uint256"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collateralAddress",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "priceUsed", "type": "uint256" }
+    ],
+    "name": "DirectMint",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newLimit", "type": "uint256" }
+    ],
+    "name": "DirectMintLimitUpdated",
+    "type": "event"
+  },
+  { "anonymous": false, "inputs": [], "name": "EIP712DomainChanged", "type": "event" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collateralAmount",
+        "type": "uint256"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collateralAddress",
+        "type": "address"
+      }
+    ],
+    "name": "Mint",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "MintAndRebase",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "mintLimitPerBlock", "type": "uint256" }
+    ],
+    "name": "MintLimitPerBlockUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newThreshold", "type": "uint256" }
+    ],
+    "name": "OracleStalenessThresholdUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "priceFeed", "type": "address" }
+    ],
+    "name": "PriceFeedSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newThresholdBps", "type": "uint256" }
+    ],
+    "name": "PriceThresholdUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newLimit", "type": "uint256" }
+    ],
+    "name": "RebaseLimitUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      { "indexed": true, "internalType": "bytes32", "name": "newAdminRole", "type": "bytes32" }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "indexed": true, "internalType": "address", "name": "account", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "indexed": true, "internalType": "address", "name": "account", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "sUSNVault", "type": "address" }
+    ],
+    "name": "SUSNVaultSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" }
+    ],
+    "name": "WhitelistedCollateralAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" }
+    ],
+    "name": "WhitelistedCollateralRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }],
+    "name": "WhitelistedUserAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }],
+    "name": "WhitelistedUserRemoved",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MINTER_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ONE_USD",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PRICE_PRECISION",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "addWhitelistedCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "addWhitelistedUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentBlockMintAmount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentDayDirectMintAmount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "custodialWallet",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateralAddress", "type": "address" },
+      { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "minUsnAmount", "type": "uint256" }
+    ],
+    "name": "directMint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "directMintLimitPerDay",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "eip712Domain",
+    "outputs": [
+      { "internalType": "bytes1", "name": "fields", "type": "bytes1" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "version", "type": "string" },
+      { "internalType": "uint256", "name": "chainId", "type": "uint256" },
+      { "internalType": "address", "name": "verifyingContract", "type": "address" },
+      { "internalType": "bytes32", "name": "salt", "type": "bytes32" },
+      { "internalType": "uint256[]", "name": "extensions", "type": "uint256[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IMinterHandler.Order",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "encodeOrder",
+    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }],
+    "name": "getRoleAdmin",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "hasRole",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IMinterHandler.Order",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "hashOrder",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastDirectMintDay",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastMintBlock",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IMinterHandler.Order",
+        "name": "order",
+        "type": "tuple"
+      },
+      { "internalType": "bytes", "name": "signature", "type": "bytes" }
+    ],
+    "name": "mint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "mintAndRebase",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "mintLimitPerBlock",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oracleStalenessThreshold",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateralAddress", "type": "address" },
+      { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" }
+    ],
+    "name": "previewDirectMint",
+    "outputs": [
+      { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "priceUsed", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "priceFeeds",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "priceThresholdBps",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rebaseLimit",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "removeWhitelistedCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "removeWhitelistedUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "callerConfirmation", "type": "address" }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "sUSNVault",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_custodialWallet", "type": "address" }],
+    "name": "setCustodialWallet",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_limit", "type": "uint256" }],
+    "name": "setDirectMintLimitPerDay",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_mintLimitPerBlock", "type": "uint256" }],
+    "name": "setMintLimitPerBlock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_threshold", "type": "uint256" }],
+    "name": "setOracleStalenessThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "address", "name": "priceFeed", "type": "address" }
+    ],
+    "name": "setPriceFeed",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_thresholdBps", "type": "uint256" }],
+    "name": "setPriceThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_rebaseLimit", "type": "uint256" }],
+    "name": "setRebaseLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_sUSNVault", "type": "address" }],
+    "name": "setSUSNVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "usnToken",
+    "outputs": [{ "internalType": "contract IUSN", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "whitelistedCollaterals",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "whitelistedUsers",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

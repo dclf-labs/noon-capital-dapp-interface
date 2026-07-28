@@ -19,6 +19,7 @@ Product routes, feature modules, and a UI kit are intentionally **not** scaffold
 | `src/wallet/<family>/`   | `config`, `provider`, `reader` (+ family hooks)          |
 | `src/components/wallet/` | Connect / status UI only                                 |
 | `src/lib/`               | Cross-cutting utils, env validation, shared query client |
+| `src/lib/abis/`          | Contract ABIs (`evm/` Solidity, `starknet/` Cairo)       |
 | `src/providers/`         | Top-level provider composition                           |
 
 ## Chain readers

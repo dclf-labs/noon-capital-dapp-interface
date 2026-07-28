@@ -1,0 +1,896 @@
+[
+  {
+    "inputs": [{ "internalType": "address", "name": "_usnToken", "type": "address" }],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "AccessControlBadConfirmation", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" },
+      { "internalType": "bytes32", "name": "neededRole", "type": "bytes32" }
+    ],
+    "name": "AccessControlUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "CollateralAlreadyAdded", "type": "error" },
+  { "inputs": [], "name": "CollateralNotFound", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "limit", "type": "uint256" },
+      { "internalType": "uint256", "name": "requested", "type": "uint256" }
+    ],
+    "name": "DirectRedeemLimitExceeded",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ECDSAInvalidSignature", "type": "error" },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "length", "type": "uint256" }],
+    "name": "ECDSAInvalidSignatureLength",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "s", "type": "bytes32" }],
+    "name": "ECDSAInvalidSignatureS",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InsufficientAllowance", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "required", "type": "uint256" },
+      { "internalType": "uint256", "name": "available", "type": "uint256" }
+    ],
+    "name": "InsufficientTreasuryBalance",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidCollateralAddress", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "orderAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "calculatedAmount", "type": "uint256" }
+    ],
+    "name": "InvalidCollateralAmount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidNonce", "type": "error" },
+  {
+    "inputs": [{ "internalType": "int256", "name": "price", "type": "int256" }],
+    "name": "InvalidOraclePrice",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "int256", "name": "price", "type": "int256" }],
+    "name": "InvalidPrice",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidShortString", "type": "error" },
+  { "inputs": [], "name": "InvalidSignature", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "OracleNotSet",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "PriceFeedNotSet",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "queueId", "type": "uint256" }],
+    "name": "QueueExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "queueId", "type": "uint256" }],
+    "name": "QueueNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "queueId", "type": "uint256" }],
+    "name": "QueueNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "queueId", "type": "uint256" }],
+    "name": "QueueNotPending",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "limit", "type": "uint256" },
+      { "internalType": "uint256", "name": "requested", "type": "uint256" }
+    ],
+    "name": "RedeemLimitExceeded",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  { "inputs": [], "name": "SignatureExpired", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "updatedAt", "type": "uint256" },
+      { "internalType": "uint256", "name": "threshold", "type": "uint256" }
+    ],
+    "name": "StaleOracleData",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "updatedAt", "type": "uint256" },
+      { "internalType": "uint256", "name": "currentTime", "type": "uint256" }
+    ],
+    "name": "StalePrice",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "str", "type": "string" }],
+    "name": "StringTooLong",
+    "type": "error"
+  },
+  { "inputs": [], "name": "TreasuryNotSet", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "UserAlreadyWhitelisted",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "UserNotWhitelisted",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ZeroAddress", "type": "error" },
+  { "inputs": [], "name": "ZeroAmount", "type": "error" },
+  { "inputs": [], "name": "ZeroOracleAddress", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" }
+    ],
+    "name": "CollateralAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "oracle", "type": "address" }
+    ],
+    "name": "CollateralOracleUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" }
+    ],
+    "name": "CollateralRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collateralAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "collateralAddress",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "priceUsed", "type": "uint256" }
+    ],
+    "name": "DirectRedeem",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newLimit", "type": "uint256" }
+    ],
+    "name": "DirectRedeemLimitUpdated",
+    "type": "event"
+  },
+  { "anonymous": false, "inputs": [], "name": "EIP712DomainChanged", "type": "event" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" },
+      { "indexed": false, "internalType": "int256", "name": "price", "type": "int256" },
+      { "indexed": false, "internalType": "uint256", "name": "updatedAt", "type": "uint256" }
+    ],
+    "name": "OracleDataUsed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newThreshold", "type": "uint256" }
+    ],
+    "name": "OracleStalenessThresholdUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "collateral", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "priceFeed", "type": "address" }
+    ],
+    "name": "PriceFeedSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "newThresholdBps", "type": "uint256" }
+    ],
+    "name": "PriceThresholdUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "queueId", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "admin", "type": "address" }
+    ],
+    "name": "RedeemApproved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "queueId", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "recipient", "type": "address" },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collateralAddress",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "collateralAmount", "type": "uint256" }
+    ],
+    "name": "RedeemClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "redeemLimitPerBlock",
+        "type": "uint256"
+      }
+    ],
+    "name": "RedeemLimitPerBlockUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "queueId", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "collateralAddress",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "collateralAmount",
+        "type": "uint256"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "price", "type": "uint256" }
+    ],
+    "name": "RedeemQueued",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "queueId", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "usnAmount", "type": "uint256" }
+    ],
+    "name": "RedeemReclaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "queueId", "type": "uint256" },
+      { "indexed": true, "internalType": "address", "name": "admin", "type": "address" }
+    ],
+    "name": "RedeemRejected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "collateralAddress",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "collateralAmount", "type": "uint256" }
+    ],
+    "name": "Redeemed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      { "indexed": true, "internalType": "bytes32", "name": "newAdminRole", "type": "bytes32" }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "indexed": true, "internalType": "address", "name": "account", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "indexed": true, "internalType": "address", "name": "account", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldTreasury", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newTreasury", "type": "address" }
+    ],
+    "name": "TreasuryUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }],
+    "name": "WhitelistedUserAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "user", "type": "address" }],
+    "name": "WhitelistedUserRemoved",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "BURNER_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "ONE_USD",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PRICE_PRECISION",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "QUEUE_EXPIRY",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "address", "name": "oracle", "type": "address" }
+    ],
+    "name": "addRedeemableCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "addWhitelistedUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_queueId", "type": "uint256" }],
+    "name": "approveQueuedRedeem",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "uint256", "name": "usnAmount", "type": "uint256" }
+    ],
+    "name": "calculateCollateralAmount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_queueId", "type": "uint256" }],
+    "name": "cancelQueuedRedeem",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentBlockRedeemAmount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentDayDirectRedeemAmount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateralAddress", "type": "address" },
+      { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "minCollateralAmount", "type": "uint256" }
+    ],
+    "name": "directRedeem",
+    "outputs": [{ "internalType": "uint256", "name": "queueId", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "directRedeemLimitPerDay",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "eip712Domain",
+    "outputs": [
+      { "internalType": "bytes1", "name": "fields", "type": "bytes1" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "version", "type": "string" },
+      { "internalType": "uint256", "name": "chainId", "type": "uint256" },
+      { "internalType": "address", "name": "verifyingContract", "type": "address" },
+      { "internalType": "bytes32", "name": "salt", "type": "bytes32" },
+      { "internalType": "uint256[]", "name": "extensions", "type": "uint256[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IRedeemHandlerV2.RedeemOrder",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "encodeOrder",
+    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "getCollateralPrice",
+    "outputs": [
+      { "internalType": "int256", "name": "price", "type": "int256" },
+      { "internalType": "uint256", "name": "updatedAt", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_queueId", "type": "uint256" }],
+    "name": "getQueuedRedeem",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "price", "type": "uint256" },
+          { "internalType": "uint256", "name": "queuedAt", "type": "uint256" },
+          { "internalType": "enum IRedeemHandlerV2.QueueStatus", "name": "status", "type": "uint8" }
+        ],
+        "internalType": "struct IRedeemHandlerV2.QueuedRedeem",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }],
+    "name": "getRoleAdmin",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "getTreasuryBalance",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "hasRole",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IRedeemHandlerV2.RedeemOrder",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "hashOrder",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "isWhitelisted",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastDirectRedeemDay",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastRedeemBlock",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextQueueId",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "oracleStalenessThreshold",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateralAddress", "type": "address" },
+      { "internalType": "uint256", "name": "usnAmount", "type": "uint256" }
+    ],
+    "name": "previewDirectRedeem",
+    "outputs": [
+      { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "priceUsed", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "priceFeeds",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "priceThresholdBps",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "queuedRedeems",
+    "outputs": [
+      { "internalType": "address", "name": "user", "type": "address" },
+      { "internalType": "address", "name": "collateralAddress", "type": "address" },
+      { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "price", "type": "uint256" },
+      { "internalType": "uint256", "name": "queuedAt", "type": "uint256" },
+      { "internalType": "enum IRedeemHandlerV2.QueueStatus", "name": "status", "type": "uint8" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_queueId", "type": "uint256" }],
+    "name": "reclaimExpiredRedeem",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IRedeemHandlerV2.RedeemOrder",
+        "name": "order",
+        "type": "tuple"
+      },
+      { "internalType": "bytes", "name": "signature", "type": "bytes" }
+    ],
+    "name": "redeem",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "redeemLimitPerBlock",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "message", "type": "string" },
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "address", "name": "collateralAddress", "type": "address" },
+          { "internalType": "uint256", "name": "collateralAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "usnAmount", "type": "uint256" },
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" }
+        ],
+        "internalType": "struct IRedeemHandlerV2.RedeemOrder",
+        "name": "order",
+        "type": "tuple"
+      },
+      { "internalType": "bytes", "name": "signature", "type": "bytes" },
+      { "internalType": "uint8", "name": "v", "type": "uint8" },
+      { "internalType": "bytes32", "name": "r", "type": "bytes32" },
+      { "internalType": "bytes32", "name": "s", "type": "bytes32" }
+    ],
+    "name": "redeemWithPermit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "redeemableCollaterals",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_queueId", "type": "uint256" }],
+    "name": "rejectQueuedRedeem",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "collateral", "type": "address" }],
+    "name": "removeRedeemableCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+    "name": "removeWhitelistedUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "callerConfirmation", "type": "address" }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_limit", "type": "uint256" }],
+    "name": "setDirectRedeemLimitPerDay",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_threshold", "type": "uint256" }],
+    "name": "setOracleStalenessThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "address", "name": "priceFeed", "type": "address" }
+    ],
+    "name": "setPriceFeed",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_thresholdBps", "type": "uint256" }],
+    "name": "setPriceThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_redeemLimitPerBlock", "type": "uint256" }],
+    "name": "setRedeemLimitPerBlock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_treasury", "type": "address" }],
+    "name": "setTreasury",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasury",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "collateral", "type": "address" },
+      { "internalType": "address", "name": "oracle", "type": "address" }
+    ],
+    "name": "updateCollateralOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "usnToken",
+    "outputs": [{ "internalType": "contract USN", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "whitelistedUsers",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

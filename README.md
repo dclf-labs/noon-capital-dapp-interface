@@ -113,7 +113,7 @@ src/
   components/
     wallet/           # Wallet connect / status UI
   constants/          # App meta + route constants
-  lib/                # env (Zod), utils, shared query client
+  lib/                # env (Zod), utils, shared query client, abis/
   providers/          # AppProviders composition
   styles/             # Global CSS / design tokens
   test/               # Test setup + helpers
@@ -133,7 +133,7 @@ docs/
 ## Extending for protocol work
 
 1. Keep chain metadata in `src/chains/`
-2. Add ABIs / contract helpers under `src/lib/` (e.g. `lib/abis/`) as needed
+2. Add ABIs under `src/lib/abis/` (`evm/` Solidity, `starknet/` Cairo) — see `src/lib/abis/README.md`
 3. Add feature modules under `src/features/<domain>/` when product domains appear
 4. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
 5. See `docs/ARCHITECTURE.md` for state ownership and Starknet balance notes

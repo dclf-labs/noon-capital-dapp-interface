@@ -29,7 +29,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "check": "prettier --check . && eslint . && tsc -b --pretty false && vitest run && tsc -b && vite build",
+    "check": "prettier --check . && eslint . && vitest run && tsc -b && vite build",
     "prepare": "husky"
   },
   "lint-staged": {

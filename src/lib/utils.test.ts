@@ -9,8 +9,21 @@ describe('cn', () => {
 })
 
 describe('truncateAddress', () => {
-  it('truncates a long address', () => {
-    expect(truncateAddress('0x1234567890abcdef1234567890abcdef12345678')).toBe('0x1234…5678')
+  const evm = '0x1234567890abcdef1234567890abcdef12345678'
+  const starknet = '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7'
+  const sui = '0x2::sui::SUI_PLACEHOLDER_ADDRESS_LONG_ENOUGH_FOR_TRUNCATION'
+
+  it('truncates a long EVM address', () => {
+    expect(truncateAddress(evm)).toBe('0x1234…5678')
+  })
+
+  it('respects a custom char window', () => {
+    expect(truncateAddress(evm, 6)).toBe('0x123456…345678')
+  })
+
+  it('truncates Starknet and Sui-style addresses', () => {
+    expect(truncateAddress(starknet)).toMatch(/^0x049d…4dc7$/)
+    expect(truncateAddress(sui).includes('…')).toBe(true)
   })
 
   it('returns empty string for empty input', () => {
@@ -20,12 +33,17 @@ describe('truncateAddress', () => {
   it('returns short values unchanged', () => {
     expect(truncateAddress('0x12')).toBe('0x12')
     expect(truncateAddress('not-an-address')).toBe('not-an-address')
+    expect(truncateAddress('0x1234567890abcdef')).toBe('0x1234567890abcdef')
   })
 })
 
 describe('formatNumber', () => {
   it('formats finite numbers', () => {
     expect(formatNumber(1234.5678)).toContain('1,234')
+  })
+
+  it('parses numeric strings', () => {
+    expect(formatNumber('1234.5')).toContain('1,234')
   })
 
   it('returns an em dash for invalid or non-finite input', () => {

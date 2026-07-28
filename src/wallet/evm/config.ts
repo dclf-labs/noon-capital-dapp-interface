@@ -4,31 +4,13 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { evmAppKitNetworks } from '@/chains'
 import { APP_DESCRIPTION, APP_NAME } from '@/constants'
 import { env, isDev, isProd } from '@/lib/env'
+import { resolveWalletConnectProjectId } from '@/wallet/evm/projectId'
 
-const projectId = env.VITE_WALLETCONNECT_PROJECT_ID.trim()
-
-/** Dev/test-only placeholder so AppKit can boot without a real Reown project id. */
-const DEV_PLACEHOLDER_PROJECT_ID = '00000000000000000000000000000000'
-
-function resolveWalletConnectProjectId(): string {
-  if (projectId) return projectId
-
-  if (isProd) {
-    throw new Error(
-      '[evm] VITE_WALLETCONNECT_PROJECT_ID is required in production. Get one at https://dashboard.reown.com',
-    )
-  }
-
-  if (isDev) {
-    console.warn(
-      '[evm] VITE_WALLETCONNECT_PROJECT_ID is empty. Set it in .env (https://dashboard.reown.com).',
-    )
-  }
-
-  return DEV_PLACEHOLDER_PROJECT_ID
-}
-
-const resolvedProjectId = resolveWalletConnectProjectId()
+const resolvedProjectId = resolveWalletConnectProjectId({
+  projectId: env.VITE_WALLETCONNECT_PROJECT_ID,
+  isProd,
+  isDev,
+})
 
 export const wagmiAdapter = new WagmiAdapter({
   projectId: resolvedProjectId,

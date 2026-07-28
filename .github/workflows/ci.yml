@@ -43,11 +43,26 @@ jobs:
       - name: Unit tests
         run: npm run test:coverage
 
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      # Vite embeds VITE_* at build time. Use a CI placeholder when the repo
+      # secret is unset (forks / first setup). Production deploys must set a
+      # real Reown project id — see SECURITY.md / README.
       - name: Production build
         run: npm run build
         env:
-          VITE_WALLETCONNECT_PROJECT_ID: ${{ secrets.VITE_WALLETCONNECT_PROJECT_ID }}
+          VITE_WALLETCONNECT_PROJECT_ID: ${{ secrets.VITE_WALLETCONNECT_PROJECT_ID || '00000000000000000000000000000000' }}
           VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+          VITE_APP_ENV: production
 
+      # Aligns with .npmrc audit-level=moderate for local installs; CI fails on
+      # moderate+ so supply-chain regressions surface before merge.
       - name: Security audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=moderate

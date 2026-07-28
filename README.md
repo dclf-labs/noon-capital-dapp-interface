@@ -19,7 +19,12 @@ Multichain wallet foundation for the Noon Capital protocol — React, TypeScript
 - Node.js **22+** (see `.nvmrc`)
 - Any of: **npm**, **Yarn**, **pnpm**, or **Bun**
 
-`package-lock.json` is the **canonical lockfile** used in CI. Other lockfiles are gitignored so PRs don’t fight over managers — use whichever tool you prefer locally.
+`package-lock.json` is the **canonical lockfile** used in CI (`npm ci`). Other lockfiles are gitignored so PRs don’t fight over managers — use whichever tool you prefer locally.
+
+Helper configs for alternate managers are committed intentionally:
+
+- `.npmrc` — shared install hygiene (`engine-strict`, `legacy-peer-deps` for `@starknet-react/*` on React 19)
+- `.yarnrc.yml` / `pnpm-workspace.yaml` — local manager settings (`pnpm-workspace.yaml` is an `allowBuilds` allowlist, **not** a monorepo workspace)
 
 ## Getting started
 
@@ -30,7 +35,7 @@ cp .env.example .env
 Install with your preferred manager:
 
 ```bash
-# npm
+# npm (canonical for CI)
 npm install
 npm run dev
 
@@ -47,7 +52,15 @@ bun install
 bun run dev
 ```
 
-Set `VITE_WALLETCONNECT_PROJECT_ID` in `.env` (required for production builds/deploys — https://dashboard.reown.com). Optionally set `VITE_GA_MEASUREMENT_ID` to enable analytics.
+### Environment variables
+
+| Variable                        | Required                        | Notes                                                                |
+| ------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
+| `VITE_WALLETCONNECT_PROJECT_ID` | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
+| `VITE_GA_MEASUREMENT_ID`        | No                              | Injected into `index.html` only; omitted / empty disables analytics  |
+| `VITE_APP_ENV`                  | No (default `development`)      | `development` \| `staging` \| `production`                           |
+
+Set these in `.env` locally and in Vercel (or your host) for deploys. CI may use a placeholder WalletConnect id when the GitHub secret is unset — that is **not** enough for production.
 
 ## Scripts
 
@@ -61,18 +74,18 @@ Scripts are manager-agnostic (`dev`, `build`, `lint`, `test`, `check`, …). Run
 | `format`        | Format with Prettier                     |
 | `typecheck`     | TypeScript project build check           |
 | `test`          | Run Vitest unit tests                    |
-| `test:coverage` | Unit tests with coverage                 |
+| `test:coverage` | Unit tests with coverage thresholds      |
 | `check`         | format + lint + typecheck + test + build |
 
 ## Quality gates
 
-| Hook / CI      | What it enforces                                   |
-| -------------- | -------------------------------------------------- |
-| pre-commit     | lint-staged (ESLint + Prettier)                    |
-| commit-msg     | Conventional Commits (commitlint)                  |
-| pre-push       | typecheck + unit tests                             |
-| GitHub Actions | format, lint, typecheck, tests, build, `npm audit` |
-| Dependabot     | weekly npm + Actions dependency PRs                |
+| Hook / CI      | What it enforces                                                     |
+| -------------- | -------------------------------------------------------------------- |
+| pre-commit     | lint-staged (ESLint + Prettier)                                      |
+| commit-msg     | Conventional Commits (commitlint)                                    |
+| pre-push       | typecheck + unit tests                                               |
+| GitHub Actions | format, lint, typecheck, coverage (+ thresholds), build, `npm audit` |
+| Dependabot     | weekly npm + Actions dependency PRs                                  |
 
 Commit examples:
 
@@ -115,7 +128,7 @@ docs/
   ARCHITECTURE.md     # State / feature conventions
 ```
 
-Planned (add when product UI lands): `features/`, `pages/` (+ router), `components/ui/` (shadcn), `store/` only if cross-route client state needs Redux.
+**Not installed yet** (add when product UI lands): `features/`, `pages/` (+ router), `components/ui/` (design system), client store only if cross-route UI needs it.
 
 ## Extending for protocol work
 
@@ -123,7 +136,7 @@ Planned (add when product UI lands): `features/`, `pages/` (+ router), `componen
 2. Add ABIs / contract helpers under `src/lib/` (e.g. `lib/abis/`) as needed
 3. Add feature modules under `src/features/<domain>/` when product domains appear
 4. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
-5. See `docs/ARCHITECTURE.md` for state ownership rules
+5. See `docs/ARCHITECTURE.md` for state ownership and Starknet balance notes
 
 ## Security notes
 
@@ -131,4 +144,5 @@ Planned (add when product UI lands): `features/`, `pages/` (+ router), `componen
 - All `VITE_*` values are embedded in the client bundle — treat them as public
 - Review new dependencies before merging Dependabot PRs
 - Prefer `npm ci` in CI and clean installs from the lockfile
-- `npm audit` runs in CI at high severity
+- `npm audit` runs in CI at **moderate** severity (matches `.npmrc`)
+- See `SECURITY.md` for reporting and deploy env requirements

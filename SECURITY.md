@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security issues privately to the Noon Capital / DCLF Labs maintainers.
+Please report security issues **privately** to the Noon Capital / DCLF Labs maintainers (for example via the GitHub Security Advisories “Report a vulnerability” flow on this repository when enabled).
 Do not open a public GitHub issue for vulnerabilities that could put user funds or keys at risk.
 
 ## Scope
@@ -20,4 +20,10 @@ This repository is a frontend interface. Especially sensitive areas:
 - Prefer wallet extensions / WalletConnect — never ask users to paste private keys
 - Treat new npm packages as untrusted until reviewed (publisher, age, downloads, advisories)
 - Remember every `VITE_*` variable is public in the browser bundle; restrict third-party API keys by HTTP referrer / domain when the provider supports it
-- Production deploys must set a real `VITE_WALLETCONNECT_PROJECT_ID` (empty values fail closed at runtime)
+- Production deploys (Vercel or otherwise) **must** set a real `VITE_WALLETCONNECT_PROJECT_ID` — empty values fail closed at AppKit bootstrap (`resolveWalletConnectProjectId`)
+- Optional `VITE_GA_MEASUREMENT_ID` is HTML-injected only; omit it to disable analytics
+
+## CI notes
+
+- GitHub Actions may build with a placeholder WalletConnect project id when the repo secret is unset (forks / bootstrap). That does **not** satisfy production deploy requirements.
+- `npm audit --audit-level=moderate` runs in CI (aligned with `.npmrc`).

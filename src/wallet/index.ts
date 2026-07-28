@@ -6,7 +6,7 @@ export {
   getEvmPublicClient,
 } from '@/wallet/evm/reader'
 export { createChainReader, getChainReader } from '@/wallet/readers'
-export { getStarknetRpcProvider } from '@/wallet/starknet/reader'
+export { getStarknetNativeBalance, getStarknetRpcProvider } from '@/wallet/starknet/reader'
 export { useStarknetWallet } from '@/wallet/starknet/useStarknetWallet'
 export { suiDAppKit } from '@/wallet/sui/config'
 export { getSuiClient, getSuiNativeBalance } from '@/wallet/sui/reader'

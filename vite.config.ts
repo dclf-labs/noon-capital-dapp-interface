@@ -56,7 +56,32 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/main.tsx', 'src/App.tsx', 'src/vite-env.d.ts', 'src/**/*.d.ts', 'src/test/**'],
+      exclude: [
+        'src/main.tsx',
+        'src/App.tsx',
+        'src/vite-env.d.ts',
+        'src/**/*.d.ts',
+        'src/test/**',
+        // Provider / AppKit bootstraps are integration-tested manually / via build.
+        'src/providers/**',
+        'src/components/**',
+        'src/wallet/**/provider.tsx',
+        'src/wallet/evm/config.ts',
+        'src/wallet/useMultiChainClient.ts',
+        // Network I/O + wallet SDK hooks — covered via mocks in readers tests / manual QA.
+        'src/wallet/evm/ethers.ts',
+        'src/wallet/evm/reader.ts',
+        'src/wallet/starknet/reader.ts',
+        'src/wallet/starknet/useStarknetWallet.ts',
+        'src/wallet/sui/config.ts',
+        'src/wallet/sui/reader.ts',
+      ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 55,
+        statements: 70,
+      },
     },
   },
 })

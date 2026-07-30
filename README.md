@@ -54,11 +54,21 @@ bun run dev
 
 ### Environment variables
 
-| Variable                        | Required                        | Notes                                                                |
-| ------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
-| `VITE_WALLETCONNECT_PROJECT_ID` | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
-| `VITE_GA_MEASUREMENT_ID`        | No                              | Injected into `index.html` only; omitted / empty disables analytics  |
-| `VITE_APP_ENV`                  | No (default `development`)      | `development` \| `staging` \| `production`                           |
+Copy `.env.example` → `.env`. Prefer the **canonical** names below; legacy `VITE_APP_*` / `VITE_APP_GOLDSKY_*` aliases still work via `src/lib/env`.
+
+App code should read **`appEnv`** (`src/lib/env`), not `import.meta.env` directly. See `src/lib/env/README.md`.
+
+| Variable                                       | Required                        | Notes                                                                |
+| ---------------------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
+| `VITE_WALLETCONNECT_PROJECT_ID`                | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
+| `VITE_API_BASE_URL`                            | Recommended                     | Noon backend (`https://back.noon.capital`)                           |
+| `VITE_STARKNET_ALCHEMY_API_KEY`                | No                              | Builds Starknet Alchemy RPC when `VITE_STARKNET_RPC_URL` is unset    |
+| `VITE_STARKNET_RPC_URL` / `VITE_SUI_RPC_URL`   | No                              | Explicit RPC overrides                                               |
+| `VITE_SUBGRAPH_USN_*` / `VITE_SUBGRAPH_SUSN_*` | No                              | Holdings subgraphs by chain (`ethereum`, `sophon`, `zksync`, `tac`)  |
+| `VITE_SUBGRAPH_ETH_META_URL`                   | No                              | Ethereum meta subgraph                                               |
+| `VITE_MIXPANEL_TOKEN`                          | No                              | Mixpanel (reserved for analytics wiring)                             |
+| `VITE_GA_MEASUREMENT_ID`                       | No                              | Injected into `index.html` only; omitted / empty disables analytics  |
+| `VITE_APP_ENV`                                 | No (default `development`)      | `development` \| `staging` \| `production`                           |
 
 Set these in `.env` locally and in Vercel (or your host) for deploys. CI may use a placeholder WalletConnect id when the GitHub secret is unset — that is **not** enough for production.
 
@@ -110,33 +120,47 @@ ESLint enforces:
 ```text
 src/
   chains/             # Chain registry (EVM / Starknet / Sui metadata)
+  config/             # Protocol deployments (contracts, tokens, pools)
+  features/           # Domain modules (hooks + providers + libs co-located)
+    _shared/          # Trade form controller + session reset
+  hooks/
+    connection/       # useWalletSession / read-only / WalletQuerySync
+    on-chain/         # balances, allowances, gas
+    query/            # useChainQuery / useApiQuery
+    ui/               # debounce, etc.
+  state/              # Zustand (active chain, points estimator)
   components/
     wallet/           # Wallet connect / status UI
-  constants/          # App meta + route constants
-  lib/                # env (Zod), utils, shared query client, abis/
-  providers/          # AppProviders composition
+  constants/          # App meta + route + UI constants
+  lib/
+    env/              # Zod → appEnv
+    wallet-session.ts # Session builders + canWriteSession
+    query-keys.ts     # TanStack key factory
+    evm-submit.ts     # Shared EVM writes
+    abis/             # Contract ABIs
+  providers/          # AppProviders (+ WalletQuerySync)
   styles/             # Global CSS / design tokens
   test/               # Test setup + helpers
   wallet/
-    evm/              # AppKit + wagmi config, provider, readers, ethers
-    starknet/         # starknet-react provider, reader, hooks
-    sui/              # dApp Kit config, provider, reader
-    types.ts          # Multi-chain client types
-    readers.ts        # Cross-family ChainReader factory
-    useMultiChainClient.ts
+    evm/              # AppKit + wagmi
+    starknet/         # starknet-react
+    sui/              # dApp Kit
 docs/
-  ARCHITECTURE.md     # State / feature conventions
+  ARCHITECTURE.md     # State / session / feature conventions
 ```
 
-**Not installed yet** (add when product UI lands): `features/`, `pages/` (+ router), `components/ui/` (design system), client store only if cross-route UI needs it.
+See `src/features/README.md` and `docs/ARCHITECTURE.md` for conventions.
 
 ## Extending for protocol work
 
 1. Keep chain metadata in `src/chains/`
-2. Add ABIs under `src/lib/abis/` (`evm/` Solidity, `starknet/` Cairo) — see `src/lib/abis/README.md`
-3. Add feature modules under `src/features/<domain>/` when product domains appear
-4. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
-5. See `docs/ARCHITECTURE.md` for state ownership and Starknet balance notes
+2. Add / update protocol deployments under `src/config/chains/` — see `src/config/README.md`
+3. Add ABIs under `src/lib/abis/` (`evm/` Solidity, `starknet/` Cairo) — see `src/lib/abis/README.md`
+4. Add feature modules under `src/features/<domain>/` — reuse `useChainQuery` / `useApiQuery` / `queryKeys`
+5. Wire wallet sessions via `useWalletSession` / family helpers; gate writes with `canWriteSession`
+6. Trade UIs: `useTradeFormController` + `useResetOnSessionChange`
+7. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
+8. See `docs/ARCHITECTURE.md` and `src/features/README.md` for conventions
 
 ## Security notes
 

@@ -56,6 +56,16 @@ describe('createChainReader', () => {
     await expect(reader.getNativeBalance('0xsui')).resolves.toBe(33n)
     expect(getSuiNativeBalance).toHaveBeenCalledWith('0xsui')
   })
+
+  it('routes EVM balance reads for additional AppKit networks', async () => {
+    for (const key of ['base', 'zksync', 'hyperevm'] as const) {
+      getEvmNativeBalance.mockClear()
+      const reader = createChainReader(key)
+      expect(reader.family).toBe('evm')
+      await expect(reader.getNativeBalance('0xabc')).resolves.toBe(11n)
+      expect(getEvmNativeBalance).toHaveBeenCalledWith(key, '0xabc')
+    }
+  })
 })
 
 describe('getChainReader', () => {

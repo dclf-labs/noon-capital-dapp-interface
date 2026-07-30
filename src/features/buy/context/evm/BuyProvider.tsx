@@ -1,0 +1,133 @@
+import React, { useMemo } from 'react'
+
+import { getTokens } from '@/config'
+import {
+  getInsufficientBalance,
+  getIsApproved,
+  useResetOnSessionChange,
+  useSyncAmountOut,
+  useTradeFormController,
+} from '@/features/_shared/use-trade-form-controller'
+import useGeckoPrice from '@/features/api/hooks/useGeckoPrice'
+import {
+  BuyBalanceContext,
+  BuyFormContext,
+  BuyPriceContext,
+  BuyTxnContext,
+} from '@/features/buy/context/evm/context'
+import { type FormInputs } from '@/features/buy/context/evm/types'
+import useBuyAllowance from '@/features/buy/hooks/evm/useBuyAllowance'
+import useBuySubmitFee from '@/features/buy/hooks/evm/useBuySubmitFee'
+import usePreviewBuy from '@/features/buy/hooks/evm/usePreviewBuy'
+import { useEvmFamilySession } from '@/hooks/connection/useWalletSession'
+import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
+
+const INITIAL_BUY_INPUTS: FormInputs = {
+  tokenIn: undefined,
+  tokenOut: undefined,
+  amountIn: undefined,
+  amountOut: undefined,
+  tokensIn: undefined,
+  tokensOut: undefined,
+}
+
+export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { step, setStep, inputs, setInputs, debouncedInputs, txnUrl, setTxnUrl, isDebouncing } =
+    useTradeFormController(INITIAL_BUY_INPUTS)
+
+  const connection = useEvmFamilySession()
+
+  const tokenInBalance = useTokenBalance(connection, debouncedInputs.tokenIn)
+  const tokenOutBalance = useTokenBalance(connection, debouncedInputs.tokenOut)
+  const tokenInAllowance = useBuyAllowance(connection, debouncedInputs.tokenIn)
+
+  const tokenPrice = useGeckoPrice(debouncedInputs.tokenIn)
+  const price = usePreviewBuy(connection, debouncedInputs.tokenIn, debouncedInputs.tokenOut, 1)
+  const preview = usePreviewBuy(
+    connection,
+    debouncedInputs.tokenIn,
+    debouncedInputs.tokenOut,
+    debouncedInputs.amountIn,
+  )
+
+  const submitFee = useBuySubmitFee(connection, debouncedInputs.tokenIn, debouncedInputs.tokenOut)
+
+  const isInsufficientBalance = useMemo(
+    () => getInsufficientBalance(tokenInBalance.data, inputs.amountIn),
+    [tokenInBalance.data, inputs.amountIn],
+  )
+  const isApproved = useMemo(
+    () => getIsApproved(tokenInAllowance.data, inputs.amountIn),
+    [inputs.amountIn, tokenInAllowance.data],
+  )
+
+  useSyncAmountOut(setInputs, preview.isLoading ? undefined : preview.data, isDebouncing)
+
+  useResetOnSessionChange({
+    session: {
+      address: connection.address,
+      chainId: connection.config?.id,
+      unsupported: connection.unsupported,
+      isConnected: connection.isConnected,
+    },
+    setInputs,
+    setStep,
+    setTxnUrl,
+    seedInputs: () => {
+      const tokensIn = getTokens(connection.config, connection.config?.sellTokens)
+      const tokensOut = getTokens(connection.config, connection.config?.buyTokens)
+      return {
+        tokensIn,
+        tokensOut,
+        tokenIn: tokensIn?.at(0),
+        tokenOut: tokensOut?.at(0),
+      }
+    },
+  })
+
+  const formValue = useMemo(
+    () => ({ inputs, setInputs, step, setStep, connection }),
+    [inputs, setInputs, step, setStep, connection],
+  )
+
+  const balanceValue = useMemo(
+    () => ({
+      tokenInBalance,
+      tokenOutBalance,
+      tokenInAllowance,
+      isInsufficientBalance,
+      isApproved,
+    }),
+    [tokenInBalance, tokenOutBalance, tokenInAllowance, isInsufficientBalance, isApproved],
+  )
+
+  const priceValue = useMemo(
+    () => ({
+      price,
+      tokenPrice,
+      isFetchingQuote: preview.isLoading || isDebouncing,
+    }),
+    [price, tokenPrice, preview.isLoading, isDebouncing],
+  )
+
+  const txnValue = useMemo(
+    () => ({
+      txnUrl,
+      setTxnUrl,
+      submitFee,
+    }),
+    [txnUrl, setTxnUrl, submitFee],
+  )
+
+  return (
+    <BuyFormContext.Provider value={formValue}>
+      <BuyBalanceContext.Provider value={balanceValue}>
+        <BuyPriceContext.Provider value={priceValue}>
+          <BuyTxnContext.Provider value={txnValue}>{children}</BuyTxnContext.Provider>
+        </BuyPriceContext.Provider>
+      </BuyBalanceContext.Provider>
+    </BuyFormContext.Provider>
+  )
+}
+
+export default BuyProvider

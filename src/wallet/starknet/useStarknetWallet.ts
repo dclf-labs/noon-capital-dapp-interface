@@ -19,7 +19,7 @@ export function useStarknetWallet() {
   return {
     address,
     status,
-    isConnected: Boolean(address),
+    isConnected: status === 'connected' && Boolean(address),
     connect: connectWallet,
     disconnect,
   }

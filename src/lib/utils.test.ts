@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cn, formatNumber, sleep, truncateAddress } from '@/lib/utils'
+import { calculateGovernanceCurve, cn, formatNumber, sleep, truncateAddress } from '@/lib/utils'
 
 describe('cn', () => {
   it('merges class names and resolves tailwind conflicts', () => {
@@ -56,5 +56,21 @@ describe('formatNumber', () => {
 describe('sleep', () => {
   it('resolves after the given delay', async () => {
     await expect(sleep(1)).resolves.toBeUndefined()
+  })
+})
+
+describe('calculateGovernanceCurve', () => {
+  it('uses discrete month breakpoints', () => {
+    expect(calculateGovernanceCurve(0, 365, 3)).toBeCloseTo(0.1696)
+    expect(calculateGovernanceCurve(0, 365, 6)).toBeCloseTo(0.2985)
+    expect(calculateGovernanceCurve(0, 365, 9)).toBeCloseTo(0.5456)
+    expect(calculateGovernanceCurve(0, 365, 12)).toBe(1)
+    expect(calculateGovernanceCurve(0, 365, 24)).toBe(1)
+  })
+
+  it('interpolates continuous staking duration', () => {
+    expect(calculateGovernanceCurve(0)).toBeCloseTo(0.09)
+    expect(calculateGovernanceCurve(365)).toBeCloseTo(0.99)
+    expect(calculateGovernanceCurve(500)).toBeCloseTo(0.99)
   })
 })

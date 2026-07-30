@@ -1,4 +1,10 @@
-export { wagmiAdapter, wagmiConfig } from '@/wallet/evm/config'
+export {
+  appKit,
+  appkitConfig,
+  appkitMetadata,
+  wagmiAdapter,
+  wagmiConfig,
+} from '@/wallet/evm/config'
 export { getEthersBrowserProvider, getEthersSigner } from '@/wallet/evm/ethers'
 export {
   getEthersJsonRpcProvider,
@@ -10,5 +16,12 @@ export { getStarknetNativeBalance, getStarknetRpcProvider } from '@/wallet/stark
 export { useStarknetWallet } from '@/wallet/starknet/useStarknetWallet'
 export { suiDAppKit } from '@/wallet/sui/config'
 export { getSuiClient, getSuiNativeBalance } from '@/wallet/sui/reader'
-export type { ChainReader, EvmWriteClient, MultiChainClient, WalletSession } from '@/wallet/types'
+export type {
+  ChainReader,
+  EvmWriteClient,
+  FamilyWalletStatus,
+  MultiChainClient,
+  WalletSession,
+} from '@/wallet/types'
+export { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 export { useMultiChainClient } from '@/wallet/useMultiChainClient'

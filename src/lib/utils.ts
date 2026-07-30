@@ -32,3 +32,13 @@ export function formatNumber(
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
+
+export function calculateGovernanceCurve(_t: number, T: number = 365, months: number = 0) {
+  if (months === 3) return 16.96 / 100
+  if (months === 6) return 29.85 / 100
+  if (months === 9) return 54.56 / 100
+  if (months === 12) return 100 / 100
+  if (months > 12) return 100 / 100
+  const t = _t >= T ? T : _t
+  return (0.1 + Math.pow(t / T, 3) * 0.73 + (t / T) * 0.27) * 0.9
+}

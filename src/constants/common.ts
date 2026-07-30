@@ -1,0 +1,190 @@
+import { mainnet as starknetMainnet } from '@starknet-react/chains'
+
+import { SUI_MAINNET_CHAIN_ID } from '@/config/chain-id'
+import { toNum } from '@/lib/format'
+
+export const TXN_WAIT_TIMEOUT = 2 * 60 * 1000
+
+export const STARKNET_BRIDGE_DESTINATION = {
+  id: toNum(starknetMainnet.id),
+  name: 'Starknet',
+  iconSlug: 'starknet',
+  hyperlaneDomain: 358974494,
+  blockExplorers: {
+    default: {
+      url: 'https://voyager.online',
+    },
+  },
+}
+
+export const SUI_BRIDGE_DESTINATION = {
+  id: SUI_MAINNET_CHAIN_ID,
+  name: 'Sui',
+  iconSlug: 'sui',
+  layerzeroOftEid: 30378,
+  blockExplorers: {
+    default: {
+      url: 'https://suiscan.xyz/mainnet',
+    },
+  },
+}
+
+export const POINTS_ESTIMATE_FDV_SLIDER_MAX_IN_BILLIONS = 10
+export const POINTS_ESTIMATE_STAKING_PERIODS = [0, 1, 2, 3, 4]
+export const POINTS_ESTIMATE_FDV_SLIDER_STEP_IN_BILLIONS = 0.05
+export const POINTS_ESTIMATE_FDV_SLIDER_MIN_IN_BILLIONS = 0.05
+
+export const CURRENT_SEASON_REFERRAL_CAMPAIGN_DISPLAY_NUMBER = 3
+export const CURRENT_SEASON_REFERRAL_CAMPAIGN_DISPLAY_NAME = 'The Echo'
+export const CURRENT_SEASON_REFERRAL_CAMPAIGN_ID = 9
+export const CURRENT_SEASON_KOL_REFERRAL_CAMPAIGN_ID = 10
+export const CURRENT_SEASON_REFERRAL_CAMPAIGN_START_DATETIME = '2025-09-01T00:00:00.000Z'
+export const CURRENT_SEASON_REFERRAL_CAMPAIGN_END_DATETIME = '2025-10-01T00:00:00.000Z'
+export const CURRENT_SEASON_REFERRAL_CAMPAIGN_POINTS_LEADERBOARD_PAGE_SIZE = 5
+
+export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60
+export const MS_SECONDS_PER_YEAR = SECONDS_PER_YEAR * 1000
+
+export const DEFAULT_POINTS_ESTIMATE_STAKING_PERIOD = 4
+export const DEFAULT_POINTS_ESTIMATE_FDV_IN_BILLIONS = 1
+export const DEFAULT_POINTS_ESTIMATE_FDV_IN_BILLIONS_MAX = 10
+export const CURRENT_SEASON_TOKEN_ALLOCATION_PERCENTAGE = 0.69
+export const DEFAULT_TOTAL_NOON_POINTS_DISTRIBUTEDBY_EOS = 148_483_373_924
+export const BRIDGE_QUOTE_FEE_MULTIPLIER = 1.02
+export const POINTS_12MONTH_BOOSTER = 10
+export const DEFAULT_POINTS_FUTURE_DISTRIBUTION_RATE_MULTIPLIER = 2
+
+export const CURRENT_SEASON = 14
+export const CURRENT_SEASON_NAME = 'Noon League Pre Season'
+export const CURRENT_SEASON_START_DATE = '2026-07-01T00:00:00.000Z'
+export const CURRENT_SEASON_END_DATE = '2026-078-01T00:00:00.000Z'
+
+/** Kill switch for all LayerZero bridge routes (Hyperlane routes remain available). */
+export const IS_LAYERZERO_BRIDGE_DISABLED = false
+
+/** Kill switch for Sui → Ethereum only (ETH → Sui stays available). */
+export const IS_SUI_TO_ETH_BRIDGE_DISABLED = true
+
+export const EXECUTOR_LZ_RECEIVE_OPTION_MAX_GAS = 65_000
+/** Higher lzReceive gas budget for Sui Move execution via LayerZero. */
+export const EXECUTOR_LZ_RECEIVE_OPTION_MAX_GAS_SUI = 500_000
+export const EXECUTOR_LZ_RECEIVE_OPTION_GAS_LIMIT = 0
+export const HYPERLANE_QUOTE_DISPATCH_DEFAULT_METADATA = '0x0001'
+export const HUNDRED_PERCENT_IN_BN = BigInt(1e6)
+export const SLIPPAGE_PERCEINT_IN_BN = BigInt(1e4)
+
+export const NOONVEMBER_PASS_WINNERS = [
+  '0x42BE280FDD6e4B3c3770e1110D6555B6687F08cE'.toLowerCase(),
+  '0x7429DFB523Ca6d8dAB99F7Efddba8625EBf9DD21'.toLowerCase(),
+  '0xE3ae13949DCacd98a03e103a4De7bdc671F55B84'.toLowerCase(),
+  '0x0475a01B3Cc3A37DEdF9cabb28B325f337D22F6529915E8602804688099C84a7'.toLowerCase(),
+  '0x475a01B3Cc3A37DEdF9cabb28B325f337D22F6529915E8602804688099C84a7'.toLowerCase(),
+  '0x011f1a6496114312727858F93d3381d303cc394C39Fd8857a11FE78B52291CCD'.toLowerCase(),
+  '0x11f1a6496114312727858F93d3381d303cc394C39Fd8857a11FE78B52291CCD'.toLowerCase(),
+  '0xfab6618a21fcf3d58fffc0fd2bbf2b8db238a756'.toLowerCase(),
+  '0x0378C667110CDBf9f5D5c3ba0361881370F582CE0ef499dB3B821bFB39859c9a'.toLowerCase(),
+  '0x378C667110CDBf9f5D5c3ba0361881370F582CE0ef499dB3B821bFB39859c9a'.toLowerCase(),
+  '0x7429DFB523Ca6d8dAB99F7Efddba8625EBf9DD21'.toLowerCase(),
+  '0xf70fe54c6523c6a8bbd05a93542536de02d6ed88'.toLowerCase(),
+  '0xf997d9cfe86f952ef18caef7649a11d1e7970a7c'.toLowerCase(),
+  '0x90481610ab58d56a83a7bbc323dc7ecef8e269a8'.toLowerCase(),
+  '0xae615Ca6E787A06379C91cf8098002852b741c16'.toLowerCase(),
+  '0xEe1402aA1f287b54C806aebeD9BbdB13051da6DE'.toLowerCase(),
+  '0xb81Eb60c0e7497B7aAd200E5b50De9d052785bB4'.toLowerCase(),
+  '0xd74de0C9eA59307ca8f1BEFFFB6f941947E93Be3'.toLowerCase(),
+  '0xf7ed5b802fe0acc3b4948565ef579128d868bf95'.toLowerCase(),
+  '0x7D984229149eF2D7d396DBdaC443951f5FB91814'.toLowerCase(),
+  '0xcf0e65e964a29b1cc911dbf18db2d836e318eebe'.toLowerCase(),
+  '0x2b8bb0627cc4a522d2d62dc23a0948e36caad9a1'.toLowerCase(),
+  '0xeabce1a82f5f038b9d67e02cd00d5ae1352f3f1e'.toLowerCase(),
+  '0x1E898B6E131cA1A7b2c34Dc46573db4D39e58219'.toLowerCase(),
+  '0x95C0b2363662297d35041CE9F145143392dEf325'.toLowerCase(),
+  '0xbbc122437aba8906d4f4bb85204e767c23c49365'.toLowerCase(),
+  '0x8EeAb549c1D3092eF2321570b6541985B2186E1A'.toLowerCase(),
+  '0xB03E094e643a50E145E804b35787C28292E6Afe4'.toLowerCase(),
+  '0x44e1060395b97fc201624f379c98d0614b7a9e08'.toLowerCase(),
+  '0xc26f21c2786d15069cb536c348bbaff9b36dd63d'.toLowerCase(),
+  '0x04C97BaA42C66a2bbE7C57F50D384E0aA108c288'.toLowerCase(),
+  '0x0c1eDF74c74c9fC348890728279953Da6ea6E2d3'.toLowerCase(),
+  '0xe6a7fb307c163855bfe4cb71dce245274e141040'.toLowerCase(),
+  '0x94b40bf8f407cbd21a5a1630754b2d7946c795fa'.toLowerCase(),
+  '0x8b937c5395d95a8c8948c7c5b844e1541798d90c'.toLowerCase(),
+  '0x2e75abef3638d02103d4c81df54cc59310c7a8fa'.toLowerCase(),
+  '0x3e2e2d44960e041fca5f4919d524a2ce76b7ab03'.toLowerCase(),
+  '0x20d3a3D7e7eb4D6de6887fDcad8B0Fee08571bF1'.toLowerCase(),
+  '0x6222c8A323739F5e163D2C5047238D26F254B7A3'.toLowerCase(),
+  '0x1cb432f80416f07db4420B8c20447924A0658894'.toLowerCase(),
+  '0xeccd9314a90d4e5c804239feddfbd7e508f03e70'.toLowerCase(),
+  '0x67c8CD4043363ADD3a7f1cdC8a66b556aE4Bf328'.toLowerCase(),
+  '0x91746f06cb81d7339774a56056541b79f576b9b4'.toLowerCase(),
+  '0x45B645E6f70dab5EF9B7b9F7ca15243705168363'.toLowerCase(),
+  '0x67c8CD4043363ADD3a7f1cdC8a66b556aE4Bf328'.toLowerCase(),
+  '0x0a53765848EcB8ccd820781Fc47C9C95BFCf3C36'.toLowerCase(),
+  '0x2ed29aDc8Fb15d93fa13A11d3D688D00FBb56E8d'.toLowerCase(),
+  '0xeA0Cdd1636B0e60DcD98E57337E319091502D52F'.toLowerCase(),
+  '0x6BcA88BB33fa828EA8F42a97321eB2c9D9d081CF'.toLowerCase(),
+  '0x7d8ec614fcbccd10a9e4a21f1a9ce00ac4eab37d'.toLowerCase(),
+  '0x47c54845094e8e45a8ee6eec63a70d7b234bedcc'.toLowerCase(),
+  '0xbe7170cf250227f800931aa7bf58774a7eb799d0'.toLowerCase(),
+  '0xf2bb209f0b2bc4ceb03da728bf7e05336158c52b'.toLowerCase(),
+  '0x750a4Ec4b73D0214F9fC9C712394E8966D746a6e'.toLowerCase(),
+  '0x494aede78ba235e33c6c8ea929fa6b6706bd5d4d'.toLowerCase(),
+  '0xB20F45FF0f2312A3586C5A23E0DD1A82dFFEd3A5'.toLowerCase(),
+  '0x029ec718fce6d305313d05e8152b18ccf25477d25cf725d353ebdf6793cf6548'.toLowerCase(),
+  '0x052204C3352A91321d2d9f29d4a81820F533D20a65432dbf53BCe27061580fc2'.toLowerCase(),
+  '0x06bbe05eeed5ba70fce531c31718954d4da1c32d51f317b2afa4c8a43a84dfb4'.toLowerCase(),
+  '0x29ec718fce6d305313d05e8152b18ccf25477d25cf725d353ebdf6793cf6548'.toLowerCase(),
+  '0x52204C3352A91321d2d9f29d4a81820F533D20a65432dbf53BCe27061580fc2'.toLowerCase(),
+  '0x6bbe05eeed5ba70fce531c31718954d4da1c32d51f317b2afa4c8a43a84dfb4'.toLowerCase(),
+  '0x0313b5af177e314630ad60c9d370ad5b533c1672242949e177bab039dba27c59'.toLowerCase(),
+  '0x313b5af177e314630ad60c9d370ad5b533c1672242949e177bab039dba27c59'.toLowerCase(),
+  '0xa1ea38d2e1f4f83f6f7583e3099813ef15647c9b'.toLowerCase(),
+  '0xf14755d7d4256d03cafc5e3078b5041863456aee'.toLowerCase(),
+  '0x2aa19cc8ce79b017f4ff8bb0ee71c980aee65f6e'.toLowerCase(),
+  '0xf394A8E67B4Acfd0FA4EDBa9D35E48b3bd950462'.toLowerCase(),
+  '0xfdd90256d88a3453196ecc4f5894dbe080f850da'.toLowerCase(),
+  '0xA94474a98bAe85688fCB69FC060043c11d6AD30B'.toLowerCase(),
+  '0x591e862e73B09Ee692bAFA0Da6fe1df5C9B365aE'.toLowerCase(),
+  '0x1fc2687885dff73d7421c143ef7651df7733c25d'.toLowerCase(),
+  '0x7c4eef71Fb17F50D2d8E17bC465B247584431b76'.toLowerCase(),
+  '0x20FbA32aEccd8B98A3E3072dd3bCD6A7D81d8DB0'.toLowerCase(),
+  '0x8C2D61cAc8677E1f795C0F320994E6Ff3c02dE6F'.toLowerCase(),
+  '0x31b387cd55f9Bb09dB50f903E3b928c17Df7fDfd'.toLowerCase(),
+  '0xcb25f5908b4b775cc5718a60b5c74bd073579d6d'.toLowerCase(),
+  '0xe2a5a9f297c131825aab5568ceb72b669deeea4d'.toLowerCase(),
+  '0xa57fce265b868dad973c1fdb2b2cab3bb2d687f4'.toLowerCase(),
+  '0xb537a079e27B6c006B36BF9E6ED88a44036a28C2'.toLowerCase(),
+  '0x04E0853d961C4fd90472ED0002c122bb835fA473D5b97a1831Be60C2E8171F48'.toLowerCase(),
+  '0x4E0853d961C4fd90472ED0002c122bb835fA473D5b97a1831Be60C2E8171F48'.toLowerCase(),
+  '0xf7ed5b802fe0acc3b4948565ef579128d868bf95'.toLowerCase(),
+  '0xbdfff91dfa551c8429398d9ca9349e2edf29fdcf'.toLowerCase(),
+  '0x26Ea1dAEA63dA7Ac97d3CcB5C76D559947D3dBC6'.toLowerCase(),
+  '0x0a97b1700fA6D07686F15fdAdcB2DFFaE087f978'.toLowerCase(),
+  '0x0f2daf4f6430b28d5240186994c7d048897ed428'.toLowerCase(),
+  '0x92925f0c1C947080be647559CE4248f9393a3B6E'.toLowerCase(),
+  '0x167480a441b9a0db3a315ad47726889b53503df9'.toLowerCase(),
+  '0x918048E798D66127543EE7850ac74CC7A5B62098'.toLowerCase(),
+  '0x4197299BE375798CA625f22A6A9aD8e4488f2Df1'.toLowerCase(),
+  '0x41206D6aB58FF3D07C3f2753C461d4D66409D2fD'.toLowerCase(),
+  '0x95B0cB330519DB2bCaf74B90C1BDe3D62f673718'.toLowerCase(),
+  '0x0dEc39e599d89Ff4656ae5d9AC057A78A09aF3A7'.toLowerCase(),
+]
+
+export const DEFAULT_VAULT_CURATOR = {
+  name: 'DCLM',
+  iconSlug: 'dclm',
+  url: 'https://dclmarkets.xyz/',
+}
+
+export const SEASON_3_REFERRAL_TOP_10_WINNERS = [
+  '0xf84651a665bb9ad7bbc6b931c7cbb16eafc2a318'?.toLowerCase(),
+  '0x67c8cd4043363add3a7f1cdc8a66b556ae4bf328'?.toLowerCase(),
+  '0x36f7a699d8d1dc24e36e6cc91a28f925da9ba64e'?.toLowerCase(),
+  '0xd609d6cab84f3d85f2ee602b31d9f5ae373ca923'?.toLowerCase(),
+  '0x3d8639c4214cb4f31142b95e24799b88b61f54dd'?.toLowerCase(),
+  '0xf7ed5b802fe0acc3b4948565ef579128d868bf95'?.toLowerCase(),
+  '0x3aa0b50578e24c059b8f5ef7d3322133a4652969'?.toLowerCase(),
+  '0xb81eb60c0e7497b7aad200e5b50de9d052785bb4'?.toLowerCase(),
+  '0x7b1187106a3ac9d2602f41224a06e247fc12be37'?.toLowerCase(),
+  '0x2579176d89122172630217b1d320506a14d4c027'?.toLowerCase(),
+]

@@ -1,4 +1,6 @@
 export {
+  activeEvmChainKeys,
+  allEvmAppKitNetworks,
   chainList,
   chains,
   evmAppKitNetworks,

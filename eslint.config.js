@@ -66,4 +66,14 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    // Legacy feature providers / txn hooks sync form state in effects.
+    // Tighten these when providers are rewritten around derived state.
+    files: ['src/features/**/*.{ts,tsx}', 'src/hooks/**/*.{ts,tsx}', 'src/state/**/*.{ts,tsx}'],
+    rules: {
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+    },
+  },
 ])

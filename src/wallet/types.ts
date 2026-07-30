@@ -1,13 +1,19 @@
 import type { ChainFamily, ChainKey, EvmChainKey } from '@/chains/types'
 
-/** Connected wallet session for one chain family (EVM / Starknet / Sui). */
-export interface WalletSession {
+/**
+ * Lightweight per-family wallet presence for the multi-chain facade.
+ * Distinct from `useWalletSession` / `UnifiedConnection` (product session API).
+ */
+export interface FamilyWalletStatus {
   family: ChainFamily
   address: string | undefined
   isConnected: boolean
   /** Active network label when known (EVM chain id, SN_MAIN, sui mainnet, …). */
   networkLabel?: string
 }
+
+/** @deprecated Use `FamilyWalletStatus`. */
+export type WalletSession = FamilyWalletStatus
 
 /** Read-only chain access — usable without a connected wallet (bridge / quotes). */
 export interface ChainReader {
@@ -29,7 +35,7 @@ export interface EvmWriteClient {
  * the active wallet is EVM (and vice versa).
  */
 export interface MultiChainClient {
-  getWalletSession(family: ChainFamily): WalletSession
+  getWalletSession(family: ChainFamily): FamilyWalletStatus
   getReader(chainKey: ChainKey): ChainReader
   listConnectedAddresses(): Partial<Record<ChainFamily, string>>
 }

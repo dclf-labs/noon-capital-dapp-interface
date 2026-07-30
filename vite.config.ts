@@ -1,15 +1,117 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+const rootDir = path.dirname(fileURLToPath(import.meta.url))
+const nm = (...parts: string[]) => path.resolve(rootDir, 'node_modules', ...parts)
+
+/**
+ * Force every Lit import onto one physical module graph.
+ * AppKit + Mysten otherwise pull both prod and `development/` Lit builds
+ * (and/or duplicate optimized chunks), which crashes AppKit with
+ * `h._$AT is not a function` and leaves an empty modal shell.
+ */
+function litSingletonPlugin(): Plugin {
+  const lit = nm('lit/index.js')
+  const litHtml = nm('lit-html/lit-html.js')
+  const litElement = nm('lit-element/index.js')
+  const reactiveElement = nm('@lit/reactive-element/reactive-element.js')
+
+  return {
+    name: 'lit-singleton',
+    enforce: 'pre',
+    resolveId(source) {
+      if (source === 'lit' || source === 'lit/index.js') return lit
+      if (
+        source === 'lit-html' ||
+        source === 'lit-html/lit-html.js' ||
+        source === 'lit-html/development/lit-html.js' ||
+        /(?:^|\/)lit-html-[A-Za-z0-9_-]+\.js$/.test(source)
+      ) {
+        return litHtml
+      }
+      if (
+        source === 'lit-element' ||
+        source === 'lit-element/index.js' ||
+        source === 'lit-element/development/lit-element.js'
+      ) {
+        return litElement
+      }
+      if (
+        source === '@lit/reactive-element' ||
+        source === '@lit/reactive-element/reactive-element.js' ||
+        source === '@lit/reactive-element/development/reactive-element.js'
+      ) {
+        return reactiveElement
+      }
+      if (source.includes('lit-html/development/')) {
+        return nm('lit-html', source.split('lit-html/development/')[1] ?? 'lit-html.js')
+      }
+      if (source.includes('lit-element/development/')) {
+        return nm('lit-element', source.split('lit-element/development/')[1] ?? 'index.js')
+      }
+      if (source.includes('@lit/reactive-element/development/')) {
+        return nm(
+          '@lit/reactive-element',
+          source.split('@lit/reactive-element/development/')[1] ?? 'reactive-element.js',
+        )
+      }
+      return undefined
     },
+  }
+}
+
+const scopedCeRegistry = nm(
+  '@webcomponents/scoped-custom-element-registry/scoped-custom-element-registry.min.js',
+)
+
+export default defineConfig({
+  plugins: [litSingletonPlugin(), react(), tailwindcss()],
+  resolve: {
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, './src') },
+      {
+        find: /^@webcomponents\/scoped-custom-element-registry$/,
+        replacement: scopedCeRegistry,
+      },
+    ],
+    dedupe: [
+      '@reown/appkit',
+      '@reown/appkit-controllers',
+      '@reown/appkit-common',
+      '@reown/appkit-scaffold-ui',
+      '@reown/appkit-ui',
+      '@reown/appkit-utils',
+      '@webcomponents/scoped-custom-element-registry',
+      'lit',
+      'lit-html',
+      'lit-element',
+      '@lit/reactive-element',
+      '@lit/task',
+      '@lit-labs/scoped-registry-mixin',
+      '@nanostores/lit',
+      'wagmi',
+      'viem',
+      'dayjs',
+    ],
+  },
+  optimizeDeps: {
+    include: [
+      'dayjs',
+      'lit',
+      'lit-html',
+      'lit-element',
+      '@lit/reactive-element',
+      'lit/decorators.js',
+      'lit/directives/class-map.js',
+      'lit/directives/when.js',
+      'lit/directives/if-defined.js',
+      'lit/directives/ref.js',
+    ],
   },
   server: {
     port: 3000,
@@ -55,27 +157,35 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: [
-        'src/main.tsx',
-        'src/App.tsx',
-        'src/vite-env.d.ts',
-        'src/**/*.d.ts',
-        'src/test/**',
-        // Provider / AppKit bootstraps are integration-tested manually / via build.
-        'src/providers/**',
-        'src/components/**',
-        'src/wallet/**/provider.tsx',
-        'src/wallet/evm/config.ts',
-        'src/wallet/useMultiChainClient.ts',
-        // Network I/O + wallet SDK hooks — covered via mocks in readers tests / manual QA.
-        'src/wallet/evm/ethers.ts',
-        'src/wallet/evm/reader.ts',
-        'src/wallet/starknet/reader.ts',
-        'src/wallet/starknet/useStarknetWallet.ts',
-        'src/wallet/sui/config.ts',
-        'src/wallet/sui/reader.ts',
+      // Gate unit-testable pure modules (env, session, chain, address, config
+      // registries, wallet project id / AppKit open). Feature hooks and large
+      // formatter/query-key surfaces need separate integration coverage.
+      include: [
+        'src/lib/address.ts',
+        'src/lib/chain.ts',
+        'src/lib/env/**/*.ts',
+        'src/lib/evm-submit.ts',
+        'src/lib/evmTxn.ts',
+        'src/lib/gasFee.ts',
+        'src/lib/subgraph.ts',
+        'src/lib/user.ts',
+        'src/lib/utils.ts',
+        'src/lib/wallet-query-sync.ts',
+        'src/lib/wallet-session.ts',
+        'src/lib/connection.ts',
+        'src/state/**/*.ts',
+        'src/chains/**/*.ts',
+        'src/config/index.ts',
+        'src/config/chain-id.ts',
+        'src/config/helpers.ts',
+        'src/config/chains/index.ts',
+        'src/constants/**/*.ts',
+        'src/wallet/evm/open-appkit.ts',
+        'src/wallet/evm/projectId.ts',
+        'src/wallet/readers.ts',
+        'src/wallet/useConnectWalletFamily.ts',
       ],
+      exclude: ['src/**/*.d.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/test/**'],
       thresholds: {
         lines: 70,
         functions: 70,

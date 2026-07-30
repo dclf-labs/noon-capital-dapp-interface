@@ -20,6 +20,8 @@ This repository is a frontend interface. Especially sensitive areas:
 - Prefer wallet extensions / WalletConnect — never ask users to paste private keys
 - Treat new npm packages as untrusted until reviewed (publisher, age, downloads, advisories)
 - Remember every `VITE_*` variable is public in the browser bundle; restrict third-party API keys by HTTP referrer / domain when the provider supports it
+- Read runtime config via `appEnv` (`src/lib/env`) — do not scatter raw `import.meta.env` reads in features
+- Gate transaction writes with `canWriteSession(connection)`; never treat typed receiver addresses as connected wallets
 - Production deploys (Vercel or otherwise) **must** set a real `VITE_WALLETCONNECT_PROJECT_ID` — empty values fail closed at AppKit bootstrap (`resolveWalletConnectProjectId`)
 - Optional `VITE_GA_MEASUREMENT_ID` is HTML-injected only; omit it to disable analytics
 

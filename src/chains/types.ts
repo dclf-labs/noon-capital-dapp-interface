@@ -14,12 +14,13 @@ export type ChainKey =
   | 'base'
   | 'sophon'
   | 'berachain'
+  | 'monad'
   | 'sui'
   | 'starknet'
 
 export type EvmChainKey = Extract<
   ChainKey,
-  'ethereum' | 'tac' | 'zksync' | 'hyperevm' | 'citrea' | 'base' | 'sophon' | 'berachain'
+  'ethereum' | 'tac' | 'zksync' | 'hyperevm' | 'citrea' | 'base' | 'sophon' | 'berachain' | 'monad'
 >
 
 export interface NativeCurrency {

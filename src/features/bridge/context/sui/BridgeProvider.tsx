@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { getToken, getTokens } from '@/config'
 import type { ProtocolChainId } from '@/config/chain-id'
+import { getAmountUsd } from '@/features/_shared/trade-amounts'
+import {
+  getInsufficientBalance,
+  getIsApproved,
+  useTradeFormController,
+} from '@/features/_shared/use-trade-form-controller'
 import useTokenPrice from '@/features/api/hooks/useTokenPrice'
 import {
   BridgeBalanceContext,
@@ -16,21 +22,21 @@ import useBridgeSubmitFee from '@/features/bridge/hooks/sui/useBridgeSubmitFee'
 import { useResolvedChain } from '@/hooks/connection'
 import { useReadOnlySession } from '@/hooks/connection/useReadOnlySession'
 import { useSuiFamilySession } from '@/hooks/connection/useWalletSession'
-import useEvmTokenBalance from '@/hooks/on-chain/starknet/useEvmTokenBalance'
-import useTokenBalance from '@/hooks/on-chain/sui/useConnectedTokenBalance'
-import { toNum } from '@/lib/format'
+import useEvmDestinationTokenBalance from '@/hooks/on-chain/evm/useDestinationTokenBalance'
+import useTokenBalance from '@/hooks/on-chain/sui/useTokenBalance'
+
+const INITIAL_BRIDGE_INPUTS: FormInputs = {
+  token: undefined,
+  amount: undefined,
+  tokens: undefined,
+  receiverAddress: undefined,
+  destinationChainId: undefined,
+  sourceChainId: undefined,
+}
 
 export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [step, setStep] = useState<number>(0)
-  const [inputs, setInputs] = useState<FormInputs>({
-    token: undefined,
-    amount: undefined,
-    tokens: undefined,
-    receiverAddress: undefined,
-    destinationChainId: undefined,
-    sourceChainId: undefined,
-  })
-  const [txnUrl, setTxnUrl] = useState<string | undefined>(undefined)
+  const { step, setStep, inputs, setInputs, txnUrl, setTxnUrl } =
+    useTradeFormController(INITIAL_BRIDGE_INPUTS)
   const [isReceiverAddressModalOpen, setIsReceiverAddressModalOpen] = useState<boolean>(false)
   const prevSourceChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
   const prevDestinationChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
@@ -50,7 +56,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const tokenPrice = useTokenPrice(inputs.token)
   const tokenInBalance = useTokenBalance(connection, inputs.token)
   const tokenInAllowance = useBridgeAllowance(connection, inputs.token)
-  const tokenOutBalance = useEvmTokenBalance(destinationConnection, tokenOut)
+  const tokenOutBalance = useEvmDestinationTokenBalance(destinationConnection, tokenOut)
 
   const feeQuote = useBridgeFeeQuote(
     connection,
@@ -70,12 +76,18 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     destinationConnection,
   )
 
-  const isInsufficientBalance = useMemo(() => {
-    return toNum(tokenInBalance.data) < toNum(inputs.amount)
-  }, [tokenInBalance.data, inputs.amount])
-  const isApproved = useMemo(() => {
-    return toNum(tokenInAllowance.data) >= toNum(inputs.amount)
-  }, [inputs.amount, tokenInAllowance.data])
+  const isInsufficientBalance = useMemo(
+    () => getInsufficientBalance(tokenInBalance.data, inputs.amount),
+    [tokenInBalance.data, inputs.amount],
+  )
+  const isApproved = useMemo(
+    () => getIsApproved(tokenInAllowance.data, inputs.amount),
+    [inputs.amount, tokenInAllowance.data],
+  )
+  const amountInUsd = useMemo(
+    () => getAmountUsd(inputs.amount, tokenPrice),
+    [inputs.amount, tokenPrice],
+  )
 
   const formValue = useMemo(
     () => ({
@@ -89,7 +101,16 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       isReceiverAddressModalOpen,
       setIsReceiverAddressModalOpen,
     }),
-    [inputs, step, connection, destinationConnection, tokenOut, isReceiverAddressModalOpen],
+    [
+      inputs,
+      setInputs,
+      step,
+      setStep,
+      connection,
+      destinationConnection,
+      tokenOut,
+      isReceiverAddressModalOpen,
+    ],
   )
   const balanceValue = useMemo(
     () => ({
@@ -105,8 +126,9 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     () => ({
       feeQuote,
       tokenPrice,
+      amountInUsd,
     }),
-    [tokenPrice, feeQuote],
+    [amountInUsd, tokenPrice, feeQuote],
   )
   const txnValue = useMemo(
     () => ({
@@ -114,7 +136,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setTxnUrl,
       submitFee,
     }),
-    [txnUrl, submitFee],
+    [txnUrl, setTxnUrl, submitFee],
   )
 
   const prevAddressRef = useRef<string | undefined>(undefined)
@@ -138,7 +160,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }))
     }
     prevAddressRef.current = nextAddress
-  }, [connection.address, connection.isConnected])
+  }, [connection.address, connection.isConnected, setInputs])
 
   useEffect(() => {
     const sourceBridgeTokens = connection.config?.bridgeTokens || []
@@ -161,7 +183,13 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       tokens,
     }))
     setStep(0)
-  }, [connection.config, destinationConnection.config, inputs.destinationChainId])
+  }, [
+    connection.config,
+    destinationConnection.config,
+    inputs.destinationChainId,
+    setInputs,
+    setStep,
+  ])
 
   useEffect(() => {
     if (connection.isConnected && connection.connectedChainId) {
@@ -190,7 +218,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     prevChainFamilyRef.current = resolvedChainFamily
-  }, [resolvedChainFamily])
+  }, [resolvedChainFamily, setInputs])
 
   useEffect(() => {
     if (inputs.sourceChainId && inputs.destinationChainId && !inputs.receiverAddress) {
@@ -228,7 +256,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       })
       prevSourceChainIdRef.current = effectiveSourceChainId
     }
-  }, [connection.connectedChainId, connection.config?.id, inputs.sourceChainId])
+  }, [connection.connectedChainId, connection.config?.id, inputs.sourceChainId, setInputs])
 
   useEffect(() => {
     const prevDestinationChainId = prevDestinationChainIdRef.current
@@ -249,7 +277,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } else if (inputs.destinationChainId === undefined) {
       prevDestinationChainIdRef.current = undefined
     }
-  }, [inputs.destinationChainId])
+  }, [inputs.destinationChainId, setInputs])
 
   useEffect(() => {
     const prevSourceChainId = prevSourceChainIdRef.current
@@ -282,6 +310,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     inputs.destinationChainId,
     connection.connectedChainId,
     connection.config?.id,
+    setInputs,
   ])
 
   useEffect(() => {

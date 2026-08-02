@@ -76,9 +76,10 @@ const useClaimOpenStaking = () => {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
             timeout: EVMConnection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
-          }).catch(() => ({
-            status: 'success',
-          }))
+          }).catch((error) => {
+            console.error('Timed out or failed waiting for transaction receipt', error)
+            throw error
+          })
 
           if (receipt.status === 'success') {
             setTxnStatus?.(TxnStatus.TXN_SUCCESS)

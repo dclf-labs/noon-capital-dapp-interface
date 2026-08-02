@@ -1,5 +1,10 @@
 import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 
+import {
+  normalizePreviewQuote,
+  normalizePreviewRoute,
+  type PreviewQuoteData,
+} from '@/features/_shared/trade-amounts'
 import useDebounce from '@/hooks/ui/useDebounce'
 import { toNum } from '@/lib/format'
 
@@ -32,7 +37,7 @@ export function useTradeFormController<TInputs>(
 }
 
 /**
- * Sync `amountOut` on form inputs from a preview quote while not debouncing.
+ * Sync `amountOut` on form inputs from a numeric preview while not debouncing.
  */
 export function useSyncAmountOut<TInputs extends { amountOut?: number | undefined }>(
   setInputs: Dispatch<SetStateAction<TInputs>>,
@@ -46,6 +51,31 @@ export function useSyncAmountOut<TInputs extends { amountOut?: number | undefine
       amountOut: toNum(previewAmount),
     }))
   }, [isDebouncing, previewAmount, setInputs])
+}
+
+type PreviewOutInputs<TRoute> = {
+  amountOut?: number | undefined
+  route?: TRoute[]
+}
+
+/**
+ * Sync `amountOut` (+ optional `route`) from EVM number or Starknet `{ quote, route }` previews.
+ */
+export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRoute>>(
+  setInputs: Dispatch<SetStateAction<TInputs>>,
+  preview: { data?: PreviewQuoteData<TRoute>; isLoading?: boolean },
+  isDebouncing: boolean,
+) {
+  useEffect(() => {
+    if (isDebouncing || preview.isLoading || preview.data === undefined) return
+    const amountOut = normalizePreviewQuote(preview.data)
+    if (amountOut === undefined) return
+    setInputs((prev) => ({
+      ...prev,
+      amountOut,
+      route: normalizePreviewRoute(preview.data),
+    }))
+  }, [isDebouncing, preview.data, preview.isLoading, setInputs])
 }
 
 export type SessionIdentity = {

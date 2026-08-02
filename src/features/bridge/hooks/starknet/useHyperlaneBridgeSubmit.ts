@@ -6,7 +6,7 @@ import { type Abi, type BigNumberish, CairoOption, CairoOptionVariant, uint256 }
 import { type Address } from 'viem'
 
 import { type Token } from '@/config/token'
-import ABI from '@/lib/abis/evm/layerzero-hyperlane-token.json'
+import { starknetAbis } from '@/lib/abis'
 import { getAddressOrZeroAddress, isEVMAddressValid } from '@/lib/address'
 import { type EVMConnection, type StarknetConnection } from '@/lib/connection'
 import { strToBn, toBn } from '@/lib/format'
@@ -21,7 +21,7 @@ const useHyperlaneBridgeSubmit = (
   destinationConnection: EVMConnection | undefined,
 ) => {
   const { contract } = useContract({
-    abi: ABI as Abi,
+    abi: starknetAbis.layerzeroHyperlaneToken as Abi,
     address: tokenIn?.hyperlane as Address,
   })
 

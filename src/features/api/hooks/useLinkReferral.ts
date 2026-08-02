@@ -9,6 +9,7 @@ import { getAddressOrZeroAddress } from '@/lib/address'
 import type { Connection } from '@/lib/connection'
 import { appEnv } from '@/lib/env'
 import { toNum } from '@/lib/format'
+import { secureRandomNonce } from '@/lib/secure-random'
 import { ApiRequestStatus } from '@/lib/types'
 import { wagmiConfig } from '@/wallet/evm/config'
 
@@ -60,7 +61,7 @@ const signReferralLinking = async (
   setTxnStatus?: (status: ApiRequestStatus) => void,
 ) => {
   try {
-    const message = Math.floor(Math.random() * 100000000000)
+    const message = secureRandomNonce()
     const MESSAGE = `Authentication ${address?.toLowerCase()}`
 
     setTxnStatus?.(ApiRequestStatus.PROCESSING)

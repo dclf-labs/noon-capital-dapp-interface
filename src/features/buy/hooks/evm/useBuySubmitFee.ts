@@ -4,7 +4,7 @@ import { type Abi, zeroAddress } from 'viem'
 
 import { getCurvePool, getToken, getUniV3Pool, getUniV4Pool } from '@/config'
 import { type Token } from '@/config/token'
-import { encodePath } from '@/features/swap/lib/swap'
+import { encodePath, toDeadline } from '@/features/swap/lib/swap'
 import useGasFee from '@/hooks/on-chain/evm/useGasFee'
 import CurveRouter from '@/lib/abis/evm/curve-router.json'
 import UniswapUniversalRouter from '@/lib/abis/evm/uniswap-universal-router.json'
@@ -108,7 +108,7 @@ const useBuySubmitFee = (
           {
             path: path,
             recipient: connection.address,
-            deadline: BigInt(Date.now() + 15 * 60 * 60 * 1000).toString(),
+            deadline: BigInt(toDeadline(15 * 60 * 1000)).toString(),
             amountIn: amountInParsed.toString(),
             amountOutMinimum: '0',
           },

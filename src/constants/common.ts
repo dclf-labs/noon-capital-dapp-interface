@@ -57,7 +57,7 @@ export const DEFAULT_POINTS_FUTURE_DISTRIBUTION_RATE_MULTIPLIER = 2
 export const CURRENT_SEASON = 14
 export const CURRENT_SEASON_NAME = 'Noon League Pre Season'
 export const CURRENT_SEASON_START_DATE = '2026-07-01T00:00:00.000Z'
-export const CURRENT_SEASON_END_DATE = '2026-078-01T00:00:00.000Z'
+export const CURRENT_SEASON_END_DATE = '2026-08-01T00:00:00.000Z'
 
 /** Kill switch for all LayerZero bridge routes (Hyperlane routes remain available). */
 export const IS_LAYERZERO_BRIDGE_DISABLED = false
@@ -71,7 +71,9 @@ export const EXECUTOR_LZ_RECEIVE_OPTION_MAX_GAS_SUI = 500_000
 export const EXECUTOR_LZ_RECEIVE_OPTION_GAS_LIMIT = 0
 export const HYPERLANE_QUOTE_DISPATCH_DEFAULT_METADATA = '0x0001'
 export const HUNDRED_PERCENT_IN_BN = BigInt(1e6)
-export const SLIPPAGE_PERCEINT_IN_BN = BigInt(1e4)
+export const SLIPPAGE_PERCENT_IN_BN = BigInt(1e4)
+/** @deprecated Use `SLIPPAGE_PERCENT_IN_BN` (typo alias kept for compatibility). */
+export const SLIPPAGE_PERCEINT_IN_BN = SLIPPAGE_PERCENT_IN_BN
 
 export const NOONVEMBER_PASS_WINNERS = [
   '0x42BE280FDD6e4B3c3770e1110D6555B6687F08cE'.toLowerCase(),

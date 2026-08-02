@@ -7,6 +7,7 @@ import type { ProtocolChainId } from '@/config/chain-id'
 import { type Address } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
 import { appEnv } from '@/lib/env'
+import { secureRandomNonce } from '@/lib/secure-random'
 import { ApiRequestStatus } from '@/lib/types'
 import { wagmiConfig } from '@/wallet/evm/config'
 
@@ -56,7 +57,7 @@ const signUsernameUpdateData = async (
   try {
     setTxnStatus?.(ApiRequestStatus.PROCESSING)
 
-    const message = Math.floor(Math.random() * 100000000000)
+    const message = secureRandomNonce()
     const MESSAGE = `Authentication ${address?.toLowerCase()}`
 
     return await wallet

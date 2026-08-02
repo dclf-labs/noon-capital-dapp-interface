@@ -27,6 +27,8 @@ export const UnstakeBalanceContext = createContext<{
 export const UnstakePriceContext = createContext<{
   price: ReturnType<typeof usePreviewUnstake>
   tokenPrice: ReturnType<typeof useTokenPrice>
+  /** Precomputed `amountIn * tokenPrice` for UI — do not recompute in components. */
+  amountInUsd: number
   isFetchingQuote: boolean
 }>(null!)
 

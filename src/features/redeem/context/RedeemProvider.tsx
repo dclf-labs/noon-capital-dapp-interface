@@ -3,6 +3,7 @@ import React, { useMemo } from 'react'
 import { mainnet } from 'wagmi/chains'
 
 import { getToken, getTokens } from '@/config'
+import { getAmountUsd } from '@/features/_shared/trade-amounts'
 import {
   getInsufficientBalance,
   getIsApproved,
@@ -42,6 +43,7 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const tokenInAllowance = useRedeemAllowance(connection, tokenIn)
   const tokenOutBalance = useTokenBalance(connection, debouncedInputs.tokenOut)
 
+  const tokenInPrice = useTokenPrice(tokenIn)
   const tokenOutPrice = useTokenPrice(debouncedInputs.tokenOut)
   const price = usePreviewRedeem(connection, tokenIn, 1, tokenOutPrice.data)
   const preview = usePreviewRedeem(
@@ -96,13 +98,19 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [tokenInBalance, tokenOutBalance, tokenInAllowance, isInsufficientBalance, isApproved],
   )
 
+  const amountInUsd = useMemo(
+    () => getAmountUsd(inputs.amountIn, tokenInPrice),
+    [inputs.amountIn, tokenInPrice],
+  )
+
   const priceValue = useMemo(
     () => ({
       price,
       tokenOutPrice,
+      amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
     }),
-    [price, tokenOutPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, price, tokenOutPrice, preview.isLoading, isDebouncing],
   )
 
   const txnValue = useMemo(

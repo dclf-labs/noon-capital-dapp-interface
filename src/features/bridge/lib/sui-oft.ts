@@ -4,16 +4,13 @@ import { SDK } from '@layerzerolabs/lz-sui-sdk-v2'
 import { addressToBytes32 } from '@layerzerolabs/lz-v2-utilities'
 import { hexToBytes } from 'viem'
 
-import { SUI_SUSN_COIN_TYPE } from '@/config/chains/sui'
 import type { Token } from '@/config/token'
 import { getBridgeOptions } from '@/features/bridge/lib/bridge'
+import { slippageAdjustedAmount } from '@/features/swap/lib/swap'
 import { strToBn } from '@/lib/format'
+import { getSuiCoinType } from '@/lib/sui-coin'
 
-export const getSuiCoinType = (token: Token | undefined): string | undefined => {
-  if (!token) return undefined
-  if (token.symbol === 'sUSN') return SUI_SUSN_COIN_TYPE
-  return undefined
-}
+export { getSuiCoinType }
 
 // LayerZero Sui SDK pins an older @mysten/sui; accept any JSON-RPC-compatible client.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +50,7 @@ export const buildSuiOftSendParam = (
     dstEid,
     to,
     amountLd,
-    minAmountLd: amountLd,
+    minAmountLd: slippageAdjustedAmount(amountLd, 1),
     extraOptions: optionsBytes,
     composeMsg: new Uint8Array(0),
     oftCmd: new Uint8Array(0),

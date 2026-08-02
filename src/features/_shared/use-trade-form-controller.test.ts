@@ -6,6 +6,7 @@ import {
   getIsApproved,
   useResetOnSessionChange,
   useSyncAmountOut,
+  useSyncPreviewOut,
   useTradeFormController,
 } from '@/features/_shared/use-trade-form-controller'
 
@@ -60,6 +61,44 @@ describe('trade form helpers', () => {
 
     rerender({ preview: 10, isDebouncing: false })
     expect(result.current.inputs.amountOut).toBe(10)
+  })
+
+  it('syncs Starknet quote + route from preview envelopes', () => {
+    const { result, rerender } = renderHook(
+      ({
+        data,
+        isLoading,
+        isDebouncing,
+      }: {
+        data?: { quote: number; route: string[] }
+        isLoading: boolean
+        isDebouncing: boolean
+      }) => {
+        const form = useTradeFormController<{ amountOut?: number; route?: string[] }>({
+          amountOut: undefined,
+          route: [],
+        })
+        useSyncPreviewOut(form.setInputs, { data, isLoading }, isDebouncing)
+        return form
+      },
+      {
+        initialProps: {
+          data: { quote: 4, route: ['a'] },
+          isLoading: false,
+          isDebouncing: true,
+        },
+      },
+    )
+
+    expect(result.current.inputs.amountOut).toBeUndefined()
+
+    rerender({
+      data: { quote: 4, route: ['a'] },
+      isLoading: false,
+      isDebouncing: false,
+    })
+    expect(result.current.inputs.amountOut).toBe(4)
+    expect(result.current.inputs.route).toEqual(['a'])
   })
 
   it('clears amounts and txn on session identity change', () => {

@@ -44,9 +44,9 @@ describe('useChainFamily', () => {
     const { result } = renderHook(() =>
       useChainFamily({
         connection: undefined,
-        evm: () => 'evm',
-        starknet: () => 'starknet',
-        sui: () => 'sui',
+        evm: 'evm',
+        starknet: 'starknet',
+        sui: 'sui',
         fallback: 'fallback',
       }),
     )
@@ -58,9 +58,9 @@ describe('useChainFamily', () => {
       ({ connection }: { connection: UnifiedConnection }) =>
         useChainFamily({
           connection,
-          evm: () => 'evm',
-          starknet: () => 'starknet',
-          sui: () => 'sui',
+          evm: 'evm',
+          starknet: 'starknet',
+          sui: 'sui',
           fallback: 'fallback',
         }),
       { initialProps: { connection: asEvm() } },
@@ -78,8 +78,8 @@ describe('useChainFamily', () => {
     const { result } = renderHook(() =>
       useChainFamily({
         connection: asSui(),
-        evm: () => 'evm',
-        starknet: () => 'starknet',
+        evm: 'evm',
+        starknet: 'starknet',
         fallback: 'fallback',
       }),
     )

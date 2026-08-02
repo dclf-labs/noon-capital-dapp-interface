@@ -12,7 +12,7 @@ Domain modules co-locate hooks, React context providers, and feature-specific li
 | `api`                                   | Protocol + points HTTP hooks (`apiFetch` + `useApiQuery`) |
 | `swap`                                  | Shared DEX quotes, spender resolution, path encoding      |
 | `shell`                                 | Account drawer, network selectors, wallet modals          |
-| `_shared`                               | Trade form controller + session reset helpers             |
+| `_shared`                               | Trade form controller, USD/presets, display models        |
 
 ## Conventions
 
@@ -22,7 +22,8 @@ Domain modules co-locate hooks, React context providers, and feature-specific li
 - **Env**: `appEnv` from `@/lib/env` — never raw `import.meta.env` in features
 - **Wallet sessions**: `useEvmTargetSession` / `useEvmFamilySession` / `useStarknetFamilySession` / `useReadOnlySession`
 - **Writes**: `canWriteSession(connection)` before submits; prefer `submitEvmWrite` for EVM
-- **Trade forms**: `useTradeFormController` + `useSyncAmountOut` + `useResetOnSessionChange`
+- **Trade forms**: `useTradeFormController` + `useSyncAmountOut` / `useSyncPreviewOut` + `useResetOnSessionChange`
+- **UI values**: providers expose `amountInUsd`, `isInsufficientBalance`, `isApproved`; use `useTradeInputModel` / `useTradePriceModel` + `trade-display` — no amount×price or half/max math in components (see `_shared/README.md`)
 - **Buy/sell**: share `usePreviewSwap` / `usePreviewEkuboSwap` / `getSwapSpender`
 - **Config helpers**: `getToken` / pools from `@/config`
 

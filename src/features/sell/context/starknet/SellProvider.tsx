@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import { getTokens } from '@/config'
+import { getAmountUsd } from '@/features/_shared/trade-amounts'
 import {
   getInsufficientBalance,
   getIsApproved,
   useResetOnSessionChange,
+  useSyncPreviewOut,
   useTradeFormController,
 } from '@/features/_shared/use-trade-form-controller'
 import useTokenPrice from '@/features/api/hooks/useTokenPrice'
@@ -68,14 +70,12 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [inputs.amountIn, tokenInAllowance.data],
   )
 
-  useEffect(() => {
-    if (isDebouncing || preview.isLoading || preview.data === undefined) return
-    setInputs((prev) => ({
-      ...prev,
-      amountOut: typeof preview.data === 'object' ? preview.data.quote : undefined,
-      route: typeof preview.data === 'object' ? preview.data.route : [],
-    }))
-  }, [isDebouncing, preview.data, preview.isLoading, setInputs])
+  useSyncPreviewOut(setInputs, preview, isDebouncing)
+
+  const amountInUsd = useMemo(
+    () => getAmountUsd(inputs.amountIn, tokenPrice),
+    [inputs.amountIn, tokenPrice],
+  )
 
   useResetOnSessionChange({
     session: {
@@ -120,9 +120,10 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
     () => ({
       price,
       tokenPrice,
+      amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
     }),
-    [price, tokenPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
   )
 
   const txnValue = useMemo(

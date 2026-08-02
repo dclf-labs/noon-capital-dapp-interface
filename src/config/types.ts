@@ -5,12 +5,6 @@ import type { Token } from '@/config/token'
 import type { VaultConfig } from '@/config/vault'
 
 /**
- * Chains that expose Goldsky USN/sUSN holdings subgraphs via `appEnv.subgraphs.holdings`.
- * Protocol configs set `holdingsSubgraphChain`; URLs live in env, not in this type.
- */
-export type HoldingsSubgraphChain = 'ethereum' | 'sophon' | 'zksync' | 'tac'
-
-/**
  * Per-chain Noon protocol deployment config (contracts, tokens, pools, explorers).
  * Distinct from `src/chains` wallet/network metadata.
  */
@@ -26,8 +20,6 @@ export type ProtocolChainConfig = {
   useHyperlane?: Partial<Record<ProtocolChainId, boolean>>
   txnWaitTimeout?: number
   pointsApiChainId?: number | string
-  /** Which holdings subgraph pair to use from `appEnv.subgraphs.holdings`. */
-  holdingsSubgraphChain?: HoldingsSubgraphChain
   syncswapV3Router?: Address
   layerzeroOftEid?: number
   hyperlaneDomain?: number
@@ -39,7 +31,6 @@ export type ProtocolChainConfig = {
   bridgeTokens?: string[]
   mintCollaterals?: string[]
   redeemCollaterals?: string[]
-  /** Preferred spelling (was `dataRefershInterval` in the legacy dapp). */
   dataRefreshInterval?: number
   usn?: Address
   susn?: Address

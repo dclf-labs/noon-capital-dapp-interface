@@ -69,9 +69,10 @@ const useApprove = () => {
             hash: txnHash as EvmAddress,
             confirmations: 1,
             timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
-          }).catch(() => ({
-            status: 'success',
-          }))
+          }).catch((error) => {
+            console.error('Timed out or failed waiting for transaction receipt', error)
+            throw error
+          })
 
           if (receipt.status === 'success') {
             await refetchAllowance?.()

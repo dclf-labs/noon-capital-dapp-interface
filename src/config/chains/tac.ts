@@ -3,6 +3,7 @@ import { hyperEvm, mainnet, sophon, tac, zksync } from 'wagmi/chains'
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
 import { DEFAULT_VAULT_CURATOR } from '@/config/vault'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: tac.id,
@@ -12,7 +13,6 @@ export const config: ProtocolChainConfig = {
   hyperlaneDomain: 239,
   pointsApiChainId: PointsApiChain.TAC,
   txnWaitTimeout: 2 * 60 * 1000, // 3 minutes
-  holdingsSubgraphChain: 'tac',
   sellTokens: ['USDT'],
   buyTokens: ['USN', 'sUSN'],
   nativeTokens: ['USN', 'sUSN'],
@@ -22,8 +22,7 @@ export const config: ProtocolChainConfig = {
   tokenExplorerUrl: 'https://explorer.tac.build/contract',
   transactionExplorerUrl: 'https://explorer.tac.build/tx',
   addressExplorerUrl: 'https://explorer.tac.build/address',
-  rpcUrl:
-    'https://rpc.ankr.com/tac/f03dd5967bf0286f19a9a5eb9c2ca819121ffb84b3b9ab77da793fe58b17283b',
+  rpcUrl: appEnv.rpc.tac || 'https://rpc.tac.build',
   useHyperlane: {
     [mainnet.id]: true,
     [zksync.id]: true,

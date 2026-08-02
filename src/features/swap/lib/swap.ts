@@ -28,7 +28,7 @@ export type CurvePool = {
 import { type PermitSingle } from '@uniswap/permit2-sdk'
 import { AbiCoder, ethers, getBytes } from 'ethers'
 
-import { HUNDRED_PERCENT_IN_BN, SLIPPAGE_PERCEINT_IN_BN } from '@/constants/common'
+export { slippageAdjustedAmount, toDeadline } from '@/features/swap/lib/amounts'
 
 export function encodePath(path: string[], fees: bigint[]): string {
   const UNI_FEE_SIZE = 3
@@ -72,16 +72,6 @@ export const encodeUniV4Path = (poolKeys: any[], currencyIn: string): any[] => {
     currencyIn = currencyOut
   }
   return pathKeys
-}
-
-export function slippageAdjustedAmount(amount: bigint, slippage: number): bigint {
-  const bnSlippage = BigInt(slippage || 1)
-  const slippageBps = bnSlippage * SLIPPAGE_PERCEINT_IN_BN
-  return (amount * (HUNDRED_PERCENT_IN_BN - slippageBps)) / HUNDRED_PERCENT_IN_BN
-}
-
-export function toDeadline(expiration: number): number {
-  return Math.floor((Date.now() + expiration) / 1000)
 }
 
 /**

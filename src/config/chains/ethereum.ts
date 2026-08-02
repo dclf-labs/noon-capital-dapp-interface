@@ -2,6 +2,7 @@ import { base, berachain, citrea, hyperEvm, mainnet, sophon, tac, zksync } from 
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: mainnet.id,
@@ -13,8 +14,7 @@ export const config: ProtocolChainConfig = {
   sNoon: '0x5f9ee665830BE17b2073a9800Eb7bbbe51b471D7',
   directMinter: '0xB91b361ebE4022Bb62dF0651bDD09b21209ac058',
   directRedeemer: '0x3Db3260fFf8f5f97c96Ae2fE871A9359D46eB566',
-  txnWaitTimeout: 2 * 60 * 1000, // 3 minutes
-  holdingsSubgraphChain: 'ethereum',
+  txnWaitTimeout: 2 * 60 * 1000, // 2 minutes
   sellTokens: ['USDT', 'USDC', 'WETH', 'ETH', 'WBTC', 'DAI', 'cbBTC', 'tBTC'],
   buyTokens: ['USN', 'sUSN'],
   nativeTokens: ['USN', 'sUSN'],
@@ -27,7 +27,7 @@ export const config: ProtocolChainConfig = {
   tokenExplorerUrl: 'https://etherscan.io/token',
   transactionExplorerUrl: 'https://etherscan.io/tx',
   addressExplorerUrl: 'https://etherscan.io/address',
-  rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/vKhVSViaOGH5mEYDuMwAy',
+  rpcUrl: appEnv.rpc.ethereum || 'https://ethereum.publicnode.com',
   dataRefreshInterval: 10 * 60 * 1000,
   sNoonRewarder: '0x22C9e2eD2f016Ae4A0131C251BF3FCe882a92eD5',
   hyperlaneMailbox: '0xc005dc82818d67AF737725bD4bf75435d065D239',

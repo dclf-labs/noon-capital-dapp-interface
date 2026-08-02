@@ -29,6 +29,8 @@ export const MintBalanceContext = createContext<{
 export const MintPriceContext = createContext<{
   price: ReturnType<typeof usePreviewMint>
   tokenPrice: ReturnType<typeof useTokenPrice>
+  /** Precomputed `amountIn * tokenPrice` for UI — do not recompute in components. */
+  amountInUsd: number
   isFetchingQuote: boolean
 }>(null!)
 

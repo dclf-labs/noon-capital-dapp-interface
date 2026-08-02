@@ -2,11 +2,12 @@ import { useMemo } from 'react'
 
 import { type Token } from '@/config/token'
 import { type SwapSide } from '@/features/swap/hooks/usePreviewSwap'
+import { resolveEkuboCalculatedAmount } from '@/features/swap/lib/ekubo-quote'
 import { useChainQuery } from '@/hooks/query/useChainQuery'
 import { isAddressValid } from '@/lib/address'
 import { type EkuboSwapInfoResponse, type EkuboSwapInfoRoute } from '@/lib/api'
 import { type StarknetConnection } from '@/lib/connection'
-import { bnToStr, strToBn, toBn, toNum } from '@/lib/format'
+import { bnToStr, strToBn, toNum } from '@/lib/format'
 import { queryKeys } from '@/lib/query-keys'
 
 export type EkuboPreviewResult = {
@@ -32,15 +33,8 @@ async function fetchEkuboPreview(
   }
 
   const data = (await response.json()) as EkuboSwapInfoResponse
-  const quote = toNum(
-    bnToStr(
-      data.total_calculated ||
-        data.splits?.reduce((acc, curr) => toBn(acc) + toBn(curr.amount_calculated), toBn(0)) /
-          toBn(data.splits?.length || 0) ||
-        0,
-      tokenOut.decimals,
-    ),
-  )
+  const rawQuote = resolveEkuboCalculatedAmount(data)
+  const quote = toNum(bnToStr(rawQuote, tokenOut.decimals))
 
   return {
     quote,

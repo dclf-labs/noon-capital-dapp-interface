@@ -29,7 +29,6 @@ export const config: ProtocolChainConfig = {
   },
   syncswapV3Router: '0x1B887a14216Bdeb7F8204Ee6a269Bd9Ff73A084C',
   explorerUrl: 'https://era.zksync.network/',
-  holdingsSubgraphChain: 'zksync',
   hyperlaneMailbox: '0x6bD0A2214797Bc81e0b006F7B74d6221BcD8cb6E',
   usn: '0x0469d9d1dE0ee58fA1153ef00836B9BbCb84c0B6',
   susn: '0xB6a09d426861c63722Aa0b333a9cE5d5a9B04c4f',

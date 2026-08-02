@@ -13,7 +13,7 @@ import {
   STARKNET_BRIDGE_DESTINATION,
 } from '@/constants/common'
 import HyperlaneMailbox from '@/lib/abis/evm/hyperlane-mailbox.json'
-import { getAddressOrZeroAddress, isAddressValid } from '@/lib/address'
+import { getAddressOrZeroAddress, isAddressValid, toBytes32Recipient } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
 import { bnToStr, strToBn, toBn, toNum } from '@/lib/format'
 import { queryKeys } from '@/lib/query-keys'
@@ -124,7 +124,7 @@ const useHyperlaneBridgeFeeQuote = (
       [
         getAddressOrZeroAddress(tokenIn?.contractAddress),
         destinationConnection?.config?.id === STARKNET_BRIDGE_DESTINATION?.id
-          ? receiverAddress
+          ? toBytes32Recipient(receiverAddress)
           : getAddressOrZeroAddress(receiverAddress),
         toBn(_amountIn),
       ],
@@ -136,7 +136,7 @@ const useHyperlaneBridgeFeeQuote = (
       args: [
         toBn(destinationConnection?.config?.hyperlaneDomain),
         destinationConnection?.config?.id === STARKNET_BRIDGE_DESTINATION?.id
-          ? receiverAddress
+          ? toBytes32Recipient(receiverAddress)
           : fromBytes(addressToBytes32(getAddressOrZeroAddress(receiverAddress)), 'hex'),
         message,
         HYPERLANE_QUOTE_DISPATCH_DEFAULT_METADATA,

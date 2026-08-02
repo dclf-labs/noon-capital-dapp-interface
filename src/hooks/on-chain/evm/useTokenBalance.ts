@@ -8,7 +8,7 @@ import type { ProtocolChainId } from '@/config/chain-id'
 import { type Token } from '@/config/token'
 import { getAddressOrZeroAddress, isEVMAddressValid } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
-import { bnToStr, toNum } from '@/lib/format'
+import { rawUnitsToNumber } from '@/lib/format'
 import { queryKeys } from '@/lib/query-keys'
 import { wagmiConfig } from '@/wallet/evm/config'
 
@@ -71,7 +71,7 @@ const useTokenBalance = (connection: EVMConnection, token: Token | undefined) =>
           address: getAddressOrZeroAddress(token?.contractAddress),
         })
 
-    return toNum(bnToStr(balance, token?.decimals))
+    return rawUnitsToNumber(balance, token?.decimals)
   }
 
   const { isLoading, isError, data, isFetching, refetch } = useQuery({

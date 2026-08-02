@@ -10,6 +10,7 @@ import { getAddressOrZeroAddress } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
 import { appEnv } from '@/lib/env'
 import { strToBn } from '@/lib/format'
+import { secureRandomNonce } from '@/lib/secure-random'
 import type { MintingOrder } from '@/lib/types'
 import { ApiRequestStatus } from '@/lib/types'
 import { canWriteSession } from '@/lib/wallet-session'
@@ -91,7 +92,7 @@ const signRedeemOrder = async (
       collateralAmount: strToBn(collateralAmount, tokenOut.decimals),
       usnAmount: strToBn(usnAmount, tokenIn.decimals),
       expiry: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // Current date in sec + 24 hr in sec.
-      nonce: Math.floor(Math.random() * 100000000000),
+      nonce: secureRandomNonce(),
     }
 
     return await wallet

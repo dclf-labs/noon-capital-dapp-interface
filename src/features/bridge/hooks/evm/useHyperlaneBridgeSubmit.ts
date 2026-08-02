@@ -10,11 +10,12 @@ import { type Token } from '@/config/token'
 import { STARKNET_BRIDGE_DESTINATION, TXN_WAIT_TIMEOUT } from '@/constants/common'
 import LayerzeroAndHyperlaneToken from '@/lib/abis/evm/layerzero-hyperlane-token.json'
 import { type Address } from '@/lib/address'
-import { getAddressOrZeroAddress, isAddressValid } from '@/lib/address'
+import { getAddressOrZeroAddress, isAddressValid, toBytes32Recipient } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
 import { getTxnPayload } from '@/lib/evmTxn'
 import { strToBn, toBn } from '@/lib/format'
 import { type TxnStatus } from '@/lib/types'
+import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
 const useHyperlaneBridgeSubmit = () => {
@@ -34,6 +35,11 @@ const useHyperlaneBridgeSubmit = () => {
     ) => {
       try {
         setTxnStatus?.('IDLE')
+
+        if (!canWriteSession(connection)) {
+          setTxnStatus?.('TXN_FAILURE')
+          return
+        }
 
         if (
           !connection.config?.id ||
@@ -71,11 +77,14 @@ const useHyperlaneBridgeSubmit = () => {
           connection?.config?.defaultGasToken?.decimals || write?.chain?.nativeCurrency?.decimals
         const sendNativeFee = strToBn(nativeFee, _decimals)
 
+        const recipientBytes32 =
+          destinationConnection?.config?.id === STARKNET_BRIDGE_DESTINATION?.id
+            ? toBytes32Recipient(receiverAddress)
+            : zeroPadValue(getAddressOrZeroAddress(receiverAddress), 32)
+
         const sendArgs = [
           toBn(destinationConnection?.config?.hyperlaneDomain),
-          destinationConnection?.config?.id === STARKNET_BRIDGE_DESTINATION?.id
-            ? receiverAddress
-            : zeroPadValue(getAddressOrZeroAddress(receiverAddress), 32),
+          recipientBytes32,
           strToBn(amount, tokenIn?.decimals),
         ]
 
@@ -101,9 +110,10 @@ const useHyperlaneBridgeSubmit = () => {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
             timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
-          }).catch(() => ({
-            status: 'success',
-          }))
+          }).catch((error) => {
+            console.error('Timed out or failed waiting for transaction receipt', error)
+            throw error
+          })
 
           if (receipt.status === 'success') {
             setTxnStatus?.('TXN_SUCCESS')
@@ -117,7 +127,7 @@ const useHyperlaneBridgeSubmit = () => {
             setTxnStatus?.('IDLE')
           }
         } catch (error) {
-          console.error('Error approving token', error)
+          console.error('Error submitting Hyperlane bridge', error)
           setTxnStatus?.('TXN_FAILURE')
         }
       } catch (error) {

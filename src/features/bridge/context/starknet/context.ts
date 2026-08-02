@@ -32,6 +32,8 @@ export const BridgeBalanceContext = createContext<{
 export const BridgePriceContext = createContext<{
   feeQuote: ReturnType<typeof useBridgeQuote>
   tokenPrice: ReturnType<typeof useTokenPrice>
+  /** Precomputed `amount * tokenPrice` for UI — do not recompute in components. */
+  amountInUsd: number
 }>(null!)
 
 export const BridgeTxnContext = createContext<{

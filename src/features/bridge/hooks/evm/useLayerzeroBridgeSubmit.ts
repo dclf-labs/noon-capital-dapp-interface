@@ -9,6 +9,7 @@ import type { ProtocolChainId } from '@/config/chain-id'
 import { type Token } from '@/config/token'
 import { IS_LAYERZERO_BRIDGE_DISABLED, TXN_WAIT_TIMEOUT } from '@/constants/common'
 import { getBridgeOptionsForDestination } from '@/features/bridge/lib/bridge'
+import { slippageAdjustedAmount } from '@/features/swap/lib/swap'
 import LayerzeroOft from '@/lib/abis/evm/layerzero-oft.json'
 import LayerzeroOftHelper from '@/lib/abis/evm/layerzero-oft-helper.json'
 import { type Address } from '@/lib/address'
@@ -17,6 +18,7 @@ import { type EVMConnection } from '@/lib/connection'
 import { getTxnPayload } from '@/lib/evmTxn'
 import { strToBn, toBn } from '@/lib/format'
 import { type TxnStatus } from '@/lib/types'
+import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
 const useBridgeSubmit = () => {
@@ -38,6 +40,11 @@ const useBridgeSubmit = () => {
         setTxnStatus?.('IDLE')
 
         if (IS_LAYERZERO_BRIDGE_DISABLED) {
+          setTxnStatus?.('TXN_FAILURE')
+          return
+        }
+
+        if (!canWriteSession(connection)) {
           setTxnStatus?.('TXN_FAILURE')
           return
         }
@@ -72,11 +79,14 @@ const useBridgeSubmit = () => {
         const contractAddress = getAddressOrZeroAddress(
           connection.config?.layerzeroOftHelper || tokenIn?.layerzeroOftAddress,
         )
+        // OFT amountLD / minAmountLD are both in **source** local decimals.
+        const amountLd = strToBn(amount, tokenIn.decimals)
+        const minAmountLd = slippageAdjustedAmount(amountLd, 1)
         const sendParamArgs = [
           toBn(destinationConnection?.config?.layerzeroOftEid),
           fromBytes(addressToBytes32(getLayerZeroReceiverAddress(receiverAddress)), 'hex'),
-          strToBn(amount, tokenIn?.decimals),
-          strToBn(amount, tokenOut?.decimals),
+          amountLd,
+          minAmountLd,
           getBridgeOptionsForDestination(destinationConnection?.config?.id),
           '0x',
           '0x',
@@ -112,9 +122,10 @@ const useBridgeSubmit = () => {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
             timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
-          }).catch(() => ({
-            status: 'success',
-          }))
+          }).catch((error) => {
+            console.error('Timed out or failed waiting for transaction receipt', error)
+            throw error
+          })
 
           if (receipt.status === 'success') {
             setTxnStatus?.('TXN_SUCCESS')
@@ -128,7 +139,7 @@ const useBridgeSubmit = () => {
             setTxnStatus?.('IDLE')
           }
         } catch (error) {
-          console.error('Error approving token', error)
+          console.error('Error submitting LayerZero bridge', error)
           setTxnStatus?.('TXN_FAILURE')
         }
       } catch (error) {

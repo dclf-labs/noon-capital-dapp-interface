@@ -26,11 +26,11 @@ export const isStarknetAddressValid = (address: string | undefined): boolean => 
   // Exclude valid EVM addresses early to avoid infinite recursion with isAddressValid
   if (isEVMAddressValid(address as Address)) return false
 
-  const trimmedAddress = address.trim()
-  const normalizedAddress = trimmedAddress.replace('0x0', '0x')
-  // Starknet addresses are 66 characters long (0x + 64 hex characters)
-  const hexPattern = /^0x[0-9a-fA-F]{1,63}$/
-  return hexPattern.test(normalizedAddress.trim()) && normalizedAddress.trim().length >= 64
+  const trimmed = address.trim()
+  // Starknet felt252: 0x + 1–64 hex digits (including full 64-char padded forms)
+  if (!/^0x[0-9a-fA-F]{1,64}$/.test(trimmed)) return false
+  if (/^0x0+$/i.test(trimmed)) return false
+  return true
 }
 
 /**
@@ -85,11 +85,22 @@ export const getAddressOrZeroAddress = (address: Address | undefined) => {
  * EVM addresses are checksummed; Sui/Starknet hex addresses are passed through
  * (LZ pads them to 32 bytes).
  */
+/**
+ * Left-pad a hex address to 32 bytes for Hyperlane / bytes32 recipients.
+ * Accepts EVM (20-byte) and Starknet/Sui (up to 32-byte) hex forms.
+ */
+export const toBytes32Recipient = (address: string | undefined): `0x${string}` => {
+  if (!address) return zeroAddress
+  const body = address.trim().replace(/^0x/i, '')
+  if (!/^[0-9a-fA-F]{1,64}$/.test(body)) return zeroAddress
+  return `0x${body.padStart(64, '0').toLowerCase()}` as `0x${string}`
+}
+
 export const getLayerZeroReceiverAddress = (address: Address | undefined): string => {
   if (!address) return zeroAddress
   if (isEVMAddressValid(address)) return getAddress(address)
   if (isSuiAddressValid(address)) return normalizeSuiAddress(address) || address
-  if (isStarknetAddressValid(address)) return address
+  if (isStarknetAddressValid(address)) return toBytes32Recipient(address)
   return zeroAddress
 }
 

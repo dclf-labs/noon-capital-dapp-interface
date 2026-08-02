@@ -6,7 +6,7 @@ import { type Address } from 'viem'
 
 import { type Token } from '@/config/token'
 import { BRIDGE_QUOTE_FEE_MULTIPLIER } from '@/constants/common'
-import ABI from '@/lib/abis/evm/layerzero-hyperlane-token.json'
+import { starknetAbis } from '@/lib/abis'
 import { type EVMConnection, type StarknetConnection } from '@/lib/connection'
 import { bnToStr, toBn, toNum } from '@/lib/format'
 
@@ -31,7 +31,7 @@ const useHyperlaneBridgeFeeQuote = (
       !!tokenIn &&
       !!tokenIn?.decimals &&
       !!connection?.isConnected,
-    abi: ABI as Abi,
+    abi: starknetAbis.layerzeroHyperlaneToken as Abi,
   })
 
   return useMemo(() => {

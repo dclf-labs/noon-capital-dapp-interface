@@ -124,7 +124,7 @@ const getUniV3TxnPayload = async (
         {
           path: path,
           recipient: connection.address,
-          deadline: BigInt(Date.now() + 5 * 60 * 1000),
+          deadline: BigInt(toDeadline(5 * 60 * 1000)),
           amountIn: amountInParsed,
           amountOutMinimum: amountOutMinimum,
         },
@@ -279,7 +279,7 @@ const getUniV4TxnPayload = async (
       UniswapUniversalRouter as Abi,
       'execute',
       getAddressOrZeroAddress(connection.config?.uniUniversalRouter),
-      [routePlanner.commands, routePlanner.inputs, BigInt(Date.now() + 5 * 60 * 1000)],
+      [routePlanner.commands, routePlanner.inputs, BigInt(toDeadline(5 * 60 * 1000))],
       undefined,
       gasLimit,
     )
@@ -388,9 +388,10 @@ const useBuySubmit = () => {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
             timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
-          }).catch(() => ({
-            status: 'success',
-          }))
+          }).catch((error) => {
+            console.error('Timed out or failed waiting for transaction receipt', error)
+            throw error
+          })
 
           if (receipt.status === 'success') {
             setTxnStatus?.(TxnStatus.TXN_SUCCESS)

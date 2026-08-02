@@ -8,7 +8,7 @@ import type { ProtocolChainId } from '@/config/chain-id'
 import { type Token } from '@/config/token'
 import { type EvmAddress, getAddressOrZeroAddress, isEVMAddressValid } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
-import { bnToStr, toNum } from '@/lib/format'
+import { rawUnitsToNumber } from '@/lib/format'
 import { queryKeys } from '@/lib/query-keys'
 import { wagmiConfig } from '@/wallet/evm/config'
 
@@ -74,7 +74,7 @@ const useTokenAllowance = (
     }
 
     if (token?.isNative) {
-      return toNum(bnToStr(maxUint256, token?.decimals))
+      return rawUnitsToNumber(maxUint256, token?.decimals)
     }
 
     const allowance = await read.readContract({
@@ -84,7 +84,7 @@ const useTokenAllowance = (
       address: getAddressOrZeroAddress(token?.contractAddress),
     })
 
-    return toNum(bnToStr(allowance, token?.decimals))
+    return rawUnitsToNumber(allowance, token?.decimals)
   }
 
   const {

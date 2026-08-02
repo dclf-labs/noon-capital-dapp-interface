@@ -14,23 +14,23 @@ This repo is a **multichain wallet foundation** (EVM AppKit, Starknet, Sui) with
 
 ## Layout conventions
 
-| Path                        | Responsibility                                                           |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `src/chains/`               | Chain metadata + AppKit network objects                                  |
-| `src/config/`               | Protocol deployments (contracts, tokens, pools); `holdingsSubgraphChain` |
-| `src/features/<domain>/`    | Domain hooks, providers, libs (co-located)                               |
-| `src/features/_shared/`     | Trade form controller + session reset                                    |
-| `src/hooks/connection/`     | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession`       |
-| `src/hooks/on-chain/`       | Balances / allowances / gas (return `0` when disabled)                   |
-| `src/hooks/query/`          | `useChainQuery` / `useApiQuery` envelopes                                |
-| `src/lib/wallet-session.ts` | Pure chain resolution + connection builders                              |
-| `src/lib/env/`              | Zod-validated env → grouped `appEnv`                                     |
-| `src/lib/query-keys.ts`     | Central TanStack Query key factory                                       |
-| `src/lib/evm-submit.ts`     | Shared EVM write + receipt (`canWriteSession` gated)                     |
-| `src/lib/abis/`             | Contract ABIs (`evm/` / `starknet/`)                                     |
-| `src/state/`                | Zustand stores                                                           |
-| `src/wallet/<family>/`      | `config`, `provider`, `reader`                                           |
-| `src/providers/`            | `AppProviders` (+ `WalletQuerySync`)                                     |
+| Path                        | Responsibility                                                     |
+| --------------------------- | ------------------------------------------------------------------ |
+| `src/chains/`               | Chain metadata + AppKit network objects                            |
+| `src/config/`               | Protocol deployments (contracts, tokens, pools)                    |
+| `src/features/<domain>/`    | Domain hooks, providers, libs (co-located)                         |
+| `src/features/_shared/`     | Trade form controller + session reset                              |
+| `src/hooks/connection/`     | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession` |
+| `src/hooks/on-chain/`       | Balances / allowances / gas (return `0` when disabled)             |
+| `src/hooks/query/`          | `useChainQuery` / `useApiQuery` envelopes                          |
+| `src/lib/wallet-session.ts` | Pure chain resolution + connection builders                        |
+| `src/lib/env/`              | Zod-validated env → grouped `appEnv`                               |
+| `src/lib/query-keys.ts`     | Central TanStack Query key factory                                 |
+| `src/lib/evm-submit.ts`     | Shared EVM write + receipt (`canWriteSession` gated)               |
+| `src/lib/abis/`             | Contract ABIs (`evm/` / `starknet/`)                               |
+| `src/state/`                | Zustand stores                                                     |
+| `src/wallet/<family>/`      | `config`, `provider`, `reader`                                     |
+| `src/providers/`            | `AppProviders` (+ `WalletQuerySync`)                               |
 
 ## Wallet sessions
 
@@ -64,20 +64,16 @@ See `src/features/_shared/README.md`.
 
 ## Env / analytics
 
-Validated in `src/lib/env` as **`appEnv`**. Prefer canonical names; legacy `VITE_APP_*` aliases still normalize. See `.env.example` and `src/lib/env/README.md`.
+Validated in `src/lib/env` as **`appEnv`**. Prefer canonical names; a few alternate `VITE_APP_*` keys still normalize. See `.env.example` and `src/lib/env/README.md`.
 
-| Variable                                       | Runtime role                                |
-| ---------------------------------------------- | ------------------------------------------- |
-| `VITE_WALLETCONNECT_PROJECT_ID`                | Required in production (AppKit fail-closed) |
-| `VITE_API_BASE_URL`                            | Noon backend API base                       |
-| `VITE_GA_MEASUREMENT_ID`                       | Optional; injected into `index.html` only   |
-| `VITE_MIXPANEL_TOKEN`                          | Optional Mixpanel token                     |
-| `VITE_STARKNET_RPC_URL`                        | Optional Starknet RPC override              |
-| `VITE_STARKNET_ALCHEMY_API_KEY`                | Builds Alchemy RPC when URL unset           |
-| `VITE_SUI_RPC_URL`                             | Optional Sui RPC override                   |
-| `VITE_SUBGRAPH_USN_*` / `VITE_SUBGRAPH_SUSN_*` | Holdings subgraphs by chain                 |
-| `VITE_SUBGRAPH_ETH_META_URL`                   | Ethereum meta subgraph                      |
-| `VITE_APP_ENV`                                 | `development` \| `staging` \| `production`  |
+| Variable                                         | Runtime role                                |
+| ------------------------------------------------ | ------------------------------------------- |
+| `VITE_API_BASE_URL`                              | Noon backend API base                       |
+| `VITE_WALLETCONNECT_PROJECT_ID`                  | Required in production (AppKit fail-closed) |
+| `VITE_STARKNET_ALCHEMY_API_KEY`                  | Builds Alchemy RPC when URL unset           |
+| `VITE_STARKNET_RPC_URL`                          | Optional Starknet RPC override              |
+| `VITE_ETHEREUM_RPC_URL` / `BASE` / `SUI` / `TAC` | Optional protocol RPC overrides             |
+| `VITE_GA_MEASUREMENT_ID`                         | Optional; injected into `index.html` only   |
 
 ## Chain readers
 
@@ -103,7 +99,7 @@ Validated in `src/lib/env` as **`appEnv`**. Prefer canonical names; legacy `VITE
 
 | Area            | Specs                                                                               |
 | --------------- | ----------------------------------------------------------------------------------- |
-| Env / subgraphs | `src/lib/env/index.test.ts`, `src/lib/subgraph.test.ts`                             |
+| Env             | `src/lib/env/index.test.ts`                                                         |
 | Wallet session  | `src/lib/wallet-session.test.ts`, `wallet-query-sync.test.ts`, `evm-submit.test.ts` |
 | Trade forms     | `src/features/_shared/use-trade-form-controller.test.ts`                            |
 | Zustand         | `src/state/active-chain.test.ts`, `points-estimator-assumptions.test.ts`            |

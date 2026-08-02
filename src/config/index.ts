@@ -39,5 +39,5 @@ export {
 export { PointsApiChain } from '@/config/points-api'
 export type { CurvePool, UniV3Pool, UniV4Pool, UniV4PoolKey } from '@/config/pools'
 export type { Token } from '@/config/token'
-export type { HoldingsSubgraphChain, ProtocolChainConfig } from '@/config/types'
+export type { ProtocolChainConfig } from '@/config/types'
 export { DEFAULT_VAULT_CURATOR, type VaultConfig, type VaultCurator } from '@/config/vault'

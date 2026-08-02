@@ -15,16 +15,35 @@ export const ceil = (amount: string | number | bigint | undefined) =>
 export const floor = (amount: string | number | bigint | undefined) =>
   Math.floor(toSafeNumber(amount))
 
+/**
+ * Truncate toward zero to `decimals` fractional digits without `Math.pow`
+ * float overflow (unsafe for large decimal counts).
+ */
 export const down = (amount: string | number | bigint | undefined, decimals: number) => {
   const value = toSafeNumber(amount)
-  const factor = Math.pow(10, decimals)
-  return Math.floor(value * factor) / factor
+  if (!Number.isFinite(value) || decimals < 0) return 0
+  const sign = value < 0 ? -1 : 1
+  const [intPart, fracPart = ''] = Math.abs(value).toString().split('.')
+  if (decimals === 0) return sign * Math.floor(Math.abs(value))
+  const clippedFrac = fracPart.slice(0, decimals)
+  return sign * Number(`${intPart}.${clippedFrac}`)
 }
 
+/** Round away from zero up to `decimals` fractional digits (string-safe). */
 export const up = (amount: string | number | bigint | undefined, decimals: number) => {
   const value = toSafeNumber(amount)
-  const factor = Math.pow(10, decimals)
-  return Math.ceil(value * factor) / factor
+  if (!Number.isFinite(value) || decimals < 0) return 0
+  const sign = value < 0 ? -1 : 1
+  const abs = Math.abs(value)
+  const [intPart, fracPart = ''] = abs.toString().split('.')
+  if (decimals === 0) return sign * Math.ceil(abs)
+  const keep = fracPart.slice(0, decimals)
+  const rest = fracPart.slice(decimals)
+  const needsBump = /[1-9]/.test(rest)
+  if (!needsBump) return sign * Number(`${intPart}.${keep}`)
+  // Bump the truncated fractional part by one unit in the last place.
+  const unit = Number(`1e-${decimals}`)
+  return sign * (Number(`${intPart}.${keep.padEnd(decimals, '0')}`) + unit)
 }
 
 export const round = (amount: string | number | bigint | undefined) =>
@@ -35,7 +54,7 @@ export const bnToStr = (
   decimals: number | undefined,
 ) => {
   try {
-    const _decimals = decimals || 18
+    const _decimals = decimals ?? 18
     const _amount = BigInt(amount?.toString() || 0)
     return formatUnits(_amount, _decimals) || '0'
   } catch {
@@ -48,7 +67,7 @@ export const bnToInt = (
   decimals: number | undefined,
 ) => {
   try {
-    const _decimals = decimals || 18
+    const _decimals = decimals ?? 18
     const _amount = BigInt(amount?.toString() || 0)
     return round(formatUnits(_amount, _decimals)) || 0
   } catch {
@@ -61,7 +80,7 @@ export const strToBn = (
   decimals: number | undefined,
 ) => {
   try {
-    const _decimals = decimals || 18
+    const _decimals = decimals ?? 18
     const _amount = amount?.toString() || '0'
     return parseUnits(_amount, _decimals) || BigInt(0)
   } catch {
@@ -78,6 +97,15 @@ export const toStr = (amount: number | string | bigint | undefined) => {
 }
 
 export const toNum = (amount: number | string | bigint | undefined) => toSafeNumber(amount)
+
+/**
+ * Convert on-chain raw units to a JS number for UI display.
+ * Prefer keeping `bigint` through submit paths; use this only at the display boundary.
+ */
+export const rawUnitsToNumber = (
+  amount: number | string | bigint | undefined,
+  decimals: number | undefined,
+) => toNum(bnToStr(amount, decimals)) || 0
 
 export const toAbsNum = (amount: number | string | bigint | undefined) =>
   Math.abs(toSafeNumber(amount))

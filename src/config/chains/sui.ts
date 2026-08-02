@@ -1,6 +1,7 @@
 import type { Address } from '@/config/address'
 import { SUI_MAINNET_CHAIN_ID } from '@/config/chain-id'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv, DEFAULT_SUI_RPC_URL } from '@/lib/env'
 
 /** Coin package (Move type lives here). */
 const SUI_SUSN_PACKAGE_ID =
@@ -35,7 +36,7 @@ export const config: ProtocolChainConfig = {
   nativeTokens: ['sUSN'],
   buyTokens: ['sUSN'],
   explorerUrl: 'https://suiscan.xyz/mainnet',
-  rpcUrl: 'https://sui-mainnet.g.alchemy.com/v2/y0P28uUJ48M_8eT4iNydP',
+  rpcUrl: appEnv.rpc.sui || DEFAULT_SUI_RPC_URL,
   contractExplorerUrl: 'https://suiscan.xyz/mainnet/object',
   tokenExplorerUrl: 'https://suiscan.xyz/mainnet/coin',
   transactionExplorerUrl: 'https://suiscan.xyz/mainnet/tx',

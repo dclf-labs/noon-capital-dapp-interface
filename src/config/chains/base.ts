@@ -2,6 +2,7 @@ import { base, hyperEvm, mainnet, sophon, tac, zksync } from 'wagmi/chains'
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: base.id,
@@ -18,7 +19,7 @@ export const config: ProtocolChainConfig = {
   transactionExplorerUrl: 'https://basescan.org/tx',
   addressExplorerUrl: 'https://basescan.org/address',
   hyperlaneMailbox: '0xeA87ae93Fa0019a82A727bfd3eBd1cFCa8f64f1D',
-  rpcUrl: 'https://base-mainnet.g.alchemy.com/v2/vKhVSViaOGH5mEYDuMwAy',
+  rpcUrl: appEnv.rpc.base || 'https://mainnet.base.org',
   dataRefreshInterval: 10 * 60 * 1000,
   gasLimits: {
     mint: 125148,

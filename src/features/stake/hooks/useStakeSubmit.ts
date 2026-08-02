@@ -74,9 +74,10 @@ const useStakeSubmit = () => {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
             timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
-          }).catch(() => ({
-            status: 'success',
-          }))
+          }).catch((error) => {
+            console.error('Timed out or failed waiting for transaction receipt', error)
+            throw error
+          })
 
           if (receipt.status === 'success') {
             setTxnStatus?.(TxnStatus.TXN_SUCCESS)
@@ -102,7 +103,7 @@ const useStakeSubmit = () => {
             setTxnStatus?.(TxnStatus.IDLE)
           }
         } catch (error) {
-          console.error('Error approving token', error)
+          console.error('Error submitting stake', error)
           setTxnStatus?.(TxnStatus.TXN_FAILURE)
         }
       } catch (error) {

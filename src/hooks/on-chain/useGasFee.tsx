@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
-
 import type { Call } from 'starknet'
 import { type Abi, type ContractFunctionArgs } from 'viem'
 
 import useEvmGasFee from '@/hooks/on-chain/evm/useGasFee'
 import useStarknetGasFee from '@/hooks/on-chain/starknet/useGasFee'
+import { type GasFeeQueryResult, IDLE_GAS_FEE_QUERY } from '@/hooks/on-chain/types'
+import useChainFamily from '@/hooks/on-chain/useChainFamily'
 import { type EvmAddress, type StarknetAddress } from '@/lib/address'
 import {
   type Connection,
@@ -13,14 +13,6 @@ import {
   isActiveEvmConnection,
   isActiveStarknetConnection,
 } from '@/lib/connection'
-
-type GasFeeHookResult = {
-  data: number
-  gasUsed: bigint | number
-  isLoading: boolean
-  isFetching: boolean
-  isError: boolean
-}
 
 type EvmGasFeeParams = {
   connection: Connection & { chainFamily: 'evm' }
@@ -43,50 +35,40 @@ type StarknetGasFeeParams = {
 
 type GasFeeParams = EvmGasFeeParams | StarknetGasFeeParams
 
-const idleGasFee: GasFeeHookResult = {
-  data: 0,
-  gasUsed: 0n,
-  isLoading: false,
-  isFetching: false,
-  isError: false,
-}
-
-const useGasFee = (params: GasFeeParams): GasFeeHookResult => {
-  const evmConnection = isActiveEvmConnection(params.connection)
-    ? params.connection
-    : EMPTY_EVM_CONNECTION
-  const starknetConnection = isActiveStarknetConnection(params.connection)
-    ? params.connection
-    : EMPTY_STARKNET_CONNECTION
-  const isStarknet = isActiveStarknetConnection(params.connection)
+const useGasFee = (params: GasFeeParams): GasFeeQueryResult => {
   const isEvm = isActiveEvmConnection(params.connection)
+  const isStarknet = isActiveStarknetConnection(params.connection)
+  const evmParams = params as EvmGasFeeParams
+  const starknetParams = params as StarknetGasFeeParams
 
-  const evmResult = useEvmGasFee({
-    connection: evmConnection,
-    address: isEvm ? (params as EvmGasFeeParams).address : undefined,
-    abi: isEvm ? (params as EvmGasFeeParams).abi : ([] as unknown as Abi),
-    functionName: isEvm ? (params as EvmGasFeeParams).functionName : '',
-    args: isEvm ? (params as EvmGasFeeParams).args : undefined,
-    configActionKey: isEvm ? (params as EvmGasFeeParams).configActionKey : '',
-    value: isEvm ? (params as EvmGasFeeParams).value : undefined,
-    configActionKeyMultiplier: isEvm
-      ? (params as EvmGasFeeParams).configActionKeyMultiplier
-      : undefined,
+  const evm = useEvmGasFee({
+    // Ternary keeps a union unless narrowed; stubs are family-specific.
+    connection: (isEvm ? params.connection : EMPTY_EVM_CONNECTION) as typeof EMPTY_EVM_CONNECTION,
+    address: isEvm ? evmParams.address : undefined,
+    abi: isEvm ? evmParams.abi : ([] as unknown as Abi),
+    functionName: isEvm ? evmParams.functionName : '',
+    args: isEvm ? evmParams.args : undefined,
+    configActionKey: isEvm ? evmParams.configActionKey : '',
+    value: isEvm ? evmParams.value : undefined,
+    configActionKeyMultiplier: isEvm ? evmParams.configActionKeyMultiplier : undefined,
   })
 
-  const starknetResult = useStarknetGasFee({
-    connection: starknetConnection,
-    address: isStarknet ? (params as StarknetGasFeeParams).address : undefined,
-    functionName: isStarknet ? (params as StarknetGasFeeParams).functionName : '',
-    calls: isStarknet ? (params as StarknetGasFeeParams).calls : [],
-    configActionKey: isStarknet ? (params as StarknetGasFeeParams).configActionKey : '',
+  const starknet = useStarknetGasFee({
+    connection: (isStarknet
+      ? params.connection
+      : EMPTY_STARKNET_CONNECTION) as typeof EMPTY_STARKNET_CONNECTION,
+    address: isStarknet ? starknetParams.address : undefined,
+    functionName: isStarknet ? starknetParams.functionName : '',
+    calls: isStarknet ? starknetParams.calls : [],
+    configActionKey: isStarknet ? starknetParams.configActionKey : '',
   })
 
-  return useMemo(() => {
-    if (!params?.connection) return idleGasFee
-    if (isStarknet) return starknetResult
-    return evmResult
-  }, [params?.connection, evmResult, isStarknet, starknetResult])
+  return useChainFamily({
+    connection: params.connection,
+    evm,
+    starknet,
+    fallback: IDLE_GAS_FEE_QUERY,
+  })
 }
 
 export default useGasFee

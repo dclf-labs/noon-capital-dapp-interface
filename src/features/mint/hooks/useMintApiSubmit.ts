@@ -10,6 +10,7 @@ import { getAddressOrZeroAddress } from '@/lib/address'
 import type { EVMConnection } from '@/lib/connection'
 import { appEnv } from '@/lib/env'
 import { strToBn } from '@/lib/format'
+import { secureRandomNonce } from '@/lib/secure-random'
 import { ApiRequestStatus } from '@/lib/types'
 import { type MintingOrder } from '@/lib/types'
 import { wagmiConfig } from '@/wallet/evm/config'
@@ -113,7 +114,7 @@ By proceeding, I confirm that I have read, understood, and agree to the above te
       user: getAddressOrZeroAddress(owner),
       collateralAmount: strToBn(collateralAmount, tokenIn.decimals),
       usnAmount: strToBn(usnAmount, tokenOut.decimals),
-      nonce: Math.floor(Math.random() * 100000000000),
+      nonce: secureRandomNonce(),
       expiry: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // Current date in sec + 24 hr in sec.
       collateralAddress: getAddressOrZeroAddress(tokenIn.contractAddress),
     }

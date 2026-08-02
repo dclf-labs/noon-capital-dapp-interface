@@ -5,6 +5,12 @@ import type { ChainId, ProtocolChainId } from '@/config/chain-id'
 import starknetConfig from '@/config/chains/starknet'
 import suiConfig from '@/config/chains/sui'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
+import { getAmountUsd } from '@/features/_shared/trade-amounts'
+import {
+  getInsufficientBalance,
+  getIsApproved,
+  useTradeFormController,
+} from '@/features/_shared/use-trade-form-controller'
 import useTokenPrice from '@/features/api/hooks/useTokenPrice'
 import {
   BridgeBalanceContext,
@@ -19,16 +25,28 @@ import useBridgeSubmitFee from '@/features/bridge/hooks/evm/useBridgeSubmitFee'
 import { useResolvedChain } from '@/hooks/connection'
 import { useReadOnlySession } from '@/hooks/connection/useReadOnlySession'
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
-import useStarknetTokenBalance from '@/hooks/on-chain/evm/useStarknetTokenBalance'
+import useEvmDestinationTokenBalance from '@/hooks/on-chain/evm/useDestinationTokenBalance'
 import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
-import useEvmTokenBalance from '@/hooks/on-chain/starknet/useEvmTokenBalance'
-import useSuiTokenBalance from '@/hooks/on-chain/sui/useTokenBalance'
+import useStarknetDestinationTokenBalance from '@/hooks/on-chain/starknet/useDestinationTokenBalance'
+import useSuiDestinationTokenBalance from '@/hooks/on-chain/sui/useDestinationTokenBalance'
 import type { SuiAddress } from '@/lib/address'
 import { getActiveEvmChainIds } from '@/lib/chain'
 import { type EVMConnection } from '@/lib/connection'
 import { toNum } from '@/lib/format'
 
 type DestinationNetworkType = 'starknet' | 'sui' | 'evm'
+
+const INITIAL_BRIDGE_INPUTS: FormInputs = {
+  token: undefined,
+  amount: undefined,
+  tokens: undefined,
+  receiverAddress: undefined,
+  evmReceiverAddress: undefined,
+  starknetReceiverAddress: undefined,
+  suiReceiverAddress: undefined,
+  destinationChainId: undefined,
+  sourceChainId: undefined,
+}
 
 const getDestinationNetworkType = (
   destinationChainId: ChainId | undefined,
@@ -40,19 +58,8 @@ const getDestinationNetworkType = (
 }
 
 export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [step, setStep] = useState<number>(0)
-  const [inputs, setInputs] = useState<FormInputs>({
-    token: undefined,
-    amount: undefined,
-    tokens: undefined,
-    receiverAddress: undefined,
-    evmReceiverAddress: undefined,
-    starknetReceiverAddress: undefined,
-    suiReceiverAddress: undefined,
-    destinationChainId: undefined,
-    sourceChainId: undefined,
-  })
-  const [txnUrl, setTxnUrl] = useState<string | undefined>(undefined)
+  const { step, setStep, inputs, setInputs, txnUrl, setTxnUrl } =
+    useTradeFormController(INITIAL_BRIDGE_INPUTS)
   const [isStarknetReceiverAddressModalOpen, setIsStarknetReceiverAddressModalOpen] =
     useState(false)
   const [isSuiReceiverAddressModalOpen, setIsSuiReceiverAddressModalOpen] = useState(false)
@@ -116,13 +123,13 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     inputs.token,
     destinationConnection as EVMConnection,
   )
-  const evmTokenOutBalance = useEvmTokenBalance(evmDestinationConnection, tokenOut)
-  const starknetTokenOutBalance = useStarknetTokenBalance(
+  const evmTokenOutBalance = useEvmDestinationTokenBalance(evmDestinationConnection, tokenOut)
+  const starknetTokenOutBalance = useStarknetDestinationTokenBalance(
     starknetDestinationConnection,
     tokenOut,
     inputs.receiverAddress,
   )
-  const suiTokenOutBalance = useSuiTokenBalance(
+  const suiTokenOutBalance = useSuiDestinationTokenBalance(
     suiDestinationConnection,
     tokenOut,
     inputs.receiverAddress as SuiAddress | undefined,
@@ -161,13 +168,20 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     destinationConnection as EVMConnection,
   )
 
-  const isInsufficientBalance = useMemo(() => {
-    return toNum(tokenInBalance.data) < toNum(inputs.amount)
-  }, [tokenInBalance.data, inputs.amount])
+  const isInsufficientBalance = useMemo(
+    () => getInsufficientBalance(tokenInBalance.data, inputs.amount),
+    [tokenInBalance.data, inputs.amount],
+  )
 
-  const isApproved = useMemo(() => {
-    return toNum(tokenInAllowance.data) >= toNum(inputs.amount)
-  }, [inputs.amount, tokenInAllowance.data])
+  const isApproved = useMemo(
+    () => getIsApproved(tokenInAllowance.data, inputs.amount),
+    [inputs.amount, tokenInAllowance.data],
+  )
+
+  const amountInUsd = useMemo(
+    () => getAmountUsd(inputs.amount, tokenPrice),
+    [inputs.amount, tokenPrice],
+  )
 
   // Effect to handle wallet connection changes and reset EVM receiver address
   useEffect(() => {
@@ -211,6 +225,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     isEvmReceiverAddressModalOpen,
     inputs.evmReceiverAddress,
     lastConnectedAddress,
+    setInputs,
   ])
 
   // Effect to handle destination network changes and modal management
@@ -310,6 +325,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     lastDestinationChainId,
     lastDestinationNetworkType,
     destinationChainId,
+    setInputs,
   ])
 
   const formValue = useMemo(
@@ -330,7 +346,9 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }),
     [
       inputs,
+      setInputs,
       step,
+      setStep,
       connection,
       destinationConnection,
       tokenOut,
@@ -358,8 +376,9 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     () => ({
       feeQuote,
       tokenPrice,
+      amountInUsd,
     }),
-    [tokenPrice, feeQuote],
+    [amountInUsd, tokenPrice, feeQuote],
   )
 
   const txnValue = useMemo(
@@ -368,7 +387,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setTxnUrl,
       submitFee,
     }),
-    [txnUrl, submitFee],
+    [txnUrl, setTxnUrl, submitFee],
   )
 
   useEffect(() => {
@@ -392,7 +411,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       tokens,
     }))
     setStep(0)
-  }, [connection.config, destinationConnection.config, destinationChainId])
+  }, [connection.config, destinationConnection.config, destinationChainId, setInputs, setStep])
 
   // Initialize source chain from connected chain, destination as undefined
   useEffect(() => {
@@ -425,7 +444,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     prevChainFamilyRef.current = resolvedChainFamily
-  }, [resolvedChainFamily])
+  }, [resolvedChainFamily, setInputs])
 
   // Effect to handle source chain changes (from connection or user selection)
   // Source chain should always be undefined or connected EVM chain
@@ -478,6 +497,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     resolvedChainId,
     resolvedChainFamily,
     sourceChainId,
+    setInputs,
   ])
 
   // Effect to handle destination chain changes (from user selection)
@@ -506,7 +526,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Update ref when destination is cleared
       prevDestinationChainIdRef.current = undefined
     }
-  }, [destinationChainId, inputs.destinationChainId])
+  }, [destinationChainId, inputs.destinationChainId, setInputs])
 
   // Sync refs when inputs change externally (e.g., from useUpdateBridge)
   useEffect(() => {

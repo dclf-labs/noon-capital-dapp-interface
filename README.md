@@ -54,21 +54,16 @@ bun run dev
 
 ### Environment variables
 
-Copy `.env.example` → `.env`. Prefer the **canonical** names below; legacy `VITE_APP_*` / `VITE_APP_GOLDSKY_*` aliases still work via `src/lib/env`.
+Copy `.env.example` → `.env`. App code should read **`appEnv`** (`src/lib/env`), not `import.meta.env` directly. See `src/lib/env/README.md`.
 
-App code should read **`appEnv`** (`src/lib/env`), not `import.meta.env` directly. See `src/lib/env/README.md`.
-
-| Variable                                       | Required                        | Notes                                                                |
-| ---------------------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
-| `VITE_WALLETCONNECT_PROJECT_ID`                | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
-| `VITE_API_BASE_URL`                            | Recommended                     | Noon backend (`https://back.noon.capital`)                           |
-| `VITE_STARKNET_ALCHEMY_API_KEY`                | No                              | Builds Starknet Alchemy RPC when `VITE_STARKNET_RPC_URL` is unset    |
-| `VITE_STARKNET_RPC_URL` / `VITE_SUI_RPC_URL`   | No                              | Explicit RPC overrides                                               |
-| `VITE_SUBGRAPH_USN_*` / `VITE_SUBGRAPH_SUSN_*` | No                              | Holdings subgraphs by chain (`ethereum`, `sophon`, `zksync`, `tac`)  |
-| `VITE_SUBGRAPH_ETH_META_URL`                   | No                              | Ethereum meta subgraph                                               |
-| `VITE_MIXPANEL_TOKEN`                          | No                              | Mixpanel (reserved for analytics wiring)                             |
-| `VITE_GA_MEASUREMENT_ID`                       | No                              | Injected into `index.html` only; omitted / empty disables analytics  |
-| `VITE_APP_ENV`                                 | No (default `development`)      | `development` \| `staging` \| `production`                           |
+| Variable                                         | Required                        | Notes                                                                |
+| ------------------------------------------------ | ------------------------------- | -------------------------------------------------------------------- |
+| `VITE_API_BASE_URL`                              | Recommended                     | Noon backend (`https://back.noon.capital`)                           |
+| `VITE_WALLETCONNECT_PROJECT_ID`                  | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
+| `VITE_STARKNET_ALCHEMY_API_KEY`                  | Recommended                     | Builds Starknet Alchemy RPC when `VITE_STARKNET_RPC_URL` is unset    |
+| `VITE_STARKNET_RPC_URL`                          | No                              | Explicit Starknet RPC (wins over Alchemy)                            |
+| `VITE_ETHEREUM_RPC_URL` / `BASE` / `SUI` / `TAC` | No                              | Optional protocol RPC overrides (else public defaults)               |
+| `VITE_GA_MEASUREMENT_ID`                         | No                              | Injected into `index.html` only; empty disables analytics            |
 
 Set these in `.env` locally and in Vercel (or your host) for deploys. CI may use a placeholder WalletConnect id when the GitHub secret is unset — that is **not** enough for production.
 

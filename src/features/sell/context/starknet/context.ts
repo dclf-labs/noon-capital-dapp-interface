@@ -27,6 +27,8 @@ export const SellBalanceContext = createContext<{
 export const SellPriceContext = createContext<{
   price: ReturnType<typeof usePreviewSell>
   tokenPrice: ReturnType<typeof useTokenPrice>
+  /** Precomputed `amountIn * tokenPrice` for UI — do not recompute in components. */
+  amountInUsd: number
   isFetchingQuote: boolean
 }>(null!)
 

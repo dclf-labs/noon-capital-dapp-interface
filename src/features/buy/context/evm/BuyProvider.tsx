@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 
 import { getTokens } from '@/config'
+import { getAmountUsd } from '@/features/_shared/trade-amounts'
 import {
   getInsufficientBalance,
   getIsApproved,
@@ -101,13 +102,19 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [tokenInBalance, tokenOutBalance, tokenInAllowance, isInsufficientBalance, isApproved],
   )
 
+  const amountInUsd = useMemo(
+    () => getAmountUsd(inputs.amountIn, tokenPrice),
+    [inputs.amountIn, tokenPrice],
+  )
+
   const priceValue = useMemo(
     () => ({
       price,
       tokenPrice,
+      amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
     }),
-    [price, tokenPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
   )
 
   const txnValue = useMemo(

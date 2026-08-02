@@ -14,7 +14,6 @@ export const config: ProtocolChainConfig = {
   hyperlaneDomain: 50104,
   hyperlaneMailbox: '0x9BbDf86b272d224323136E15594fdCe487F40ce7',
   buyTokens: ['USN', 'sUSN'],
-  holdingsSubgraphChain: 'sophon',
   nativeTokens: ['USN', 'sUSN'],
   bridgeTokens: ['USN', 'sUSN'],
   useHyperlane: {

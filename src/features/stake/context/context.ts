@@ -30,6 +30,8 @@ export const StakeBalanceContext = createContext<{
 export const StakePriceContext = createContext<{
   price: ReturnType<typeof usePreviewStake>
   tokenPrice: ReturnType<typeof useTokenPrice>
+  /** Precomputed `amountIn * tokenPrice` for UI — do not recompute in components. */
+  amountInUsd: number
   isFetchingQuote: boolean
 }>(null!)
 

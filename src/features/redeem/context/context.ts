@@ -29,6 +29,8 @@ export const RedeemBalanceContext = createContext<{
 export const RedeemPriceContext = createContext<{
   price: ReturnType<typeof usePreviewRedeem>
   tokenOutPrice: ReturnType<typeof useTokenPrice>
+  /** Precomputed `amountIn * USN price` for UI — do not recompute in components. */
+  amountInUsd: number
   isFetchingQuote: boolean
 }>(null!)
 

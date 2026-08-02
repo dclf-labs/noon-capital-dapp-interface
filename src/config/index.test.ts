@@ -39,7 +39,6 @@ describe('protocol configs', () => {
   it('exposes ethereum contracts and USN token metadata', () => {
     expect(ethereumConfig.usn).toBe('0xdA67B4284609d2d48e5d10cfAc411572727dc1eD')
     expect(ethereumConfig.pointsApiChainId).toBe(PointsApiChain.ETHEREUM)
-    expect(ethereumConfig.holdingsSubgraphChain).toBe('ethereum')
 
     const usn = getToken(ethereumConfig, 'USN')
     expect(usn?.symbol).toBe('USN')

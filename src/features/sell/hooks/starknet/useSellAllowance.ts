@@ -1,17 +1,11 @@
-import { maxUint256 } from 'viem'
-
 import { type Token } from '@/config/token'
+import { createAlwaysApprovedAllowance } from '@/features/_shared/always-approved-allowance'
 import { type StarknetConnection } from '@/lib/connection'
-import { bnToStr, toNum } from '@/lib/format'
 
-const useSellAllowance = (_: StarknetConnection, token: Token | undefined) => {
-  return {
-    isLoading: false,
-    isError: false,
-    isFetching: false,
-    refetch: () => Promise.resolve(),
-    data: toNum(bnToStr(maxUint256, token?.decimals)),
-  }
-}
+/**
+ * Starknet sell uses transfer-to-router — no approve step.
+ */
+const useSellAllowance = (_connection: StarknetConnection, token: Token | undefined) =>
+  createAlwaysApprovedAllowance(token)
 
 export default useSellAllowance

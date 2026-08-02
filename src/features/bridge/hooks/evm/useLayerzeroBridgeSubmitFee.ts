@@ -7,6 +7,7 @@ import { type Abi, fromBytes } from 'viem'
 import type { ProtocolChainId } from '@/config/chain-id'
 import { type Token } from '@/config/token'
 import { getBridgeOptionsForDestination } from '@/features/bridge/lib/bridge'
+import { slippageAdjustedAmount } from '@/features/swap/lib/swap'
 import useGasFee from '@/hooks/on-chain/evm/useGasFee'
 import LayerzeroOft from '@/lib/abis/evm/layerzero-oft.json'
 import LayerzeroOftHelper from '@/lib/abis/evm/layerzero-oft-helper.json'
@@ -81,12 +82,12 @@ const useLayerzeroBridgeSubmitFee = (
       }
     }
 
-    const _amountIn = amount
-      ? strToBn(amount, tokenIn?.decimals).toString()
-      : strToBn(`0.${'0'.repeat(tokenIn?.decimals - 2)}11`, tokenIn?.decimals).toString()
-    const _amountOut = amount
-      ? strToBn(amount, tokenOut?.decimals).toString()
-      : strToBn(`0.${'0'.repeat(tokenOut?.decimals - 2)}10`, tokenOut?.decimals).toString()
+    // OFT amountLD / minAmountLD are both in **source** local decimals.
+    const amountLd = amount
+      ? strToBn(amount, tokenIn?.decimals)
+      : strToBn(`0.${'0'.repeat((tokenIn?.decimals ?? 18) - 2)}11`, tokenIn?.decimals)
+    const _amountIn = amountLd.toString()
+    const _amountOut = slippageAdjustedAmount(amountLd, 1).toString()
 
     const _decimals =
       connection?.config?.defaultGasToken?.decimals || read?.chain?.nativeCurrency?.decimals

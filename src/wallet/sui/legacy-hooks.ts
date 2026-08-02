@@ -3,18 +3,15 @@ import { useCallback, useState } from 'react'
 import { useCurrentClient, useDAppKit, useWalletConnection } from '@mysten/dapp-kit-react'
 
 /**
- * Compatibility shims for the legacy `@mysten/dapp-kit` hook names used by
- * ported Noon hooks. Prefer `useCurrentClient` / `useDAppKit` in new code.
+ * Compatibility shims for older `@mysten/dapp-kit` hook names.
+ * Prefer `useCurrentClient` / `useDAppKit` in new code.
  */
 
 export function useSuiClient() {
   return useCurrentClient()
 }
 
-/**
- * Thin wrapper around dApp Kit `signAndExecuteTransaction`.
- * Matches the mutateAsync-style API of the previous `useSignAndExecuteTransaction`.
- */
+/** Thin wrapper around dApp Kit `signAndExecuteTransaction` (mutateAsync-style API). */
 export function useSignAndExecuteTransaction() {
   const dAppKit = useDAppKit()
   const connection = useWalletConnection()

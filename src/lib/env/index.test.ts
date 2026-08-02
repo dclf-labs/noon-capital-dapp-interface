@@ -8,7 +8,6 @@ const validEnv = {
   PROD: false,
   SSR: false,
   BASE_URL: '/',
-  VITE_APP_ENV: 'development' as const,
 }
 
 describe('parseEnv', () => {
@@ -29,16 +28,10 @@ describe('parseEnv', () => {
     expect(env.VITE_API_BASE_URL).toBe('')
   })
 
-  it('defaults MODE and VITE_APP_ENV when omitted', () => {
-    const { MODE: _mode, VITE_APP_ENV: _appEnv, ...rest } = validEnv
+  it('defaults MODE when omitted', () => {
+    const { MODE: _mode, ...rest } = validEnv
     const env = parseEnv(rest)
     expect(env.MODE).toBe('development')
-    expect(env.VITE_APP_ENV).toBe('development')
-  })
-
-  it('accepts staging and production app envs', () => {
-    expect(parseEnv({ ...validEnv, VITE_APP_ENV: 'staging' }).VITE_APP_ENV).toBe('staging')
-    expect(parseEnv({ ...validEnv, VITE_APP_ENV: 'production' }).VITE_APP_ENV).toBe('production')
   })
 
   it('throws on invalid MODE', () => {
@@ -47,22 +40,16 @@ describe('parseEnv', () => {
     spy.mockRestore()
   })
 
-  it('throws on invalid VITE_APP_ENV', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    expect(() => parseEnv({ ...validEnv, VITE_APP_ENV: 'local' })).toThrow(/Invalid environment/i)
-    spy.mockRestore()
-  })
-
-  it('normalizes legacy aliases into canonical keys', () => {
+  it('normalizes alternate VITE_APP_* names into canonical keys', () => {
     const env = parseEnv({
       ...validEnv,
       VITE_APP_API_BASE_URL: 'https://legacy.api/',
       VITE_APP_WALLET_CONNECT_PROJECT_ID: 'legacy-wc',
-      VITE_APP_GOLDSKY_USN_MAINNET_URL: ' https://goldsky.example/usn ',
+      VITE_APP_STARKNET_ALCHEMY_API_KEY: 'legacy-starknet',
     })
     expect(env.VITE_API_BASE_URL).toBe('https://legacy.api/')
     expect(env.VITE_WALLETCONNECT_PROJECT_ID).toBe('legacy-wc')
-    expect(env.VITE_SUBGRAPH_USN_ETHEREUM_URL).toBe('https://goldsky.example/usn')
+    expect(env.VITE_STARKNET_ALCHEMY_API_KEY).toBe('legacy-starknet')
   })
 })
 
@@ -72,12 +59,9 @@ describe('createAppEnv', () => {
       parseEnv({
         ...validEnv,
         VITE_API_BASE_URL: 'https://api.example.test/',
-        VITE_SUBGRAPH_USN_ETHEREUM_URL: 'https://goldsky.example/usn',
       }),
     )
     expect(app.api.baseUrl).toBe('https://api.example.test')
-    expect(app.subgraphs.holdings.ethereum.usn).toBe('https://goldsky.example/usn')
-    expect(app.stage).toBe('development')
   })
 
   it('prefers the canonical WalletConnect project id', () => {
@@ -91,7 +75,7 @@ describe('createAppEnv', () => {
     expect(app.walletConnect.projectId).toBe('canonical')
   })
 
-  it('falls back to the legacy WalletConnect project id', () => {
+  it('falls back to the alternate WalletConnect project id', () => {
     const app = createAppEnv(
       parseEnv({
         ...validEnv,
@@ -129,7 +113,7 @@ describe('createAppEnv', () => {
 })
 
 describe('normalizeRawEnv', () => {
-  it('prefers canonical keys over legacy aliases', () => {
+  it('prefers canonical keys over alternate names', () => {
     const normalized = normalizeRawEnv({
       VITE_API_BASE_URL: 'canonical',
       VITE_APP_API_BASE_URL: 'legacy',

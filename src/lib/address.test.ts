@@ -12,6 +12,7 @@ import {
   sanitizeEVMAddress,
   sanitizeInput,
   sanitizeSuiAddress,
+  toBytes32Recipient,
 } from '@/lib/address'
 
 const EVM = '0x1111111111111111111111111111111111111111'
@@ -40,9 +41,14 @@ describe('Starknet addresses', () => {
   it('accepts 64-hex Starknet addresses and rejects EVM', () => {
     expect(isStarknetAddressValid(STARKNET)).toBe(true)
     expect(isStarknetAddressValid(`0x${'b'.repeat(63)}`)).toBe(true)
+    expect(isStarknetAddressValid(`0x${'a'.repeat(64)}`)).toBe(true)
+    expect(isStarknetAddressValid(`0x${'f'.repeat(64)}`)).toBe(true)
     expect(isStarknetAddressValid(EVM)).toBe(false)
     expect(isStarknetAddressValid(undefined)).toBe(false)
-    expect(isStarknetAddressValid('0xabc')).toBe(false)
+    expect(isStarknetAddressValid('0xabc')).toBe(true)
+    expect(isStarknetAddressValid('0x0')).toBe(false)
+    expect(isStarknetAddressValid(`0x${'0'.repeat(64)}`)).toBe(false)
+    expect(isStarknetAddressValid(`0x${'a'.repeat(65)}`)).toBe(false)
   })
 })
 
@@ -83,8 +89,11 @@ describe('cross-family address helpers', () => {
     expect(getLayerZeroReceiverAddress(EVM.toLowerCase() as `0x${string}`)).toMatch(/^0x/)
     expect(getLayerZeroReceiverAddress(undefined)).toBe(zeroAddress)
     expect(getLayerZeroReceiverAddress(SUI as `0x${string}`)).toBe(SUI)
-    expect(getLayerZeroReceiverAddress(STARKNET as `0x${string}`)).toBe(STARKNET)
+    expect(getLayerZeroReceiverAddress(STARKNET as `0x${string}`)).toBe(STARKNET.toLowerCase())
+    expect(getLayerZeroReceiverAddress('0xabc' as `0x${string}`)).toBe(`0x${'0'.repeat(61)}abc`)
     expect(getLayerZeroReceiverAddress('not-an-address' as never)).toBe(zeroAddress)
+    expect(toBytes32Recipient('0xABC')).toBe(`0x${'0'.repeat(61)}abc`)
+    expect(toBytes32Recipient(undefined)).toBe(zeroAddress)
   })
 
   it('strips HTML from free-text inputs', () => {

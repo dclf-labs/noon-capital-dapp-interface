@@ -4,14 +4,17 @@ Thin route wiring for product surfaces. **Presentational panels live in `src/moc
 
 ## Routes (`src/App.tsx`)
 
-| Path(s)                           | Shell               | Notes                                          |
-| --------------------------------- | ------------------- | ---------------------------------------------- |
-| `/`                               | —                   | Home links into each surface + UI mock gallery |
-| `/mock`                           | —                   | Stubbed gallery of `src/mock/*` panels         |
-| `/swap/buy`, `/swap/sell`         | `swap/SwapShell`    | DEX buy/sell — **not** mint/redeem             |
-| `/mint`, `/redeem`                | `MintRedeemShell`   | DirectMinter / DirectRedeemer (Ethereum)       |
-| `/stake`, `/unstake`, `/withdraw` | `StakeUnstakeShell` | USN ↔ sUSN vault + claim after cooldown        |
-| `/bridge`                         | `BridgeShell`       | Hyperlane / LayerZero (EVM, Starknet, Sui)     |
+| Path(s)                           | Shell               | Notes                                      |
+| --------------------------------- | ------------------- | ------------------------------------------ |
+| `/`                               | `AppShell`          | Product vaults (same as `/vaults`)         |
+| `/mock`                           | `AppShell`          | Stubbed gallery of `src/mock/*` panels     |
+| `/swap/buy`, `/swap/sell`         | `AppShell` + swap   | DEX buy/sell — **not** mint/redeem         |
+| `/mint`, `/redeem`                | `AppShell` + mint   | DirectMinter / DirectRedeemer (Ethereum)   |
+| `/stake`, `/unstake`, `/withdraw` | `AppShell` + stake  | USN ↔ sUSN vault + claim after cooldown    |
+| `/bridge`                         | `AppShell` + bridge | Hyperlane / LayerZero (EVM, Starknet, Sui) |
+| `/vaults`                         | `AppShell`          | Vaults list content from `src/mock/vaults` |
+
+Shared chrome (sidebar, network + wallet header, footer, max-width **1440px**) is `src/layout/AppShell` + `src/components/shell`.
 
 ## Layout per surface
 

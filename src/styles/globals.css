@@ -1,15 +1,102 @@
 @import 'tailwindcss';
 
+/*
+ * Brand fonts from noon/dapp (`public/fonts`).
+ *
+ * Available Suisse Int'l cuts: Regular 400, Book 450, Medium 500, SemiBold 600, Bold 700.
+ * Figma also references Suisse Light — we do not ship that cut; map Light → Regular 400.
+ * Denton file is "Denton Test"; CSS family name stays `Denton` (same as old dapp).
+ */
+
 @layer base {
+  @font-face {
+    font-family: 'SuisseIntl';
+    src: url('/fonts/suisse-intl.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'SuisseIntl';
+    src: url('/fonts/suisse-intl-book.ttf') format('truetype');
+    font-weight: 450;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'SuisseIntl';
+    src: url('/fonts/suisse-intl-medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'SuisseIntl';
+    src: url('/fonts/suisse-intl-semi-bold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'SuisseIntl';
+    src: url('/fonts/suisse-intl-bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Louize';
+    src: url('/fonts/louize.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Denton';
+    src: url('/fonts/denton-test.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --font-s: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-l: 'Louize', Georgia, 'Times New Roman', serif;
+    --font-d: 'Denton', Georgia, 'Times New Roman', serif;
+  }
+
   html {
-    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    @apply m-0 min-h-dvh;
+    margin: 0;
+    min-height: 100dvh;
+    font-family: var(--font-s);
+    font-weight: 450;
   }
 
   #root {
-    @apply min-h-dvh;
+    min-height: 100dvh;
   }
+}
+
+@theme {
+  --font-suisse: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-louize: 'Louize', Georgia, 'Times New Roman', serif;
+  --font-denton: 'Denton', Georgia, 'Times New Roman', serif;
+  --font-display: 'Louize', Georgia, 'Times New Roman', serif;
+  --font-text: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --default-font-family: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Suisse Book — Figma “Suisse Int'l Book” */
+  --font-weight-book: 450;
 }

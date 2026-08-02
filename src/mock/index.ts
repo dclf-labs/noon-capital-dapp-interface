@@ -14,3 +14,9 @@ export {
 export { WithdrawClaimsPanel } from '@/mock/stake-unstake/WithdrawClaimsPanel'
 export { NetworkSwitcher } from '@/mock/swap/NetworkSwitcher'
 export { TradePanelView, type TradePanelViewProps } from '@/mock/swap/TradePanelView'
+export {
+  DEMO_VAULTS,
+  type VaultListItem,
+  VaultsPageView,
+  type VaultsPageViewProps,
+} from '@/mock/vaults'

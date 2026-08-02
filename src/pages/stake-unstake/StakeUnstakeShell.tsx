@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 
 import * as styles from '@/mock/stake-unstake/stake-unstake-styles'
 
@@ -6,11 +6,6 @@ export function StakeUnstakeShell() {
   return (
     <div style={styles.page}>
       <header style={{ display: 'grid', gap: 8 }}>
-        <div style={styles.row}>
-          <Link to="/" style={styles.link}>
-            ← Home
-          </Link>
-        </div>
         <h1 style={{ margin: 0, fontSize: 22 }}>Stake / Unstake</h1>
         <p style={styles.muted}>
           Ethereum mainnet USN ↔ sUSN vault. Unstake starts a cooldown; claim matured requests on

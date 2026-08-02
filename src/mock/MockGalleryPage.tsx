@@ -6,6 +6,7 @@ import { BridgePanel } from '@/mock/bridge/BridgePanel'
 import { MintRedeemPanel } from '@/mock/mint-redeem/MintRedeemPanel'
 import { StakeUnstakePanel } from '@/mock/stake-unstake/StakeUnstakePanel'
 import { TradePanelView } from '@/mock/swap/TradePanelView'
+import { DEMO_VAULTS, VaultCard } from '@/mock/vaults'
 
 const noop = () => undefined
 
@@ -43,7 +44,7 @@ const section: CSSProperties = {
 }
 
 const page: CSSProperties = {
-  fontFamily: 'system-ui, sans-serif',
+  fontFamily: 'var(--font-s)',
   padding: 24,
   display: 'grid',
   gap: 24,
@@ -184,6 +185,19 @@ export function MockGalleryPage() {
           onMax={noop}
           onPrimary={noop}
         />
+      </section>
+
+      <section style={section}>
+        <h2 style={{ margin: 0, fontSize: 16 }}>Vaults — VaultCard</h2>
+        <p style={{ margin: 0, color: '#555', fontSize: 13 }}>
+          Stubbed product vaults. Live list: <Link to="/">/</Link> or{' '}
+          <Link to="/vaults">/vaults</Link>.
+        </p>
+        <div style={{ display: 'grid', gap: 24, paddingRight: 120 }}>
+          {DEMO_VAULTS.map((vault) => (
+            <VaultCard key={vault.id} vault={vault} onEarnClick={noop} />
+          ))}
+        </div>
       </section>
     </div>
   )

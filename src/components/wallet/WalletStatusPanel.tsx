@@ -36,7 +36,9 @@ export function WalletStatusPanel() {
   const activeConfig = getChainConfig(selectedChainId)
 
   return (
-    <div style={{ display: 'grid', gap: 24, maxWidth: 720, padding: 24, fontFamily: 'system-ui' }}>
+    <div
+      style={{ display: 'grid', gap: 24, maxWidth: 720, padding: 24, fontFamily: 'var(--font-s)' }}
+    >
       <header>
         <h1 style={{ margin: 0 }}>noon.capital</h1>
         <p style={{ margin: '8px 0 0', opacity: 0.7 }}>

@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 
 import { useResolvedChain } from '@/hooks/connection'
 import { NetworkSwitcher } from '@/mock/swap/NetworkSwitcher'
@@ -10,11 +10,6 @@ export function SwapShell() {
   return (
     <div style={styles.page}>
       <header style={{ display: 'grid', gap: 8 }}>
-        <div style={styles.row}>
-          <Link to="/" style={styles.link}>
-            ← Home
-          </Link>
-        </div>
         <h1 style={{ margin: 0, fontSize: 22 }}>Buy / Sell</h1>
         <p style={styles.muted}>
           Active network: <strong>{config.name}</strong> ({chainFamily})

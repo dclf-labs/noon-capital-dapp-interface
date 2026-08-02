@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import { AppShell } from '@/layout/AppShell'
 import { MockGalleryPage } from '@/mock/MockGalleryPage'
 import { BridgePage } from '@/pages/bridge/BridgePage'
 import { BridgeShell } from '@/pages/bridge/BridgeShell'
@@ -14,39 +15,43 @@ import { WithdrawPage } from '@/pages/stake-unstake/WithdrawPage'
 import { BuyPage } from '@/pages/swap/BuyPage'
 import { SellPage } from '@/pages/swap/SellPage'
 import { SwapShell } from '@/pages/swap/SwapShell'
+import { VaultsPage } from '@/pages/vaults/VaultsPage'
 
 export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route element={<AppShell />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/vaults" element={<VaultsPage />} />
 
-        {/* Presentational UI gallery (stubbed props — see src/mock/) */}
-        <Route path="/mock" element={<MockGalleryPage />} />
+          {/* Presentational UI gallery (stubbed props — see src/mock/) */}
+          <Route path="/mock" element={<MockGalleryPage />} />
 
-        {/* Buy / Sell (DEX swap) */}
-        <Route path="/swap" element={<SwapShell />}>
-          <Route index element={<Navigate to="buy" replace />} />
-          <Route path="buy" element={<BuyPage />} />
-          <Route path="sell" element={<SellPage />} />
-        </Route>
+          {/* Buy / Sell (DEX swap) */}
+          <Route path="/swap" element={<SwapShell />}>
+            <Route index element={<Navigate to="buy" replace />} />
+            <Route path="buy" element={<BuyPage />} />
+            <Route path="sell" element={<SellPage />} />
+          </Route>
 
-        {/* Mint / Redeem (DirectMinter / DirectRedeemer — separate product surface) */}
-        <Route element={<MintRedeemShell />}>
-          <Route path="/mint" element={<MintPage />} />
-          <Route path="/redeem" element={<RedeemPage />} />
-        </Route>
+          {/* Mint / Redeem (DirectMinter / DirectRedeemer — separate product surface) */}
+          <Route element={<MintRedeemShell />}>
+            <Route path="/mint" element={<MintPage />} />
+            <Route path="/redeem" element={<RedeemPage />} />
+          </Route>
 
-        {/* Stake / Unstake / Withdraw (USN ↔ sUSN vault — separate product surface) */}
-        <Route element={<StakeUnstakeShell />}>
-          <Route path="/stake" element={<StakePage />} />
-          <Route path="/unstake" element={<UnstakePage />} />
-          <Route path="/withdraw" element={<WithdrawPage />} />
-        </Route>
+          {/* Stake / Unstake / Withdraw (USN ↔ sUSN vault — separate product surface) */}
+          <Route element={<StakeUnstakeShell />}>
+            <Route path="/stake" element={<StakePage />} />
+            <Route path="/unstake" element={<UnstakePage />} />
+            <Route path="/withdraw" element={<WithdrawPage />} />
+          </Route>
 
-        {/* Bridge (Hyperlane / LayerZero — separate product surface) */}
-        <Route element={<BridgeShell />}>
-          <Route path="/bridge" element={<BridgePage />} />
+          {/* Bridge (Hyperlane / LayerZero — separate product surface) */}
+          <Route element={<BridgeShell />}>
+            <Route path="/bridge" element={<BridgePage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

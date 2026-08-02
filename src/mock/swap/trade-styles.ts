@@ -6,7 +6,7 @@ export const page: CSSProperties = {
   maxWidth: 480,
   margin: '0 auto',
   padding: 24,
-  fontFamily: 'system-ui, sans-serif',
+  fontFamily: 'var(--font-s)',
 }
 
 export const row: CSSProperties = {

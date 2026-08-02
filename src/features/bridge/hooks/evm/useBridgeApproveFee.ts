@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import { type Token } from '@/config/token'
 import useHyperlaneBridgeApproveFee from '@/features/bridge/hooks/evm/useHyperlaneBridgeApproveFee'
 import useLayerzeroBridgeApproveFee from '@/features/bridge/hooks/evm/useLayerzeroBridgeApproveFee'
+import { isHyperlaneBridgeRoute } from '@/features/bridge/route'
 import { type EVMConnection } from '@/lib/connection'
-import { toNum } from '@/lib/format'
 
 const useBridgeApproveFee = (
   connection: EVMConnection,
@@ -15,10 +15,11 @@ const useBridgeApproveFee = (
   const layerzeroApproveFee = useLayerzeroBridgeApproveFee(connection, token)
 
   return useMemo(() => {
-    if (connection.config?.useHyperlane?.[toNum(destinationConnection?.config?.id)]) {
+    if (
+      isHyperlaneBridgeRoute(connection.config?.useHyperlane, destinationConnection?.config?.id)
+    ) {
       return hyperlaneApproveFee
     }
-
     return layerzeroApproveFee
   }, [
     connection.config?.useHyperlane,

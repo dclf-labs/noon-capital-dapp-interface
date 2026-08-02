@@ -13,6 +13,7 @@ import {
 import { isEVMAddressValid } from '@/lib/address'
 import { type EVMConnection, type SuiConnection } from '@/lib/connection'
 import { strToBn } from '@/lib/format'
+import { canWriteSession } from '@/lib/wallet-session'
 import { useSignAndExecuteTransaction, useSuiClient } from '@/wallet/sui/legacy-hooks'
 
 const useLayerzeroBridgeSubmit = (
@@ -36,8 +37,8 @@ const useLayerzeroBridgeSubmit = (
   const canSubmit = useMemo(
     () =>
       !IS_SUI_TO_ETH_BRIDGE_DISABLED &&
-      !!connection?.isConnected &&
-      !!connection?.address &&
+      !!connection &&
+      canWriteSession(connection) &&
       !!tokenIn &&
       !!amount &&
       !!nativeFee &&
@@ -45,8 +46,7 @@ const useLayerzeroBridgeSubmit = (
       !!destinationConnection?.config?.layerzeroOftEid &&
       isSuiOftSourceConfigured(tokenIn),
     [
-      connection?.isConnected,
-      connection?.address,
+      connection,
       tokenIn,
       amount,
       nativeFee,
@@ -62,7 +62,9 @@ const useLayerzeroBridgeSubmit = (
 
     if (
       !canSubmit ||
-      !connection?.address ||
+      !connection ||
+      !canWriteSession(connection) ||
+      !connection.address ||
       !tokenIn ||
       !amount ||
       !receiverAddress ||
@@ -106,8 +108,7 @@ const useLayerzeroBridgeSubmit = (
   }, [
     canSubmit,
     client,
-    connection?.address,
-    connection?.config?.defaultGasToken?.decimals,
+    connection,
     tokenIn,
     amount,
     receiverAddress,

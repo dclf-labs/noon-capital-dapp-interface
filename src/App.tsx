@@ -1,5 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import { BridgePage } from '@/pages/bridge/BridgePage'
+import { BridgeShell } from '@/pages/bridge/BridgeShell'
 import { HomePage } from '@/pages/HomePage'
 import { MintPage } from '@/pages/mint-redeem/MintPage'
 import { MintRedeemShell } from '@/pages/mint-redeem/MintRedeemShell'
@@ -36,6 +38,11 @@ export function App() {
           <Route path="/stake" element={<StakePage />} />
           <Route path="/unstake" element={<UnstakePage />} />
           <Route path="/withdraw" element={<WithdrawPage />} />
+        </Route>
+
+        {/* Bridge (Hyperlane / LayerZero — separate product surface) */}
+        <Route element={<BridgeShell />}>
+          <Route path="/bridge" element={<BridgePage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

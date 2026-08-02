@@ -23,6 +23,9 @@ export function HomePage() {
         <Link to="/stake" style={{ color: '#111', fontSize: 14 }}>
           Open Stake / Unstake →
         </Link>
+        <Link to="/bridge" style={{ color: '#111', fontSize: 14 }}>
+          Open Bridge →
+        </Link>
       </div>
       <WalletStatusPanel />
     </div>

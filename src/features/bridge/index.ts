@@ -8,3 +8,16 @@ export { default as useStarknetBridge } from './hooks/starknet/useBridge'
 export { default as useSuiBridge } from './hooks/sui/useBridge'
 export * from './lib/bridge'
 export * from './lib/sui-oft'
+export {
+  type BridgePrimaryAction,
+  type BridgePrimaryParams,
+  getBridgePrimaryAction,
+} from './primary'
+export {
+  doesLayerzeroNeedApproval,
+  getLayerzeroApproveSpender,
+  isBridgePairAllowed,
+  isHyperlaneBridgeRoute,
+  isLayerzeroBridgeRouteDisabled,
+  isSuiToEthBridgeDisabled,
+} from './route'

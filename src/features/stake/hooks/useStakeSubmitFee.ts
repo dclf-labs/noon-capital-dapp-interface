@@ -3,11 +3,11 @@ import { useMemo } from 'react'
 import { type Abi } from 'viem'
 
 import { type Token } from '@/config/token'
+import { getStakeDepositArgs } from '@/features/stake-unstake/submit-args'
 import useGasFee from '@/hooks/on-chain/evm/useGasFee'
 import StakingVault from '@/lib/abis/evm/staking-vault.json'
 import { getAddressOrZeroAddress } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
-import { strToBn } from '@/lib/format'
 
 const useStakeSubmitFee = (
   connection: EVMConnection,
@@ -15,20 +15,22 @@ const useStakeSubmitFee = (
   amountIn: number | undefined,
 ) => {
   const params = useMemo(() => {
-    const parsedAmount = strToBn(amountIn, tokenIn?.decimals)
+    const args = getStakeDepositArgs(tokenIn, amountIn, connection.address)
     return {
       connection,
       address: getAddressOrZeroAddress(connection.config?.stakingVault),
-      args: [parsedAmount?.toString(), getAddressOrZeroAddress(connection.address)],
+      args: args
+        ? [args[0].toString(), args[1]]
+        : ['1', getAddressOrZeroAddress(connection.address)],
     }
   }, [amountIn, connection, tokenIn])
 
   return useGasFee({
-    connection: params?.connection,
-    address: params?.address,
+    connection: params.connection,
+    address: params.address,
     abi: StakingVault as Abi,
     functionName: 'deposit',
-    args: params?.args,
+    args: params.args,
     configActionKey: 'stake',
   })
 }

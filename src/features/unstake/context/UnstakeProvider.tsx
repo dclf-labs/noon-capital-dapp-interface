@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { mainnet } from 'wagmi/chains'
 
@@ -43,14 +43,24 @@ export const UnstakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const price = usePreviewUnstake(connection, tokenIn, tokenOut, 1)
   const preview = usePreviewUnstake(connection, tokenIn, tokenOut, debouncedInputs.amountIn)
 
-  const submitFee = useUnstakeSubmitFee(connection, tokenIn, debouncedInputs.amountIn)
+  // Gas estimate must use previewed USN assets (amountOut), matching withdraw(assets, …).
+  const submitFee = useUnstakeSubmitFee(connection, tokenOut, inputs.amountOut)
 
   const isInsufficientBalance = useMemo(
     () => getInsufficientBalance(tokenInBalance.data, inputs.amountIn),
     [tokenInBalance.data, inputs.amountIn],
   )
 
-  useSyncAmountOut(setInputs, preview.isLoading ? undefined : preview.data, isDebouncing)
+  useSyncAmountOut(
+    setInputs,
+    preview.isLoading || preview.isError ? undefined : preview.data,
+    isDebouncing || step > 0,
+  )
+
+  useEffect(() => {
+    if (!preview.isError || step > 0) return
+    setInputs((prev) => (prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }))
+  }, [preview.isError, setInputs, step])
 
   useResetOnSessionChange({
     session: {
@@ -89,8 +99,9 @@ export const UnstakeProvider: React.FC<{ children: React.ReactNode }> = ({ child
       tokenPrice,
       amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
+      isQuoteError: preview.isError,
     }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, isDebouncing, price, preview.isError, preview.isLoading, tokenPrice],
   )
 
   const txnValue = useMemo(

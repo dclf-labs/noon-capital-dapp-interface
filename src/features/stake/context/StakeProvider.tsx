@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { mainnet } from 'wagmi/chains'
 
@@ -57,7 +57,16 @@ export const StakeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [inputs.amountIn, tokenInAllowance.data],
   )
 
-  useSyncAmountOut(setInputs, preview.isLoading ? undefined : preview.data, isDebouncing)
+  useSyncAmountOut(
+    setInputs,
+    preview.isLoading || preview.isError ? undefined : preview.data,
+    isDebouncing || step > 0,
+  )
+
+  useEffect(() => {
+    if (!preview.isError || step > 0) return
+    setInputs((prev) => (prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }))
+  }, [preview.isError, setInputs, step])
 
   useResetOnSessionChange({
     session: {
@@ -98,8 +107,9 @@ export const StakeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       tokenPrice,
       amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
+      isQuoteError: preview.isError,
     }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, isDebouncing, price, preview.isError, preview.isLoading, tokenPrice],
   )
 
   const txnValue = useMemo(

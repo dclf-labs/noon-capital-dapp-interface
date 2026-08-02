@@ -30,6 +30,7 @@ export const UnstakePriceContext = createContext<{
   /** Precomputed `amountIn * tokenPrice` for UI — do not recompute in components. */
   amountInUsd: number
   isFetchingQuote: boolean
+  isQuoteError: boolean
 }>(null!)
 
 export const UnstakeTxnContext = createContext<{

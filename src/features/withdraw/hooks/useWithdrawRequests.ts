@@ -4,14 +4,34 @@ import { useQuery } from '@tanstack/react-query'
 import { type Config, getPublicClient } from '@wagmi/core'
 import { type Abi } from 'viem'
 
-import type { ProtocolChainId, WithdrawRequest } from '@/config/chain-id'
+import type { ProtocolChainId } from '@/config/chain-id'
 import type { Token } from '@/config/token'
+import type { WithdrawRequestView } from '@/features/stake-unstake/withdraw-claim'
 import WithdrawHandler from '@/lib/abis/evm/withdraw-handler.json'
 import { getAddressOrZeroAddress, isEVMAddressValid } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
 import { bnToStr, toNum } from '@/lib/format'
 import { queryKeys } from '@/lib/query-keys'
 import { wagmiConfig } from '@/wallet/evm/config'
+
+type OnChainWithdrawRequest = {
+  amount: bigint
+  timestamp: bigint
+  claimed: boolean
+}
+
+function mapWithdrawRequest(
+  result: OnChainWithdrawRequest,
+  requestId: number,
+  decimals: number,
+): WithdrawRequestView {
+  return {
+    amount: toNum(bnToStr(result.amount || 0n, decimals)),
+    timestamp: toNum(result.timestamp || 0n) * 1000,
+    claimed: Boolean(result.claimed),
+    requestId,
+  }
+}
 
 const useWithdrawRequests = (connection: EVMConnection, token: Token | undefined) => {
   const queryKey = useMemo(
@@ -46,79 +66,65 @@ const useWithdrawRequests = (connection: EVMConnection, token: Token | undefined
     ],
   )
 
-  const fetcher = async (connection: EVMConnection) => {
-    if (!connection.config?.id || !connection.address || !token) {
-      throw new Error('Connection not found')
-    }
-
-    const read = getPublicClient(wagmiConfig as Config, {
-      chainId: connection.config?.id as ProtocolChainId,
-    })
-    if (read?.chain?.id !== connection.config?.id) {
-      throw new Error('Chains not synced')
-    }
-
-    const nextRequestIdBn = await read.readContract({
-      abi: WithdrawHandler as Abi,
-      functionName: 'nextRequestId',
-      args: [getAddressOrZeroAddress(connection?.address)],
-      address: getAddressOrZeroAddress(connection?.config?.stakeWithdrawHandler),
-    })
-
-    const nextRequestId = toNum((nextRequestIdBn || BigInt(0)) as bigint)
-    if (nextRequestId <= 0) {
-      return []
-    }
-
-    const requests = await read?.multicall({
-      contracts: Array.from({ length: nextRequestId }, (_, i) => ({
-        abi: WithdrawHandler as Abi,
-        functionName: 'getWithdrawalRequest',
-        args: [getAddressOrZeroAddress(connection?.address), i],
-        address: getAddressOrZeroAddress(connection?.config?.stakeWithdrawHandler),
-      })),
-    })
-
-    return requests
-      .map(
-        (
-          request:
-            | { error?: undefined; result: unknown; status: 'success' }
-            | { error: Error; result?: undefined; status: 'failure' },
-          i,
-        ) => {
-          const result = request.result as WithdrawRequest
-          return {
-            amount: toNum(bnToStr((result?.amount || BigInt(0)) as bigint, token.decimals)),
-            timestamp: toNum((result?.timestamp || BigInt(0)) as bigint) * 1000,
-            status: result?.status,
-            requestId: i,
-            claimed: result?.claimed,
-          }
-        },
-      )
-      .reverse()
-  }
-
-  const { isLoading, isError, data, isFetching } = useQuery({
-    queryFn: async () => await fetcher(connection),
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+  const { isLoading, isError, data, isFetching, refetch } = useQuery({
+    queryKey,
+    enabled: isEnabled,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
     refetchOnWindowFocus: false,
     refetchIntervalInBackground: false,
-    queryKey: queryKey,
     refetchInterval: connection.config?.dataRefreshInterval,
-    enabled: isEnabled,
+    queryFn: async (): Promise<WithdrawRequestView[]> => {
+      if (!connection.config?.id || !connection.address || !token) {
+        throw new Error('Connection not found')
+      }
+
+      const read = getPublicClient(wagmiConfig as Config, {
+        chainId: connection.config.id as ProtocolChainId,
+      })
+      if (read?.chain?.id !== connection.config.id) {
+        throw new Error('Chains not synced')
+      }
+
+      const nextRequestIdBn = await read.readContract({
+        abi: WithdrawHandler as Abi,
+        functionName: 'nextRequestId',
+        args: [getAddressOrZeroAddress(connection.address)],
+        address: getAddressOrZeroAddress(connection.config.stakeWithdrawHandler),
+      })
+
+      const nextRequestId = toNum((nextRequestIdBn || 0n) as bigint)
+      if (nextRequestId <= 0) {
+        return []
+      }
+
+      const requests = await read.multicall({
+        contracts: Array.from({ length: nextRequestId }, (_, i) => ({
+          abi: WithdrawHandler as Abi,
+          functionName: 'getWithdrawalRequest',
+          args: [getAddressOrZeroAddress(connection.address), i],
+          address: getAddressOrZeroAddress(connection.config?.stakeWithdrawHandler),
+        })),
+      })
+
+      return requests
+        .flatMap((request, i) => {
+          if (request.status !== 'success' || !request.result) return []
+          return [mapWithdrawRequest(request.result as OnChainWithdrawRequest, i, token.decimals)]
+        })
+        .reverse()
+    },
   })
 
   return useMemo(
     () => ({
       isLoading,
-      isError: isError,
+      isError,
       data: data || [],
-      isFetching: isFetching,
+      isFetching,
+      refetch,
     }),
-    [isLoading, isError, data, isFetching],
+    [isLoading, isError, data, isFetching, refetch],
   )
 }
 

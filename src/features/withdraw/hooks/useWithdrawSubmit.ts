@@ -10,6 +10,7 @@ import WithdrawHandler from '@/lib/abis/evm/withdraw-handler.json'
 import { getAddressOrZeroAddress } from '@/lib/address'
 import { type EVMConnection, TxnStatus } from '@/lib/connection'
 import { getTxnPayload } from '@/lib/evmTxn'
+import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
 const useWithdrawSubmit = () => {
@@ -24,21 +25,25 @@ const useWithdrawSubmit = () => {
       try {
         setTxnStatus?.(TxnStatus.IDLE)
 
+        if (!canWriteSession(connection)) {
+          throw new Error('Wallet session cannot write')
+        }
+
         if (
           !connection.config?.id ||
           !connection.address ||
-          !connection.config?.stakeWithdrawHandler
+          !connection.config.stakeWithdrawHandler
         ) {
           throw new Error('Invalid parameters')
         }
 
         const write = await getWalletClient(wagmiConfig as Config, {
-          chainId: connection.config?.id as ProtocolChainId,
+          chainId: connection.config.id as ProtocolChainId,
           account: connection.address,
         })
 
         if (
-          write?.chain?.id !== connection.config?.id ||
+          write?.chain?.id !== connection.config.id ||
           write.account?.address !== connection.address
         ) {
           throw new Error('Invalid connection')
@@ -48,24 +53,23 @@ const useWithdrawSubmit = () => {
 
         const txnPayload = getTxnPayload(
           connection.config,
-          write?.chain,
-          write?.account,
+          write.chain,
+          write.account,
           WithdrawHandler as Abi,
           'claimWithdrawal',
-          getAddressOrZeroAddress(connection.config?.stakeWithdrawHandler),
+          getAddressOrZeroAddress(connection.config.stakeWithdrawHandler),
           [requestId],
         )
 
         try {
-          const _write = write
-          const txnHash = await _write?.writeContract(txnPayload).then((txn) => txn as string)
+          const txnHash = await write.writeContract(txnPayload).then((txn) => txn as string)
 
           setTxnStatus?.(TxnStatus.TXN_SUBMITTED_ON_CHAIN)
 
           const receipt = await waitForTransactionReceipt(write as Client, {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
-            timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
+            timeout: connection.config.txnWaitTimeout || TXN_WAIT_TIMEOUT,
           }).catch((error) => {
             console.error('Timed out or failed waiting for transaction receipt', error)
             throw error
@@ -74,7 +78,7 @@ const useWithdrawSubmit = () => {
           if (receipt.status === 'success') {
             setTxnStatus?.(TxnStatus.TXN_SUCCESS)
             setTxnUrl?.(
-              `${connection.config?.explorerUrl || write?.chain?.blockExplorers?.default?.url}/tx/${txnHash}`,
+              `${connection.config.explorerUrl || write.chain?.blockExplorers?.default?.url}/tx/${txnHash}`,
             )
             callback?.()
           } else if (receipt.status === 'reverted') {

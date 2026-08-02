@@ -20,6 +20,9 @@ export function HomePage() {
         <Link to="/mint" style={{ color: '#111', fontSize: 14 }}>
           Open Mint / Redeem →
         </Link>
+        <Link to="/stake" style={{ color: '#111', fontSize: 14 }}>
+          Open Stake / Unstake →
+        </Link>
       </div>
       <WalletStatusPanel />
     </div>

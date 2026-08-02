@@ -4,6 +4,10 @@ import { HomePage } from '@/pages/HomePage'
 import { MintPage } from '@/pages/mint-redeem/MintPage'
 import { MintRedeemShell } from '@/pages/mint-redeem/MintRedeemShell'
 import { RedeemPage } from '@/pages/mint-redeem/RedeemPage'
+import { StakePage } from '@/pages/stake-unstake/StakePage'
+import { StakeUnstakeShell } from '@/pages/stake-unstake/StakeUnstakeShell'
+import { UnstakePage } from '@/pages/stake-unstake/UnstakePage'
+import { WithdrawPage } from '@/pages/stake-unstake/WithdrawPage'
 import { BuyPage } from '@/pages/swap/BuyPage'
 import { SellPage } from '@/pages/swap/SellPage'
 import { SwapShell } from '@/pages/swap/SwapShell'
@@ -25,6 +29,13 @@ export function App() {
         <Route element={<MintRedeemShell />}>
           <Route path="/mint" element={<MintPage />} />
           <Route path="/redeem" element={<RedeemPage />} />
+        </Route>
+
+        {/* Stake / Unstake / Withdraw (USN ↔ sUSN vault — separate product surface) */}
+        <Route element={<StakeUnstakeShell />}>
+          <Route path="/stake" element={<StakePage />} />
+          <Route path="/unstake" element={<UnstakePage />} />
+          <Route path="/withdraw" element={<WithdrawPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

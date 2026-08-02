@@ -3,36 +3,47 @@ import { useMemo } from 'react'
 import type { Abi } from 'viem'
 
 import { type Token } from '@/config/token'
+import { getUnstakeWithdrawArgs } from '@/features/stake-unstake/submit-args'
 import useGasFee from '@/hooks/on-chain/evm/useGasFee'
 import StakingVault from '@/lib/abis/evm/staking-vault.json'
 import { getAddressOrZeroAddress } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
-import { strToBn } from '@/lib/format'
 
+/**
+ * Gas estimate for unstake `withdraw`.
+ * `assetsAmount` must be the previewed USN out (same as submit).
+ */
 const useUnstakeSubmitFee = (
   connection: EVMConnection,
-  tokenIn: Token | undefined,
-  amountIn: number | undefined,
+  tokenOut: Token | undefined,
+  assetsAmount: number | undefined,
 ) => {
   const params = useMemo(() => {
-    const parsedAmount = strToBn(amountIn, tokenIn?.decimals)
+    const args = getUnstakeWithdrawArgs(
+      tokenOut,
+      assetsAmount,
+      connection.config?.stakeWithdrawHandler,
+      connection.address,
+    )
     return {
       connection,
       address: getAddressOrZeroAddress(connection.config?.stakingVault),
-      args: [
-        parsedAmount?.toString(),
-        getAddressOrZeroAddress(connection.config?.stakeWithdrawHandler),
-        getAddressOrZeroAddress(connection.address),
-      ],
+      args: args
+        ? [args[0].toString(), args[1], args[2]]
+        : [
+            '1',
+            getAddressOrZeroAddress(connection.config?.stakeWithdrawHandler),
+            getAddressOrZeroAddress(connection.address),
+          ],
     }
-  }, [amountIn, connection, tokenIn])
+  }, [assetsAmount, connection, tokenOut])
 
   return useGasFee({
-    connection: params?.connection,
-    address: params?.address,
+    connection: params.connection,
+    address: params.address,
     abi: StakingVault as Abi,
     functionName: 'withdraw',
-    args: params?.args,
+    args: params.args,
     configActionKey: 'unstake',
   })
 }

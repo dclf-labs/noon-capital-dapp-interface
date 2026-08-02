@@ -7,22 +7,26 @@ import { waitForTransactionReceipt } from 'viem/actions'
 import type { ProtocolChainId } from '@/config/chain-id'
 import { type Token } from '@/config/token'
 import { TXN_WAIT_TIMEOUT } from '@/constants/common'
+import { getUnstakeWithdrawArgs } from '@/features/stake-unstake/submit-args'
 import StakingVault from '@/lib/abis/evm/staking-vault.json'
 import { getAddressOrZeroAddress } from '@/lib/address'
-import { type EVMConnection } from '@/lib/connection'
-import { TxnStatus } from '@/lib/connection'
+import { type EVMConnection, TxnStatus } from '@/lib/connection'
 import { getTxnPayload } from '@/lib/evmTxn'
-import { strToBn } from '@/lib/format'
 import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
+/**
+ * Unstake via ERC-4626 `withdraw(assets, receiver, owner)`.
+ * Pass the previewed USN `amountOut` as `assetsAmount` — not sUSN shares.
+ * Receiver is WithdrawHandler (starts cooldown); owner is the user.
+ */
 const useUnstakeSubmit = () => {
   const onSubmit = useCallback(
     async (
       connection: EVMConnection,
       tokenIn: Token | undefined,
       tokenOut: Token | undefined,
-      amountIn: number | undefined,
+      assetsAmount: number | undefined,
       callback?: () => void,
       setTxnStatus?: (status: TxnStatus) => void,
       setTxnUrl?: (url: string) => void,
@@ -39,17 +43,28 @@ const useUnstakeSubmit = () => {
           !connection.address ||
           !tokenIn ||
           !tokenOut ||
-          !amountIn ||
-          !connection.config?.stakingVault
+          !assetsAmount ||
+          !connection.config.stakingVault ||
+          !connection.config.stakeWithdrawHandler
         ) {
           throw new Error('Invalid parameters')
         }
 
+        const args = getUnstakeWithdrawArgs(
+          tokenOut,
+          assetsAmount,
+          connection.config.stakeWithdrawHandler,
+          connection.address,
+        )
+        if (!args) {
+          throw new Error('Invalid parameters')
+        }
+
         const write = await getWalletClient(wagmiConfig as Config, {
-          chainId: connection.config?.id as ProtocolChainId,
+          chainId: connection.config.id as ProtocolChainId,
           account: connection.address,
         })
-        if (write?.chain?.id !== connection.config?.id) {
+        if (write?.chain?.id !== connection.config.id) {
           throw new Error('Invalid connection')
         }
 
@@ -57,28 +72,23 @@ const useUnstakeSubmit = () => {
 
         const txnPayload = getTxnPayload(
           connection.config,
-          write?.chain,
-          write?.account,
+          write.chain,
+          write.account,
           StakingVault as Abi,
           'withdraw',
-          getAddressOrZeroAddress(connection.config?.stakingVault),
-          [
-            strToBn(amountIn, tokenIn.decimals),
-            getAddressOrZeroAddress(connection.config?.stakeWithdrawHandler),
-            getAddressOrZeroAddress(connection.address),
-          ],
+          getAddressOrZeroAddress(connection.config.stakingVault),
+          [...args],
         )
 
         try {
-          const _write = write
-          const txnHash = await _write?.writeContract(txnPayload).then((txn) => txn as string)
+          const txnHash = await write.writeContract(txnPayload).then((txn) => txn as string)
 
           setTxnStatus?.(TxnStatus.TXN_SUBMITTED_ON_CHAIN)
 
           const receipt = await waitForTransactionReceipt(write as Client, {
             hash: txnHash as `0x${string}`,
             confirmations: 1,
-            timeout: connection.config?.txnWaitTimeout || TXN_WAIT_TIMEOUT,
+            timeout: connection.config.txnWaitTimeout || TXN_WAIT_TIMEOUT,
           }).catch((error) => {
             console.error('Timed out or failed waiting for transaction receipt', error)
             throw error
@@ -87,7 +97,7 @@ const useUnstakeSubmit = () => {
           if (receipt.status === 'success') {
             setTxnStatus?.(TxnStatus.TXN_SUCCESS)
             setTxnUrl?.(
-              `${connection.config?.explorerUrl || write?.chain?.blockExplorers?.default?.url}/tx/${txnHash}`,
+              `${connection.config.explorerUrl || write.chain?.blockExplorers?.default?.url}/tx/${txnHash}`,
             )
             callback?.()
           } else if (receipt.status === 'reverted') {

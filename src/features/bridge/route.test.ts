@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { base, berachain, hyperEvm, mainnet as ethereum, tac } from 'wagmi/chains'
 
+import type { Token } from '@/config/token'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
 import {
   doesLayerzeroNeedApproval,
@@ -12,6 +13,16 @@ import {
 
 const STARKNET = Number(STARKNET_BRIDGE_DESTINATION.id)
 const SUI = Number(SUI_BRIDGE_DESTINATION.id)
+
+function tokenStub(partial: Pick<Token, 'contractAddress' | 'layerzeroOftAddress'>): Token {
+  return {
+    name: 'Test',
+    symbol: 'TEST',
+    decimals: 18,
+    iconSlug: 'test',
+    ...partial,
+  }
+}
 
 describe('isHyperlaneBridgeRoute', () => {
   it('routes Starknet destinations through Hyperlane', () => {
@@ -43,10 +54,10 @@ describe('isBridgePairAllowed', () => {
 
 describe('layerzero approve spender', () => {
   it('prefers helper, else OFT address', () => {
-    const token = {
+    const token = tokenStub({
       layerzeroOftAddress: '0x1111111111111111111111111111111111111111',
       contractAddress: '0x2222222222222222222222222222222222222222',
-    } as never
+    })
     expect(getLayerzeroApproveSpender(token, '0x3333333333333333333333333333333333333333')).toBe(
       '0x3333333333333333333333333333333333333333',
     )
@@ -54,10 +65,10 @@ describe('layerzero approve spender', () => {
   })
 
   it('skips approval when OFT is the token itself and no helper', () => {
-    const token = {
+    const token = tokenStub({
       layerzeroOftAddress: '0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa',
       contractAddress: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    } as never
+    })
     expect(doesLayerzeroNeedApproval(token)).toBe(false)
     expect(doesLayerzeroNeedApproval(token, '0x1111111111111111111111111111111111111111')).toBe(
       true,

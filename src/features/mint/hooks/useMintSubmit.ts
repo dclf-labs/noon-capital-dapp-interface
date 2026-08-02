@@ -7,11 +7,11 @@ import { waitForTransactionReceipt } from 'viem/actions'
 import type { ProtocolChainId } from '@/config/chain-id'
 import { type Token } from '@/config/token'
 import { TXN_WAIT_TIMEOUT } from '@/constants/common'
+import { getDirectMintCallArgs } from '@/features/mint-redeem/submit-args'
 import DirectMinter from '@/lib/abis/evm/direct-minter.json'
 import { getAddressOrZeroAddress } from '@/lib/address'
 import { type EVMConnection, TxnStatus } from '@/lib/connection'
 import { getTxnPayload } from '@/lib/evmTxn'
-import { strToBn } from '@/lib/format'
 import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
@@ -54,6 +54,11 @@ const useMintSubmit = () => {
           throw new Error('Invalid connection')
         }
 
+        const args = getDirectMintCallArgs(tokenIn, tokenOut, amountIn, minAmountOut)
+        if (!args) {
+          throw new Error('Invalid parameters')
+        }
+
         setTxnStatus?.(TxnStatus.PROCESSING)
 
         const txnPayload = getTxnPayload(
@@ -63,11 +68,7 @@ const useMintSubmit = () => {
           DirectMinter as Abi,
           'directMint',
           getAddressOrZeroAddress(connection.config?.directMinter),
-          [
-            getAddressOrZeroAddress(tokenIn?.contractAddress),
-            strToBn(amountIn, tokenIn.decimals),
-            strToBn(minAmountOut, tokenOut.decimals),
-          ],
+          [...args],
         )
 
         try {

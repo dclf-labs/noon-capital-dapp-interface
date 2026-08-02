@@ -32,6 +32,7 @@ export {
 } from './trade-input-format'
 export {
   getTradePrimaryAction,
+  type TradeMode,
   type TradePrimaryAction,
   type TradePrimaryParams,
 } from './trade-primary'

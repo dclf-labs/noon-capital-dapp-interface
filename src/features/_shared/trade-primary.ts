@@ -1,3 +1,5 @@
+export type TradeMode = 'buy' | 'sell'
+
 export type TradePrimaryAction = {
   label: string
   disabled: boolean
@@ -5,7 +7,7 @@ export type TradePrimaryAction = {
 }
 
 export type TradePrimaryParams = {
-  mode: 'buy' | 'sell'
+  mode: TradeMode
   step: number
   isConnected: boolean
   isBalanceLoading: boolean

@@ -32,6 +32,7 @@ export const RedeemPriceContext = createContext<{
   /** Precomputed `amountIn * USN price` for UI — do not recompute in components. */
   amountInUsd: number
   isFetchingQuote: boolean
+  isQuoteError: boolean
 }>(null!)
 
 export const RedeemTxnContext = createContext<{

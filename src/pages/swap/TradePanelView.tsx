@@ -11,11 +11,12 @@ import {
   TRADE_PAY_DECIMALS,
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
+import type { TradeMode } from '@/features/_shared/trade-primary'
 import { down } from '@/lib/format'
 import * as styles from '@/pages/swap/trade-styles'
 
 export type TradePanelViewProps = {
-  mode: 'buy' | 'sell'
+  mode: TradeMode
   step: number
   isConnected: boolean
   unsupported?: boolean
@@ -91,7 +92,6 @@ export function TradePanelView({
   const amountOutValue = toTradeReceiveStoredAmount(amountOut)
   const amountInValue = toTradePayAmount(amountIn)
 
-  // Local draft keeps typing smooth (`1.`, `0.0`) without fighting controlled number state.
   const [payFocused, setPayFocused] = useState(false)
   const [payDraft, setPayDraft] = useState<string | undefined>(undefined)
 
@@ -125,7 +125,7 @@ export function TradePanelView({
           <p style={styles.muted}>Waiting for explorer link…</p>
         )}
         <button type="button" style={styles.button} onClick={onReset}>
-          {mode === 'buy' ? 'Buy more' : 'Sell more'}
+          {title} more
         </button>
       </section>
     )

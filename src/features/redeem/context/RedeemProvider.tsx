@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { mainnet } from 'wagmi/chains'
 
@@ -12,6 +12,10 @@ import {
   useTradeFormController,
 } from '@/features/_shared/use-trade-form-controller'
 import useTokenPrice from '@/features/api/hooks/useTokenPrice'
+import {
+  isMintRedeemPricePending,
+  isMintRedeemPriceUnavailable,
+} from '@/features/mint-redeem/preview'
 import {
   RedeemBalanceContext,
   RedeemFormContext,
@@ -41,19 +45,25 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const tokenInBalance = useTokenBalance(connection, tokenIn)
   const tokenInAllowance = useRedeemAllowance(connection, tokenIn)
-  const tokenOutBalance = useTokenBalance(connection, debouncedInputs.tokenOut)
+  const tokenOutBalance = useTokenBalance(connection, inputs.tokenOut)
 
   const tokenInPrice = useTokenPrice(tokenIn)
-  const tokenOutPrice = useTokenPrice(debouncedInputs.tokenOut)
-  const price = usePreviewRedeem(connection, tokenIn, 1, tokenOutPrice.data)
+  const tokenOutPrice = useTokenPrice(inputs.tokenOut)
+  const price = usePreviewRedeem(connection, inputs.tokenOut, 1, tokenOutPrice.data)
   const preview = usePreviewRedeem(
     connection,
-    tokenIn,
+    debouncedInputs.tokenOut,
     debouncedInputs.amountIn,
     tokenOutPrice.data,
   )
 
-  const submitFee = useRedeemSubmitFee()
+  const submitFee = useRedeemSubmitFee(
+    connection,
+    tokenIn,
+    debouncedInputs.tokenOut,
+    debouncedInputs.amountIn,
+    debouncedInputs.amountOut,
+  )
 
   const isInsufficientBalance = useMemo(
     () => getInsufficientBalance(tokenInBalance.data, inputs.amountIn),
@@ -64,7 +74,16 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [inputs.amountIn, tokenInAllowance.data],
   )
 
-  useSyncAmountOut(setInputs, preview.isLoading ? undefined : preview.data, isDebouncing)
+  useSyncAmountOut(
+    setInputs,
+    preview.isLoading || preview.isError ? undefined : preview.data,
+    isDebouncing || step > 0,
+  )
+
+  useEffect(() => {
+    if (!preview.isError || step > 0) return
+    setInputs((prev) => (prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }))
+  }, [preview.isError, setInputs, step])
 
   useResetOnSessionChange({
     session: {
@@ -103,15 +122,31 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [inputs.amountIn, tokenInPrice],
   )
 
-  const priceValue = useMemo(
-    () => ({
+  const priceValue = useMemo(() => {
+    const amountForQuote = debouncedInputs.amountIn
+    const pricePending = isMintRedeemPricePending(amountForQuote, tokenOutPrice.isLoading)
+    const priceUnavailable = isMintRedeemPriceUnavailable(
+      amountForQuote,
+      tokenOutPrice.isLoading,
+      tokenOutPrice.data,
+      tokenOutPrice.isError,
+    )
+    return {
       price,
       tokenOutPrice,
       amountInUsd,
-      isFetchingQuote: preview.isLoading || isDebouncing,
-    }),
-    [amountInUsd, price, tokenOutPrice, preview.isLoading, isDebouncing],
-  )
+      isFetchingQuote: preview.isLoading || isDebouncing || pricePending,
+      isQuoteError: preview.isError || priceUnavailable,
+    }
+  }, [
+    amountInUsd,
+    debouncedInputs.amountIn,
+    isDebouncing,
+    price,
+    preview.isError,
+    preview.isLoading,
+    tokenOutPrice,
+  ])
 
   const txnValue = useMemo(
     () => ({

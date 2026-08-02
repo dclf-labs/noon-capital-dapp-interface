@@ -12,6 +12,7 @@ const useUpdateRedeem = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         tokenOut,
+        amountOut: undefined,
       }))
     },
     [setInputs],
@@ -22,6 +23,7 @@ const useUpdateRedeem = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         amountIn,
+        amountOut: undefined,
       }))
     },
     [setInputs],

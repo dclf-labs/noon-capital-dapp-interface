@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { mainnet } from 'wagmi/chains'
 
@@ -22,6 +22,10 @@ import { type FormInputs } from '@/features/mint/context/types'
 import useMintAllowance from '@/features/mint/hooks/useMintAllowance'
 import useMintSubmitFee from '@/features/mint/hooks/useMintSubmitFee'
 import usePreviewMint from '@/features/mint/hooks/usePreviewMint'
+import {
+  isMintRedeemPricePending,
+  isMintRedeemPriceUnavailable,
+} from '@/features/mint-redeem/preview'
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
 
@@ -40,10 +44,10 @@ export const MintProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tokenOut = getToken(connection.config, 'USN')
 
   const tokenOutBalance = useTokenBalance(connection, tokenOut)
-  const tokenInBalance = useTokenBalance(connection, debouncedInputs.tokenIn)
-  const tokenInAllowance = useMintAllowance(connection, debouncedInputs.tokenIn)
+  const tokenInBalance = useTokenBalance(connection, inputs.tokenIn)
+  const tokenInAllowance = useMintAllowance(connection, inputs.tokenIn)
 
-  const tokenPrice = useTokenPrice(debouncedInputs.tokenIn)
+  const tokenPrice = useTokenPrice(inputs.tokenIn)
   const price = usePreviewMint(connection, debouncedInputs.tokenIn, 1, tokenPrice.data)
   const preview = usePreviewMint(
     connection,
@@ -69,7 +73,16 @@ export const MintProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [inputs.amountIn, tokenInAllowance.data],
   )
 
-  useSyncAmountOut(setInputs, preview.isLoading ? undefined : preview.data, isDebouncing)
+  useSyncAmountOut(
+    setInputs,
+    preview.isLoading || preview.isError ? undefined : preview.data,
+    isDebouncing || step > 0,
+  )
+
+  useEffect(() => {
+    if (!preview.isError || step > 0) return
+    setInputs((prev) => (prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }))
+  }, [preview.isError, setInputs, step])
 
   useResetOnSessionChange({
     session: {
@@ -108,15 +121,31 @@ export const MintProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [inputs.amountIn, tokenPrice],
   )
 
-  const priceValue = useMemo(
-    () => ({
+  const priceValue = useMemo(() => {
+    const amountForQuote = debouncedInputs.amountIn
+    const pricePending = isMintRedeemPricePending(amountForQuote, tokenPrice.isLoading)
+    const priceUnavailable = isMintRedeemPriceUnavailable(
+      amountForQuote,
+      tokenPrice.isLoading,
+      tokenPrice.data,
+      tokenPrice.isError,
+    )
+    return {
       price,
       tokenPrice,
       amountInUsd,
-      isFetchingQuote: preview.isLoading || isDebouncing,
-    }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
-  )
+      isFetchingQuote: preview.isLoading || isDebouncing || pricePending,
+      isQuoteError: preview.isError || priceUnavailable,
+    }
+  }, [
+    amountInUsd,
+    debouncedInputs.amountIn,
+    isDebouncing,
+    price,
+    preview.isError,
+    preview.isLoading,
+    tokenPrice,
+  ])
 
   const txnValue = useMemo(
     () => ({

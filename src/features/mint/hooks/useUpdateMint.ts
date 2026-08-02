@@ -12,6 +12,7 @@ const useUpdateMint = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         tokenIn,
+        amountOut: undefined,
       }))
     },
     [setInputs],
@@ -22,6 +23,7 @@ const useUpdateMint = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         amountIn,
+        amountOut: undefined,
       }))
     },
     [setInputs],

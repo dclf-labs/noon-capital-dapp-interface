@@ -1,4 +1,5 @@
 import { ArrowUpRightIcon } from '@/assets/icons'
+import { safeExternalHref } from '@/lib/safe-external-href'
 import { cn } from '@/lib/utils'
 import type { VaultListItem } from '@/mock/vaults/types'
 
@@ -28,16 +29,18 @@ function MetaChip({
   )
 }
 
-/** Only allow absolute https destinations for external vault CTAs. */
-function safeExternalHref(href: string | undefined): string | undefined {
-  if (!href) return undefined
-  try {
-    const url = new URL(href)
-    if (url.protocol !== 'https:') return undefined
-    return url.href
-  } catch {
-    return undefined
-  }
+function EarnNowLabel() {
+  return (
+    <>
+      <span className="shrink-0">Earn Now</span>
+      <ArrowUpRightIcon
+        width={14}
+        height={14}
+        className="size-3.5 shrink-0 text-white"
+        aria-hidden
+      />
+    </>
+  )
 }
 
 export function VaultCard({ vault }: VaultCardProps) {
@@ -51,7 +54,7 @@ export function VaultCard({ vault }: VaultCardProps) {
     : undefined
 
   return (
-    <div className="group/card relative w-full">
+    <div className="group/card relative flex w-full flex-col gap-2 md:gap-0">
       {linkProps ? (
         <a
           {...linkProps}
@@ -64,12 +67,26 @@ export function VaultCard({ vault }: VaultCardProps) {
         <VaultCardBody vault={vault} />
       )}
 
+      {/* Mobile: full-width Earn Now under the card (Figma). */}
       {linkProps ? (
         <a
           {...linkProps}
           className={cn(
-            // Start at the card edge; pl-3 bridges the 12px visual gap so hover never drops.
-            'absolute top-1/2 left-full z-10 flex h-[154px] -translate-y-1/2 items-center pl-3',
+            'flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#6c77e9] px-5 py-3',
+            'text-base tracking-[0.32px] whitespace-nowrap text-white md:hidden',
+          )}
+          aria-label={`Earn now in ${vault.name}`}
+        >
+          <EarnNowLabel />
+        </a>
+      ) : null}
+
+      {/* Desktop: side hover panel. */}
+      {linkProps ? (
+        <a
+          {...linkProps}
+          className={cn(
+            'absolute top-1/2 left-full z-10 hidden h-[154px] -translate-y-1/2 items-center pl-3 md:flex',
             'opacity-0 transition-opacity duration-200 ease-out',
             'pointer-events-none group-hover/card:pointer-events-auto group-hover/card:opacity-100',
             'focus-visible:pointer-events-auto focus-visible:opacity-100',
@@ -83,13 +100,7 @@ export function VaultCard({ vault }: VaultCardProps) {
               'text-base tracking-[0.32px] whitespace-nowrap text-white',
             )}
           >
-            <span className="shrink-0">Earn now</span>
-            <ArrowUpRightIcon
-              width={14}
-              height={14}
-              className="size-3.5 shrink-0 text-white"
-              aria-hidden
-            />
+            <EarnNowLabel />
           </span>
         </a>
       ) : null}
@@ -99,10 +110,11 @@ export function VaultCard({ vault }: VaultCardProps) {
 
 function VaultCardBody({ vault }: { vault: VaultListItem }) {
   return (
-    <article className="flex w-full flex-col gap-4 rounded-2xl border border-stone-200 bg-white/70 p-4 backdrop-blur-[11.7px]">
+    <article className="flex w-full flex-col gap-6 rounded-2xl border border-stone-200 bg-white/70 p-4 backdrop-blur-[11.7px] md:gap-4">
+      {/* Title row — APY sits on the right on desktop only. */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="size-14 shrink-0 overflow-hidden rounded-lg">
+          <div className="size-12 shrink-0 overflow-hidden rounded-lg md:size-14">
             <img
               src={vault.iconSrc}
               alt=""
@@ -119,13 +131,41 @@ function VaultCardBody({ vault }: { vault: VaultListItem }) {
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-1">
+        <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
           <p className="text-sm leading-5 font-book text-stone-500">APY, 7D</p>
           <p className="font-denton text-[28px] leading-none text-black">{vault.apyLabel}</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      {/* Mobile metrics grid */}
+      <div className="flex w-full flex-col gap-2 md:hidden">
+        <div className="flex w-full gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <p className="text-sm leading-5 font-book text-stone-500">APY, 7D</p>
+            <p className="font-denton text-[28px] leading-none text-black">{vault.apyLabel}</p>
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            <p className="text-sm tracking-[0.28px] text-[rgba(17,17,17,0.5)]">TVL</p>
+            <p className="text-base leading-6 font-book text-stone-900">{vault.tvlLabel}</p>
+          </div>
+        </div>
+        <div className="flex w-full gap-2">
+          <div className="flex min-w-0 flex-1 items-center">
+            <MetaChip label="Chain" iconSrc={vault.chainIconSrc} value={vault.chainName} />
+          </div>
+          <div className="flex min-w-0 flex-1 items-center">
+            <MetaChip
+              label="Assets"
+              iconSrc={vault.assetIconSrc}
+              value={vault.assetSymbol}
+              iconClassName="bg-[#1d2228]"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop metrics row */}
+      <div className="hidden items-center gap-6 md:flex">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
           <MetaChip label="Chain" iconSrc={vault.chainIconSrc} value={vault.chainName} />
           <MetaChip

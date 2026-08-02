@@ -36,14 +36,14 @@ function VaultsToolbar({
 /** Vaults list content — shell chrome lives in `src/layout/AppShell`. */
 export function VaultsPageView({ vaults, onSortClick, onFilterClick }: VaultsPageViewProps) {
   return (
-    <div className="flex w-full flex-col items-center pt-10">
-      <div className="flex w-full flex-col items-center gap-12">
+    <div className="flex w-full flex-col items-center pt-6 md:pt-10">
+      <div className="flex w-full flex-col items-center gap-6 md:gap-12">
         <VaultsHero />
 
         <div className="flex w-full flex-col gap-2">
           <VaultsToolbar onSortClick={onSortClick} onFilterClick={onFilterClick} />
 
-          {/* Desktop only: reserve space for the Earn Now hover panel. */}
+          {/* Desktop: reserve space for the Earn Now hover panel. */}
           <div className="flex w-full flex-col gap-8 md:pr-[11rem]">
             {vaults.map((vault) => (
               <VaultCard key={vault.id} vault={vault} />

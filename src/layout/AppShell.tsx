@@ -10,6 +10,7 @@ import {
   shellNavForPath,
   type SidebarApyPeriod,
 } from '@/components/shell'
+import { MobileNavDrawer } from '@/components/shell/MobileNavDrawer'
 import useSidebarProtocolMetrics from '@/features/shell/hooks/useSidebarProtocolMetrics'
 import { useWalletSession } from '@/hooks/connection'
 import { openEvmAppKit } from '@/wallet/evm/open-appkit'
@@ -21,12 +22,13 @@ function shortenAddress(address?: string) {
 
 /**
  * Shared app chrome: background, max-width column, header (network + wallet),
- * hover-expand sidebar, footer. Product routes render in `<Outlet />`.
+ * hover-expand sidebar (desktop) / mobile nav drawer, footer.
  */
 export function AppShell() {
   const location = useLocation()
   const session = useWalletSession()
   const [apyPeriod, setApyPeriod] = useState<SidebarApyPeriod>('7d')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { apy: sidebarApy, tvl: sidebarTvl } = useSidebarProtocolMetrics(apyPeriod)
 
   const navItems = useMemo(() => shellNavForPath(location.pathname), [location.pathname])
@@ -35,6 +37,10 @@ export function AppShell() {
     session.name ||
     shortenAddress(session.address) ||
     (session.isConnected ? 'Connected' : undefined)
+
+  const openWallet = () => {
+    void openEvmAppKit()
+  }
 
   return (
     <div
@@ -56,23 +62,27 @@ export function AppShell() {
       <div className="relative z-10 flex min-h-dvh w-full min-w-0 flex-1 flex-col">
         <AppHeader
           walletLabel={walletLabel}
-          onConnectClick={() => {
-            void openEvmAppKit()
-          }}
+          isConnected={session.isConnected}
+          apy={sidebarApy}
+          tvl={sidebarTvl}
+          onMenuClick={() => setMobileMenuOpen(true)}
+          onConnectClick={openWallet}
         />
 
-        <div className="flex flex-1 gap-4 pr-3 pb-16 pl-[5px] sm:pr-5">
-          <AppSidebar
-            apy={sidebarApy}
-            tvl={sidebarTvl}
-            apyPeriod={apyPeriod}
-            onApyPeriodChange={setApyPeriod}
-            navItems={navItems}
-          />
+        <div className="flex flex-1 gap-4 px-4 pb-16 lg:pr-5 lg:pl-[5px]">
+          <div className="hidden lg:contents">
+            <AppSidebar
+              apy={sidebarApy}
+              tvl={sidebarTvl}
+              apyPeriod={apyPeriod}
+              onApyPeriodChange={setApyPeriod}
+              navItems={navItems}
+            />
+          </div>
 
           <main className="flex min-w-0 flex-1 flex-col items-center">
-            {/* Full width on mobile; 60% of the space beside the sidebar from sm up. */}
-            <div className="flex w-full min-w-0 flex-1 flex-col sm:w-[60%]">
+            {/* Full width on mobile/tablet; 60% beside the sidebar from lg up. */}
+            <div className="flex w-full min-w-0 flex-1 flex-col lg:w-[60%]">
               <Outlet />
             </div>
           </main>
@@ -80,6 +90,17 @@ export function AppShell() {
 
         <AppFooter />
       </div>
+
+      <MobileNavDrawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        navItems={navItems}
+        apy={sidebarApy}
+        tvl={sidebarTvl}
+        isConnected={session.isConnected}
+        walletLabel={walletLabel}
+        onConnectClick={openWallet}
+      />
     </div>
   )
 }

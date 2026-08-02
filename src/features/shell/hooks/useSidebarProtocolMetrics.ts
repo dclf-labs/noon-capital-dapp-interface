@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import type { SidebarApyPeriod } from '@/components/shell/types'
 import useProtocolStats from '@/features/api/hooks/useProtocolStats'
 import useProtocolTvl from '@/features/api/hooks/useProtocolTvl'
-import { toIntlCompactStr, toNum } from '@/lib/format'
+import { formatSidebarProtocolMetrics } from '@/features/shell/hooks/sidebar-protocol-metrics'
 
 /**
  * Sidebar protocol metrics — same sources as the legacy dapp chrome:
@@ -16,22 +16,21 @@ export function useSidebarProtocolMetrics(apyPeriod: SidebarApyPeriod) {
   const protocolStats = useProtocolStats()
   const protocolTvl = useProtocolTvl()
 
-  return useMemo(() => {
-    const apyRaw =
-      apyPeriod === '28d' ? protocolStats.data?.twentyEightDayApy : protocolStats.data?.sevenDayApy
-    const apyReady =
-      !protocolStats.isLoading && protocolStats.data != null && Number.isFinite(toNum(apyRaw))
-
-    const tvlReady = !protocolTvl.isLoading
-    const tvlRaw = protocolTvl.data
-
-    return {
-      apy: apyReady ? toIntlCompactStr(apyRaw, 2, true, 1, '', '%') : '—',
-      tvl: tvlReady ? toIntlCompactStr(tvlRaw, 2, true, 1, '', '') : '—',
-      isLoading: protocolStats.isLoading || protocolTvl.isLoading,
-      isError: protocolStats.isError || protocolTvl.isError,
-    }
-  }, [apyPeriod, protocolStats, protocolTvl])
+  return useMemo(
+    () =>
+      formatSidebarProtocolMetrics({
+        apyPeriod,
+        sevenDayApy: protocolStats.data?.sevenDayApy,
+        twentyEightDayApy: protocolStats.data?.twentyEightDayApy,
+        tvl: protocolTvl.data,
+        statsLoading: protocolStats.isLoading,
+        statsError: protocolStats.isError,
+        statsReady: protocolStats.data != null,
+        tvlLoading: protocolTvl.isLoading,
+        tvlError: protocolTvl.isError,
+      }),
+    [apyPeriod, protocolStats, protocolTvl],
+  )
 }
 
 export default useSidebarProtocolMetrics

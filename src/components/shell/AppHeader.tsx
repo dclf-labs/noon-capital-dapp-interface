@@ -1,50 +1,94 @@
+import { InfoIcon, MenuIcon } from '@/assets/icons'
+import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
 import { NetworkSelector } from '@/components/shell/NetworkSelector'
+import { WalletAvatarButton } from '@/components/shell/WalletAvatarButton'
 import { cn } from '@/lib/utils'
 
 type AppHeaderProps = {
   walletLabel?: string
+  /** True when a wallet is connected for the selected product network. */
+  isConnected?: boolean
   onConnectClick?: () => void
+  onMenuClick?: () => void
+  apy?: string
+  tvl?: string
 }
 
-const chip = 'flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white'
-
-export function AppHeader({ walletLabel, onConnectClick }: AppHeaderProps) {
+/**
+ * Desktop (lg+): network selector + connect CTA or connected wallet chip.
+ * Mobile / tablet: hamburger · mark · APY/TVL · network selector
+ * (connect / connected wallet live at the bottom of the nav drawer).
+ */
+export function AppHeader({
+  walletLabel,
+  isConnected = false,
+  onConnectClick,
+  onMenuClick,
+  apy = '—',
+  tvl = '—',
+}: AppHeaderProps) {
   return (
-    <header className="flex w-full items-center justify-end gap-2 px-4 py-3 md:gap-[14px] md:px-6 md:py-4">
-      <NetworkSelector />
+    <>
+      {/* Mobile + tablet top bar */}
+      <header className="px-3 pt-2.5 pb-1 lg:hidden">
+        <div
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg border border-[#d4d1cf] bg-[#e9e9e9]/90 p-3',
+            'backdrop-blur-[11.7px]',
+          )}
+        >
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Open menu"
+            className={cn(
+              'flex shrink-0 items-center rounded-[5px] border border-stone-200 bg-white p-2 text-primary',
+              'shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)]',
+              'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
+            )}
+          >
+            <MenuIcon width={16} height={16} className="size-4" aria-hidden />
+          </button>
 
-      <button
-        type="button"
-        onClick={onConnectClick}
-        className={cn(
-          chip,
-          'group overflow-visible py-2 pr-3 pl-2 text-stone-900 transition-colors hover:text-primary focus-visible:text-primary',
-        )}
-      >
-        {/* Outer relative only — overflow on the avatar leaf so the connector badge isn't clipped. */}
-        <span className="relative size-6 shrink-0">
-          <span className="block size-6 overflow-hidden rounded">
+          <div className="min-w-0 flex-1">
             <img
-              src="/assets/shell/wallet-avatar.png"
-              alt=""
-              width={24}
+              src="/assets/shell/sidebar-logo.svg"
+              alt="NOON"
+              width={35}
               height={24}
-              className="size-full object-cover"
+              className="h-6 w-auto"
             />
-          </span>
-          {/* Figma: 12px badge; fox glyph ~7×6.75 centered (not stretched to fill). */}
-          <span className="absolute -right-[3px] -bottom-[2.25px] flex size-3 items-center justify-center overflow-hidden rounded border-[0.75px] border-stone-200 bg-white">
-            <img
-              src="/assets/shell/metamask.svg"
-              alt=""
-              width={7}
-              height={7}
-              className="h-[6.75px] w-[7px] object-contain"
-            />
-          </span>
-        </span>
-        <span className="text-base leading-6 font-medium">{walletLabel || 'Connect'}</span>
-      </button>
-    </header>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1.5">
+            <div className="flex flex-col items-start justify-center">
+              <div className="mb-[-2px] flex items-center gap-0.5">
+                <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
+                <InfoIcon width={16} height={16} className="size-4 text-stone-500" aria-hidden />
+              </div>
+              <p className="font-denton text-base leading-5 text-black">{apy}</p>
+            </div>
+            <div className="flex flex-col items-start justify-center">
+              <span className="mb-[-2px] text-xs leading-[18px] font-book text-stone-500">TVL</span>
+              <p className="font-denton text-base leading-5 text-black">{tvl}</p>
+            </div>
+          </div>
+
+          <div className="mx-0.5 h-10 w-px shrink-0 bg-[#d4d1cf]" aria-hidden />
+
+          <NetworkSelector />
+        </div>
+      </header>
+
+      {/* Desktop top bar */}
+      <header className="hidden w-full items-center justify-end gap-2 px-4 py-3 lg:flex lg:gap-[14px] lg:px-6 lg:py-4">
+        <NetworkSelector />
+        {isConnected ? (
+          <WalletAvatarButton onClick={onConnectClick} label={walletLabel} showLabel />
+        ) : (
+          <ConnectWalletButton onClick={onConnectClick} />
+        )}
+      </header>
+    </>
   )
 }

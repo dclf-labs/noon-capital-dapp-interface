@@ -8,9 +8,11 @@
  */
 export { default as ArrowUpRightIcon } from '@/assets/icons/arrow-up-right.svg?react'
 export { default as ChevronDownIcon } from '@/assets/icons/chevron-down.svg?react'
+export { default as CloseIcon } from '@/assets/icons/close.svg?react'
 export { default as DividerIcon } from '@/assets/icons/divider.svg?react'
 export { default as FilterIcon } from '@/assets/icons/filter.svg?react'
 export { default as InfoIcon } from '@/assets/icons/info.svg?react'
+export { default as MenuIcon } from '@/assets/icons/menu.svg?react'
 export { default as NavBridgeIcon } from '@/assets/icons/nav-bridge.svg?react'
 export { default as NavDashboardIcon } from '@/assets/icons/nav-dashboard.svg?react'
 export { default as NavGiftIcon } from '@/assets/icons/nav-gift.svg?react'
@@ -26,3 +28,4 @@ export { default as SocialLinkedInIcon } from '@/assets/icons/social-linkedin.sv
 export { default as SocialTelegramIcon } from '@/assets/icons/social-telegram.svg?react'
 export { default as SocialXIcon } from '@/assets/icons/social-x.svg?react'
 export { default as SortIcon } from '@/assets/icons/sort.svg?react'
+export { default as WalletIcon } from '@/assets/icons/wallet.svg?react'

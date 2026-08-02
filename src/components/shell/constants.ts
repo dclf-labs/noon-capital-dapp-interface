@@ -46,6 +46,12 @@ export const SHELL_SELECTION_SPRING = {
   damping: 30,
 }
 
+/**
+ * Network dropdown panel — above shell chrome (sidebar 30, mobile drawer 100),
+ * below modals / AppKit (1000).
+ */
+export const NETWORK_SELECTOR_Z_INDEX = 500
+
 export const SHELL_NAV: Omit<ShellNavItem, 'active'>[] = [
   { id: 'home', label: 'Home', icon: NavDashboardIcon, href: '/', enabled: true },
   {

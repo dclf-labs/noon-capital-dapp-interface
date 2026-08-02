@@ -28,6 +28,10 @@ export const createSuiOft = (client: any, token: Token | undefined): OFT | undef
   )
 }
 
+/**
+ * Build Sui OFT `SendParam`. UI shows 1:1 amount / “Slippage 0%”, but on-chain
+ * `minAmountLd` still applies the shared 1% haircut (`slippageAdjustedAmount`).
+ */
 export const buildSuiOftSendParam = (
   dstEid: number,
   receiverAddress: string,

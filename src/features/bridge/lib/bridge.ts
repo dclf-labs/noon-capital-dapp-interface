@@ -9,6 +9,7 @@ import {
 } from '@/constants/common'
 import { toBn } from '@/lib/format'
 
+/** LayerZero executor options hex for `lzReceive` gas. */
 export const getBridgeOptions = (
   executorLzReceiveOptionMaxGas?: number,
   executorLzReceiveOptionGasLimit?: number,
@@ -20,6 +21,7 @@ export const getBridgeOptions = (
     )
     .toHex()
 
+/** Sui destinations need a higher max-gas option than EVM/Starknet. */
 export const getBridgeOptionsForDestination = (destinationChainId: ChainId | undefined) => {
   const isSuiDestination = Number(destinationChainId) === Number(SUI_BRIDGE_DESTINATION.id)
   return getBridgeOptions(isSuiDestination ? EXECUTOR_LZ_RECEIVE_OPTION_MAX_GAS_SUI : undefined)

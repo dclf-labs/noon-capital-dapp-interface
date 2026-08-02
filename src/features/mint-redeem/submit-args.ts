@@ -2,32 +2,17 @@ import type { Address } from 'viem'
 
 import type { Token } from '@/config/token'
 import { getAddressOrZeroAddress } from '@/lib/address'
-import { strToBn } from '@/lib/format'
+import { toTruncatedTokenUnits } from '@/lib/format'
 
 type AmountToken = Pick<Token, 'contractAddress' | 'decimals'>
 type DecimalsToken = Pick<Token, 'decimals'>
 
 /**
- * Convert a JS number to token units, truncating toward zero.
- * Caps fractional digits at 12 so IEEE float dust cannot inflate minAmountOut.
- */
-function toTruncatedUnits(amount: number | undefined, decimals: number | undefined): bigint {
-  if (amount == null || decimals == null || !Number.isFinite(amount)) return 0n
-  const negative = amount < 0
-  const abs = Math.abs(amount).toString()
-  if (abs.includes('e') || abs.includes('E')) {
-    // Rare huge/tiny values — fall back to strToBn without extra truncation.
-    return strToBn(amount, decimals)
-  }
-  const [intPart, fracPart = ''] = abs.split('.')
-  const precision = Math.min(decimals, 12)
-  const clipped = fracPart ? `${intPart}.${fracPart.slice(0, precision)}` : intPart
-  return strToBn(negative ? `-${clipped}` : clipped, decimals)
-}
-
-/**
  * `directMint(collateral, collateralAmount, minUsnAmount)` args.
  * Collateral is tokenIn; min out uses tokenOut (USN) decimals.
+ *
+ * Off-chain price quotes set `minAmountOut === amountOut` (UI “Slippage 0%”) —
+ * not an AMM min-out haircut.
  */
 export function getDirectMintCallArgs(
   tokenIn: AmountToken | undefined,
@@ -38,8 +23,8 @@ export function getDirectMintCallArgs(
   if (!tokenIn || !tokenOut || !amountIn || !minAmountOut) return undefined
   return [
     getAddressOrZeroAddress(tokenIn.contractAddress),
-    toTruncatedUnits(amountIn, tokenIn.decimals),
-    toTruncatedUnits(minAmountOut, tokenOut.decimals),
+    toTruncatedTokenUnits(amountIn, tokenIn.decimals),
+    toTruncatedTokenUnits(minAmountOut, tokenOut.decimals),
   ] as const
 }
 
@@ -56,8 +41,8 @@ export function getDirectRedeemCallArgs(
   if (!tokenIn || !tokenOut || !amountIn || !minAmountOut) return undefined
   return [
     getAddressOrZeroAddress(tokenOut.contractAddress),
-    toTruncatedUnits(amountIn, tokenIn.decimals),
-    toTruncatedUnits(minAmountOut, tokenOut.decimals),
+    toTruncatedTokenUnits(amountIn, tokenIn.decimals),
+    toTruncatedTokenUnits(minAmountOut, tokenOut.decimals),
   ] as const
 }
 

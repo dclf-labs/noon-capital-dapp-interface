@@ -157,8 +157,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      // Gate unit-testable pure modules. Heavy React hooks / wallet SDK glue stay
-      // out of the threshold set; product math and CTA machines are included.
+      // Coverage gate: product math, CTA machines, and thin shared controllers
+      // (form debounce/sync, amount handlers, input model). Wallet SDK / submit
+      // hooks stay outside thresholds.
       include: [
         'src/lib/address.ts',
         'src/lib/chain.ts',

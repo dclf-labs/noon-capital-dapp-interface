@@ -11,7 +11,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -21,7 +20,6 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "isolatedModules": true,
-
     /* Linting / correctness */
     "strict": true,
     "noUnusedLocals": true,

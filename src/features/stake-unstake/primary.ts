@@ -27,10 +27,7 @@ export type StakeUnstakePrimaryParams = {
   submitFailed: boolean
 }
 
-/**
- * Stake/unstake CTA machine (quote → optional approve → confirm).
- * Separate from buy/sell and mint/redeem primaries.
- */
+/** Stake/unstake CTA machine: quote → optional approve → confirm. */
 export function getStakeUnstakePrimaryAction({
   mode,
   step,

@@ -13,6 +13,7 @@ import {
   toBn,
   toNum,
   toStr,
+  toTruncatedTokenUnits,
   up,
 } from '@/lib/format'
 
@@ -61,5 +62,12 @@ describe('format helpers used by previews', () => {
     expect(bnToStr('not-a-number' as never, 18)).toBe('0')
     expect(strToBn('not.a.number', 18)).toBe(0n)
     expect(toBn({} as never)).toBe(0n)
+  })
+
+  it('truncates float dust before token-unit conversion for submit', () => {
+    const noisy = 0.1 * 3
+    expect(noisy).toBeGreaterThan(0.3)
+    expect(toTruncatedTokenUnits(noisy, 18)).toBe(strToBn('0.3', 18))
+    expect(toTruncatedTokenUnits(12.345678901234567, 18)).toBe(strToBn('12.345678901234', 18))
   })
 })

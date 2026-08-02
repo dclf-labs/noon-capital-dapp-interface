@@ -138,6 +138,7 @@ export function MintRedeemPanel({
           {formatTokenAmount(amountOutValue, tokenOut?.symbol, TRADE_RECEIVE_DISPLAY_DECIMALS)}
         </p>
         {feeLabel ? <p style={styles.muted}>Network fee {feeLabel}</p> : null}
+        {/* Off-chain price quote: minAmountOut === amountOut (no AMM haircut). */}
         <p style={styles.muted}>Slippage 0%</p>
         {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
         <div style={styles.row}>
@@ -275,6 +276,7 @@ export function MintRedeemPanel({
             thousandSeparator
             allowNegative={false}
             value={receiveDisplay}
+            // Field shows ≤2dp; title keeps full stored 6dp for hover/debug.
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
           {mode === 'redeem' ? (
@@ -302,6 +304,7 @@ export function MintRedeemPanel({
         </div>
         {unitRateLabel ? <p style={styles.muted}>Rate {unitRateLabel}</p> : null}
         {feeLabel ? <p style={styles.muted}>Est. fee {feeLabel}</p> : null}
+        {/* Off-chain price quote: minAmountOut === amountOut (no AMM haircut). */}
         <p style={styles.muted}>Slippage 0%</p>
       </div>
 

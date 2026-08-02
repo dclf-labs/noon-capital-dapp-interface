@@ -16,5 +16,7 @@ Cross-feature hooks live here. Domain logic belongs under `src/features/<domain>
 - Prefer `enabled: isAddressValid(address)` for any user-scoped API path
 - Prefer `queryKeys.*` from `@/lib/query-keys` for every `queryKey`
 
-See `src/features/README.md` for mint, bridge, buy/sell, api, shell, and other domains.
+See `src/features/README.md` for mint/redeem, stake/unstake, bridge, buy/sell, api, shell, and other domains.
+Route UI lives under `src/pages/` (`src/pages/README.md`).
 `src/state/` holds Zustand stores (active chain, points estimator assumptions).
+Architecture and testing: `docs/ARCHITECTURE.md`, `docs/TESTING.md`.

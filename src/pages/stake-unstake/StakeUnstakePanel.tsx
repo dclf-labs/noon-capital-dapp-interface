@@ -134,6 +134,7 @@ export function StakeUnstakePanel({
           {formatTokenAmount(amountOutValue, tokenOut?.symbol, TRADE_RECEIVE_DISPLAY_DECIMALS)}
         </p>
         {mode === 'unstake' ? (
+          // On-chain withdraw uses previewed USN out (not sUSN shares); then cooldown → Withdraw tab.
           <p style={styles.banner}>Unstake starts a cooldown. USN is claimable after it ends.</p>
         ) : null}
         {feeLabel ? <p style={styles.muted}>Network fee {feeLabel}</p> : null}
@@ -248,6 +249,7 @@ export function StakeUnstakePanel({
             thousandSeparator
             allowNegative={false}
             value={receiveDisplay}
+            // Field shows ≤2dp; title keeps full stored 6dp for hover/debug.
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
           <input

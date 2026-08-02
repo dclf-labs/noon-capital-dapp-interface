@@ -13,6 +13,11 @@ import {
 import { down } from '@/lib/format'
 import * as styles from '@/pages/bridge/bridge-styles'
 
+/**
+ * Bridge form UI. Receive mirrors send 1:1 (OFT); pay uses `amount` (not amountIn/Out).
+ * Confirm/LZ submit may still apply a 1% `minAmountLd` haircut under the hood.
+ */
+
 export type BridgeNetworkOption = {
   id: number
   name: string
@@ -322,8 +327,10 @@ export function BridgePanel({
           thousandSeparator
           allowNegative={false}
           value={receiveDisplay}
+          // 1:1 OFT send; 2dp is display-only. Title keeps full pay precision.
           title={amountValue != null ? String(amountValue) : undefined}
         />
+        {/* UI copy is 1:1; LZ/Sui OFT submit still sets minAmountLd with 1% haircut. */}
         <p style={styles.muted}>1:1 amount · Slippage 0%</p>
         {protocolLabel ? <p style={styles.muted}>Route {protocolLabel}</p> : null}
         {feeLabel ? <p style={styles.muted}>Est. bridge fee {feeLabel}</p> : null}

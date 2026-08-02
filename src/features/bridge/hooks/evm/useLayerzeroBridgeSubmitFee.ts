@@ -83,6 +83,7 @@ const useLayerzeroBridgeSubmitFee = (
     }
 
     // OFT amountLD / minAmountLD are both in **source** local decimals.
+    // Fee quote minAmount mirrors submit's 1% haircut (UI still shows 1:1).
     const amountLd = amount
       ? strToBn(amount, tokenIn?.decimals)
       : strToBn(`0.${'0'.repeat((tokenIn?.decimals ?? 18) - 2)}11`, tokenIn?.decimals)

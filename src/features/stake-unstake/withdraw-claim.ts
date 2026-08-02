@@ -10,6 +10,7 @@ export function getWithdrawUnlockAt(timestampMs: number, withdrawPeriodMs: numbe
   return timestampMs + withdrawPeriodMs
 }
 
+/** True when the cooldown has elapsed and the request is not yet claimed. */
 export function isWithdrawRequestClaimable(
   request: Pick<WithdrawRequestView, 'claimed' | 'timestamp'>,
   withdrawPeriodMs: number,
@@ -34,6 +35,7 @@ export function formatCooldownRemaining(unlockAtMs: number, nowMs = Date.now()):
   return '<1m'
 }
 
+/** Claim-button / status label for a single withdraw request row. */
 export function getWithdrawClaimLabel(params: {
   claimed: boolean
   claimable: boolean

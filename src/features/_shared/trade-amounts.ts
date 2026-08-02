@@ -53,10 +53,11 @@ export function getAmountUsd(
   return toNum(amount) * toNum(tokenPrice?.data)
 }
 
-/** Preview shapes returned by EVM (number) and Starknet Ekubo ({ quote, route }). */
+/** Preview shapes: EVM number quote, or Starknet Ekubo `{ quote, route }`. */
 export type PreviewQuoteData<TRoute = unknown> =
   number | { quote: number; route?: TRoute[] } | undefined | null
 
+/** Extract the numeric quote from either preview shape. */
 export function normalizePreviewQuote(data: PreviewQuoteData): number | undefined {
   if (data == null) return undefined
   if (typeof data === 'number') return toNum(data)
@@ -64,6 +65,7 @@ export function normalizePreviewQuote(data: PreviewQuoteData): number | undefine
   return undefined
 }
 
+/** Starknet route hops; empty for plain numeric (EVM) previews. */
 export function normalizePreviewRoute<TRoute>(data: PreviewQuoteData<TRoute>): TRoute[] {
   if (data != null && typeof data === 'object' && 'route' in data && Array.isArray(data.route)) {
     return data.route

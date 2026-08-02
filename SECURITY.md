@@ -10,9 +10,10 @@ Do not open a public GitHub issue for vulnerabilities that could put user funds 
 This repository is a frontend interface. Especially sensitive areas:
 
 - Wallet connection flows
-- Transaction signing UX
+- Transaction signing UX (mint/redeem, stake/unstake, buy/sell, bridge)
 - Dependency / supply-chain changes
 - Environment variable handling
+- Calldata amount encoding (`toTruncatedTokenUnits`, slippage / min-out helpers)
 
 ## Guidelines for contributors
 

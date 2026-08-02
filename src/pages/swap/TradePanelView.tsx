@@ -141,6 +141,7 @@ export function TradePanelView({
         </p>
         {feeLabel ? <p style={styles.muted}>Network fee {feeLabel}</p> : null}
         <p style={styles.muted}>
+          {/* Display approx of submit `slippageAdjustedAmount(..., 1)` — not the signed bigint. */}
           Min received (1% slippage){' '}
           {formatTokenAmount(
             amountOutValue != null
@@ -270,6 +271,7 @@ export function TradePanelView({
             thousandSeparator
             allowNegative={false}
             value={receiveDisplayValue}
+            // Field shows ≤2dp; title keeps full stored 6dp for hover/debug.
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
           <select

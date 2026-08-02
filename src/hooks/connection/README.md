@@ -28,14 +28,15 @@ import {
 import { canWriteSession } from '@/lib/connection'
 ```
 
-| Use case                            | Hook                                                   |
-| ----------------------------------- | ------------------------------------------------------ |
-| Shell / active product chain        | `useWalletSession()`                                   |
-| Pick network (all pages)            | `useSelectActiveChain()`                               |
-| Mint / redeem / stake (Ethereum)    | `useEvmTargetSession(mainnet.id)`                      |
-| Buy / sell on current EVM chain     | `useEvmFamilySession()`                                |
-| Starknet / Sui family flows         | `useStarknetFamilySession()` / `useSuiFamilySession()` |
-| Bridge destination / pasted address | `useReadOnlySession(chainId, address)`                 |
+| Use case                                   | Hook                                                   |
+| ------------------------------------------ | ------------------------------------------------------ |
+| Shell / active product chain               | `useWalletSession()`                                   |
+| Pick network (all pages)                   | `useSelectActiveChain()`                               |
+| Mint / redeem / stake / unstake (Ethereum) | `useEvmTargetSession(mainnet.id)`                      |
+| Buy / sell on current EVM chain            | `useEvmFamilySession()`                                |
+| Bridge source (EVM / Starknet / Sui)       | Matching family session                                |
+| Starknet / Sui family flows                | `useStarknetFamilySession()` / `useSuiFamilySession()` |
+| Bridge destination / pasted address        | `useReadOnlySession(chainId, address)`                 |
 
 ## Active network
 

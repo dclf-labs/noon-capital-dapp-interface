@@ -31,7 +31,8 @@ type TradePriceModelParams = {
 }
 
 /**
- * UI-ready price / fee / rate model for trade screens.
+ * UI-ready price / fee / unit-rate labels for trade screens.
+ * Optional helper when a provider does not already expose these fields.
  */
 export function useTradePriceModel({
   amount,

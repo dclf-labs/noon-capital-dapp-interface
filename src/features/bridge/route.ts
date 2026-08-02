@@ -17,7 +17,11 @@ import {
 } from '@/lib/chain'
 import { toNum } from '@/lib/format'
 
-/** Hyperlane when dest is Starknet or source config maps dest → Hyperlane. */
+/**
+ * Whether the route should use Hyperlane (vs LayerZero).
+ * Missing destination defaults to Hyperlane so approval/fee hooks stay inert
+ * until a concrete dest is chosen (avoids premature LZ approve UX).
+ */
 export function isHyperlaneBridgeRoute(
   sourceUseHyperlane: Partial<Record<number, boolean>> | undefined,
   destinationChainId: ChainId | null | undefined,
@@ -27,7 +31,7 @@ export function isHyperlaneBridgeRoute(
   return !!sourceUseHyperlane?.[toNum(destinationChainId)]
 }
 
-/** Product pair hard-blocks (matches old dapp `lib/chain` helpers). */
+/** Product pair hard-blocks (same chain, TAC/HyperEVM/Base/Citrea/Bera/Sui rules). */
 export function isBridgePairAllowed(
   sourceChainId: ChainId | null | undefined,
   destinationChainId: ChainId | null | undefined,
@@ -68,6 +72,10 @@ export function getLayerzeroApproveSpender(
   return (layerzeroOftHelper || token?.layerzeroOftAddress) as Address | undefined
 }
 
+/**
+ * Whether LZ needs an ERC-20 approve before send.
+ * Always when a helper is configured; otherwise only when OFT ≠ underlying token.
+ */
 export function doesLayerzeroNeedApproval(
   token: Token | undefined,
   layerzeroOftHelper?: Address,

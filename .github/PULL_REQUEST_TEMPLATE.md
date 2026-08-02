@@ -24,6 +24,13 @@ CI runs `format:check`, `lint`, `typecheck`, `test:coverage` (with thresholds), 
 - [ ] `npm run test` (or `test:coverage`)
 - [ ] `npm run build`
 - [ ] Manual check in the browser (if UI changed)
+- [ ] Calculation / UI-value tests updated if amounts, quotes, or confirm copy changed (see `docs/TESTING.md`)
+
+## Product surfaces (if applicable)
+
+- [ ] Kept mint/redeem, stake/unstake/withdraw, bridge, and buy/sell as separate surfaces
+- [ ] Pay ≤6dp / receive display ≤2dp preserved where relevant
+- [ ] Docs/READMEs updated for new routes, helpers, or env keys
 
 ## Web3 / security notes
 

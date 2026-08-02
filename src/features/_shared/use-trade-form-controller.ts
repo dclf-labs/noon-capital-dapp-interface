@@ -99,7 +99,8 @@ type PreviewOutInputs<TRoute> = {
 }
 
 /**
- * Sync `amountOut` (+ optional `route`) from EVM number or Starknet `{ quote, route }` previews.
+ * Sync `amountOut` + `route` from Starknet `{ quote, route }` (or shapes that include a route).
+ * Requires a non-empty `route`; plain numeric EVM quotes must use {@link useSyncAmountOut}.
  */
 export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRoute>>(
   setInputs: Dispatch<SetStateAction<TInputs>>,
@@ -125,6 +126,7 @@ export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRout
     const amountOut = normalizePreviewQuote(preview.data)
     const route = normalizePreviewRoute(preview.data)
     setInputs((prev) => {
+      // Empty route ⇒ clear (Starknet path); EVM numeric quotes use useSyncAmountOut.
       if (amountOut === undefined || !(amountOut > 0) || route.length === 0) {
         if (prev.amountOut === undefined && (!prev.route || prev.route.length === 0)) return prev
         return {
@@ -221,10 +223,12 @@ export function useResetOnSessionChange<TInputs extends object>({
   }, [session.unsupported, setStep, setTxnUrl])
 }
 
+/** True when wallet balance cannot cover the entered pay amount. */
 export function getInsufficientBalance(balance: number | undefined, amountIn: number | undefined) {
   return toNum(balance) < toNum(amountIn)
 }
 
+/** True when allowance covers the entered pay amount. */
 export function getIsApproved(allowance: number | undefined, amountIn: number | undefined) {
   return toNum(allowance) >= toNum(amountIn)
 }

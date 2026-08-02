@@ -13,6 +13,7 @@ export type BridgePrimaryParams = {
   pairAllowed: boolean
   hasReceiver: boolean
   hasToken: boolean
+  /** Bridge send amount (1:1 receive); named `amount` not amountIn/Out. */
   amount?: number
   isBalanceLoading: boolean
   isAllowanceLoading: boolean

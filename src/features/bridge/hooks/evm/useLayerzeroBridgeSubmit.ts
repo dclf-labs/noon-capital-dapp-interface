@@ -80,6 +80,7 @@ const useBridgeSubmit = () => {
           connection.config?.layerzeroOftHelper || tokenIn?.layerzeroOftAddress,
         )
         // OFT amountLD / minAmountLD are both in **source** local decimals.
+        // UI shows 1:1 send; minAmountLd still applies the shared 1% haircut.
         const amountLd = strToBn(amount, tokenIn.decimals)
         const minAmountLd = slippageAdjustedAmount(amountLd, 1)
         const sendParamArgs = [

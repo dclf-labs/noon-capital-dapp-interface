@@ -23,3 +23,5 @@ src/config/
 | `src/config/` | Protocol deployments keyed by numeric chain id      |
 
 Import protocol data from `@/config` (or `@/config/chains/<name>`). Prefer ABIs from `@/lib/abis`.
+
+Product features that consume these configs (mint/redeem, stake/unstake, bridge, buy/sell) are documented under `src/features/README.md` and `docs/ARCHITECTURE.md`.

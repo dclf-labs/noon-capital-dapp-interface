@@ -28,10 +28,7 @@ export type MintRedeemPrimaryParams = {
   submitFailed: boolean
 }
 
-/**
- * Mint/redeem CTA state machine (whitelist → quote → approve → confirm).
- * Kept separate from buy/sell swap primary actions.
- */
+/** Mint/redeem CTA machine: whitelist → quote → approve → confirm. */
 export function getMintRedeemPrimaryAction({
   mode,
   step,

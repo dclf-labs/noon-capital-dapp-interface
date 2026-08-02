@@ -41,6 +41,7 @@ export type { ResetOnSessionChangeOptions, SessionIdentity } from './use-trade-f
 export {
   getInsufficientBalance,
   getIsApproved,
+  getQuoteSourceKey,
   useResetOnSessionChange,
   useSyncAmountOut,
   useSyncPreviewOut,

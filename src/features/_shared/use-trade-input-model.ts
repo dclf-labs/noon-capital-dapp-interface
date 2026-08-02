@@ -32,6 +32,9 @@ type TradeInputModelParams = {
 /**
  * UI-ready trade input model. Components should only bind these values —
  * no amount×price, half/max, or Intl formatting in the view.
+ *
+ * Note: `maxAmount` here does **not** reserve native gas. For Max buttons use
+ * `getTradeMaxAmount` / `useTradeAmountHandlers` (applies `NATIVE_GAS_RESERVE`).
  */
 export function useTradeInputModel({
   amount,
@@ -59,7 +62,9 @@ export function useTradeInputModel({
         ? formatTokenAmount(balance.data, tokenSymbol, tokenDecimals)
         : undefined,
       isPresetDisabled: balance ? isBalancePresetDisabled(balance) : true,
+      /** Half of balance at input precision (no gas reserve). */
       halfAmount: getPresetAmount(balance?.data, 'half'),
+      /** Full balance at input precision (no gas reserve — see hook note). */
       maxAmount: getPresetAmount(balance?.data, 'max'),
       normalizeAmount: (value: number | undefined) =>
         normalizeTradeAmount(value, TRADE_INPUT_DECIMALS),

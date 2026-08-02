@@ -1,9 +1,9 @@
 import { toIntlCompactStr, toIntlCompactStrWithMaxFractionDigits4, toIntlStr } from '@/lib/format'
 
 /**
- * Display-only formatters for trade UI.
- * Prefer calling these from hooks/contexts (or thin presentational leaves)
- * so screens do not invent their own Intl args.
+ * Display-only formatters for trade UI (confirm rows, USD, fees, balances).
+ * Prefer these over ad-hoc `toIntlStr` args in screens — pay/receive field
+ * precision still goes through `trade-input-format`.
  */
 
 export function formatUsd(amount: number | string | bigint | undefined): string {

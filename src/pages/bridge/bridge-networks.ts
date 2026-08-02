@@ -10,6 +10,7 @@ import {
 } from '@/lib/chain'
 import type { BridgeNetworkOption } from '@/pages/bridge/BridgePanel'
 
+/** Source networks available for the connected wallet family. */
 export function getBridgeSourceNetworks(family: 'evm' | 'starknet' | 'sui'): BridgeNetworkOption[] {
   if (family === 'starknet') {
     return [{ id: Number(starknetConfig.id), name: starknetConfig.name }]
@@ -23,6 +24,10 @@ export function getBridgeSourceNetworks(family: 'evm' | 'starknet' | 'sui'): Bri
   })
 }
 
+/**
+ * Destination candidates for the active family, filtered by {@link isBridgePairAllowed}
+ * once a source is selected.
+ */
 export function getBridgeDestinationNetworks(
   sourceChainId: ChainId | undefined,
   family: 'evm' | 'starknet' | 'sui',

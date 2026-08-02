@@ -5,7 +5,7 @@ import {
 } from '@/features/_shared/trade-amounts'
 import { down, toNum } from '@/lib/format'
 
-/** Pay input: up to 6 fraction digits (matches old dapp NumericFormat). */
+/** Pay input: up to 6 fraction digits (product NumericFormat scale). */
 export const TRADE_PAY_DECIMALS = TRADE_INPUT_DECIMALS
 
 /** Receive field display: at most 2 fraction digits; stored value stays at 6. */
@@ -44,7 +44,8 @@ export function formatTradePayDisplay(amount: number | string | undefined): stri
 
 /**
  * Format receive amount for display: commas + at most 2 fraction digits.
- * Does not mutate the stored 6dp value — display-only rounding.
+ * Truncates via `down` (does not round up). Stored 6dp value is unchanged —
+ * panels also put the full amount in the input `title` tooltip.
  */
 export function formatTradeReceiveDisplay(amount: number | string | undefined): string {
   const stored = toTradeReceiveStoredAmount(amount)

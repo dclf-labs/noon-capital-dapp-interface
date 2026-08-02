@@ -1,5 +1,15 @@
 import { formatUnits, parseUnits } from 'viem/utils'
 
+/**
+ * Numeric helpers for UI display and submit boundaries.
+ *
+ * - `down` / `up` clip fractional digits without `Math.pow` overflow.
+ * - Intl helpers (`toIntlStr*`) take a `precision` used with `down()` first;
+ *   displayed fraction digits are then capped by Intl (`2` or `4`), not by `precision`.
+ * - Prefer keeping `bigint` through submit paths; convert with these helpers only
+ *   at display or calldata-encoding edges.
+ */
+
 function toSafeNumber(amount: string | number | bigint | undefined): number {
   try {
     const value = Number(amount?.toString() || 0)
@@ -118,6 +128,28 @@ export const toBn = (amount: number | string | bigint | undefined) => {
   }
 }
 
+/**
+ * JS number → token units for calldata, truncating toward zero.
+ * Caps fractional digits at 12 so IEEE float dust cannot inflate mins/amounts.
+ */
+export const toTruncatedTokenUnits = (
+  amount: number | undefined,
+  decimals: number | undefined,
+): bigint => {
+  if (amount == null || decimals == null || !Number.isFinite(amount)) return 0n
+  const negative = amount < 0
+  const abs = Math.abs(amount).toString()
+  if (abs.includes('e') || abs.includes('E')) {
+    // Rare huge/tiny values — fall back without extra truncation.
+    return strToBn(amount, decimals)
+  }
+  const [intPart, fracPart = ''] = abs.split('.')
+  const precision = Math.min(decimals, 12)
+  const clipped = fracPart ? `${intPart}.${fracPart.slice(0, precision)}` : intPart
+  return strToBn(negative ? `-${clipped}` : clipped, decimals)
+}
+
+/** Fixed 2-fraction-digit Intl string after `down(amount, precision)`. */
 export const toIntlStr = (
   amount: number | string | bigint | undefined,
   precision: number = 2,

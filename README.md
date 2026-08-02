@@ -71,16 +71,16 @@ Set these in `.env` locally and in Vercel (or your host) for deploys. CI may use
 
 Scripts are manager-agnostic (`dev`, `build`, `lint`, `test`, `check`, …). Run them as `npm run <script>`, `yarn <script>`, `pnpm <script>`, or `bun run <script>`.
 
-| Command         | Description                              |
-| --------------- | ---------------------------------------- |
-| `dev`           | Start local dev server                   |
-| `build`         | Typecheck + production build             |
-| `lint`          | Run ESLint (includes import order)       |
-| `format`        | Format with Prettier                     |
-| `typecheck`     | TypeScript project build check           |
-| `test`          | Run Vitest unit tests                    |
-| `test:coverage` | Unit tests with coverage thresholds      |
-| `check`         | format + lint + typecheck + test + build |
+| Command         | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `dev`           | Start local dev server                                   |
+| `build`         | Typecheck + production build                             |
+| `lint`          | Run ESLint (includes import order)                       |
+| `format`        | Format with Prettier                                     |
+| `typecheck`     | TypeScript project build check                           |
+| `test`          | Run Vitest unit tests                                    |
+| `test:coverage` | Unit tests + coverage thresholds (see `docs/TESTING.md`) |
+| `check`         | format + lint + typecheck + test + build                 |
 
 ## Quality gates
 
@@ -110,6 +110,17 @@ ESLint enforces:
 4. Local (`@/…`, then relative)
 5. Side-effect imports (CSS)
 
+## Product routes
+
+Surfaces are separate shells/routes — do not fold mint/redeem, stake/unstake, or bridge into buy/sell.
+
+| Surface                 | Paths                             |
+| ----------------------- | --------------------------------- |
+| Buy / Sell (DEX)        | `/swap/buy`, `/swap/sell`         |
+| Mint / Redeem           | `/mint`, `/redeem`                |
+| Stake / Unstake / Claim | `/stake`, `/unstake`, `/withdraw` |
+| Bridge                  | `/bridge`                         |
+
 ## Project structure
 
 ```text
@@ -117,7 +128,11 @@ src/
   chains/             # Chain registry (EVM / Starknet / Sui metadata)
   config/             # Protocol deployments (contracts, tokens, pools)
   features/           # Domain modules (hooks + providers + libs co-located)
-    _shared/          # Trade form controller + session reset
+    _shared/          # Trade form controller, amounts, display, precision
+    mint-redeem/      # Pure mint/redeem preview + CTA + submit-args
+    stake-unstake/    # Pure stake/unstake CTA + submit-args + claims
+    bridge/           # Route rules, CTA, Hyperlane / LayerZero
+  pages/              # Route shells, panels, flows (thin UI)
   hooks/
     connection/       # useWalletSession / read-only / WalletQuerySync
     on-chain/         # balances, allowances, gas
@@ -129,6 +144,7 @@ src/
   constants/          # App meta + route + UI constants
   lib/
     env/              # Zod → appEnv
+    format.ts         # Display clip / Intl / toTruncatedTokenUnits
     wallet-session.ts # Session builders + canWriteSession
     query-keys.ts     # TanStack key factory
     evm-submit.ts     # Shared EVM writes
@@ -141,10 +157,17 @@ src/
     starknet/         # starknet-react
     sui/              # dApp Kit
 docs/
-  ARCHITECTURE.md     # State / session / feature conventions
+  ARCHITECTURE.md     # State / session / product conventions
+  TESTING.md          # Coverage gate + key suites
 ```
 
-See `src/features/README.md` and `docs/ARCHITECTURE.md` for conventions.
+See:
+
+- `docs/ARCHITECTURE.md` — sessions, product rules, layout
+- `docs/TESTING.md` — Vitest coverage include list + UI-value conventions
+- `src/features/README.md` — domain modules
+- `src/pages/README.md` — route shells / panels
+- `src/features/_shared/README.md` — shared trade primitives
 
 ## Extending for protocol work
 
@@ -152,10 +175,11 @@ See `src/features/README.md` and `docs/ARCHITECTURE.md` for conventions.
 2. Add / update protocol deployments under `src/config/chains/` — see `src/config/README.md`
 3. Add ABIs under `src/lib/abis/` (`evm/` Solidity, `starknet/` Cairo) — see `src/lib/abis/README.md`
 4. Add feature modules under `src/features/<domain>/` — reuse `useChainQuery` / `useApiQuery` / `queryKeys`
-5. Wire wallet sessions via `useWalletSession` / family helpers; gate writes with `canWriteSession`
-6. Trade UIs: `useTradeFormController` + `useResetOnSessionChange`
-7. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
-8. See `docs/ARCHITECTURE.md` and `src/features/README.md` for conventions
+5. Keep product surfaces separate (mint/stake/bridge ≠ buy/sell); thin pages under `src/pages/`
+6. Wire wallet sessions via `useWalletSession` / family helpers; gate writes with `canWriteSession`
+7. Trade UIs: `_shared` form controller + pay 6dp / receive 2dp helpers; submit via `toTruncatedTokenUnits`
+8. Prefer React Query for server/chain reads; keep wallet UI in `components/wallet`
+9. Add/update tests for calculations and UI values — see `docs/TESTING.md`
 
 ## Security notes
 

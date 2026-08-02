@@ -16,6 +16,12 @@ interface ImportMetaEnv {
   readonly VITE_BASE_RPC_URL: string
   readonly VITE_SUI_RPC_URL: string
   readonly VITE_TAC_RPC_URL: string
+  readonly VITE_ZKSYNC_RPC_URL: string
+  readonly VITE_SOPHON_RPC_URL: string
+  readonly VITE_BERACHAIN_RPC_URL: string
+  readonly VITE_CITREA_RPC_URL: string
+  readonly VITE_HYPEREVM_RPC_URL: string
+  readonly VITE_MONAD_RPC_URL: string
 
   // ── Alternate names (normalized in src/lib/env) ───────────────────────────
   readonly VITE_APP_API_BASE_URL: string

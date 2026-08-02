@@ -2,6 +2,7 @@ import { hyperEvm, mainnet, sophon, tac, zksync } from 'wagmi/chains'
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: sophon.id,
@@ -22,7 +23,7 @@ export const config: ProtocolChainConfig = {
     [tac.id]: true,
     [hyperEvm.id]: true,
   },
-  rpcUrl: 'https://rpc.sophon.xyz',
+  rpcUrl: appEnv.rpc.sophon || 'https://rpc.sophon.xyz',
   dataRefreshInterval: 10 * 60 * 1000,
   explorerUrl: 'https://sophscan.xyz',
   contractExplorerUrl: 'https://sophscan.xyz/address',

@@ -2,6 +2,7 @@ import { berachain, mainnet } from 'wagmi/chains'
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: berachain.id,
@@ -14,7 +15,7 @@ export const config: ProtocolChainConfig = {
   nativeTokens: ['sUSN'],
   bridgeTokens: ['sUSN'],
   explorerUrl: 'https://berascan.com/',
-  rpcUrl: 'https://rpc.berachain.com',
+  rpcUrl: appEnv.rpc.berachain || 'https://rpc.berachain.com',
   contractExplorerUrl: 'https://berascan.com/address',
   tokenExplorerUrl: 'https://berascan.com/token',
   transactionExplorerUrl: 'https://berascan.com/tx',

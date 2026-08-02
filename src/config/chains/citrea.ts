@@ -2,6 +2,7 @@ import { citrea, mainnet } from '@reown/appkit/networks'
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: citrea.id,
@@ -14,7 +15,7 @@ export const config: ProtocolChainConfig = {
   nativeTokens: ['sUSN'],
   bridgeTokens: ['sUSN'],
   explorerUrl: 'https://explorer.mainnet.citrea.xyz',
-  rpcUrl: 'https://rpc.mainnet.citrea.xyz',
+  rpcUrl: appEnv.rpc.citrea || 'https://rpc.mainnet.citrea.xyz',
   contractExplorerUrl: 'https://explorer.mainnet.citrea.xyz/address',
   tokenExplorerUrl: 'https://explorer.mainnet.citrea.xyz/token',
   transactionExplorerUrl: 'https://explorer.mainnet.citrea.xyz/tx',

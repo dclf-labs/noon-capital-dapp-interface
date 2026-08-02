@@ -2,6 +2,7 @@ import { hyperEvm, mainnet, sophon, tac, zksync } from 'wagmi/chains'
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: zksync.id,
@@ -15,7 +16,7 @@ export const config: ProtocolChainConfig = {
   txnWaitTimeout: 2 * 60 * 1000, // 2 minutes
   nativeTokens: ['USN', 'sUSN'],
   bridgeTokens: ['USN', 'sUSN'],
-  rpcUrl: 'https://mainnet.era.zksync.io',
+  rpcUrl: appEnv.rpc.zksync || 'https://mainnet.era.zksync.io',
   contractExplorerUrl: 'https://era.zksync.network/address/',
   tokenExplorerUrl: 'https://era.zksync.network/token/',
   transactionExplorerUrl: 'https://era.zksync.network/tx/',

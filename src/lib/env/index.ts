@@ -42,6 +42,12 @@ export const envSchema = z.object({
   VITE_BASE_RPC_URL: optionalString,
   VITE_SUI_RPC_URL: optionalString,
   VITE_TAC_RPC_URL: optionalString,
+  VITE_ZKSYNC_RPC_URL: optionalString,
+  VITE_SOPHON_RPC_URL: optionalString,
+  VITE_BERACHAIN_RPC_URL: optionalString,
+  VITE_CITREA_RPC_URL: optionalString,
+  VITE_HYPEREVM_RPC_URL: optionalString,
+  VITE_MONAD_RPC_URL: optionalString,
 })
 
 export type AppEnvRaw = z.infer<typeof envSchema>
@@ -135,6 +141,12 @@ export function createAppEnv(raw: AppEnvRaw) {
       /** Empty when unset — callers fall back to Mysten / protocol config. */
       sui: raw.VITE_SUI_RPC_URL,
       tac: raw.VITE_TAC_RPC_URL,
+      zksync: raw.VITE_ZKSYNC_RPC_URL,
+      sophon: raw.VITE_SOPHON_RPC_URL,
+      berachain: raw.VITE_BERACHAIN_RPC_URL,
+      citrea: raw.VITE_CITREA_RPC_URL,
+      hyperevm: raw.VITE_HYPEREVM_RPC_URL,
+      monad: raw.VITE_MONAD_RPC_URL,
     },
   } as const
 }
@@ -162,6 +174,12 @@ function readImportMetaEnv(): RawRecord {
     VITE_BASE_RPC_URL: e.VITE_BASE_RPC_URL,
     VITE_SUI_RPC_URL: e.VITE_SUI_RPC_URL,
     VITE_TAC_RPC_URL: e.VITE_TAC_RPC_URL,
+    VITE_ZKSYNC_RPC_URL: e.VITE_ZKSYNC_RPC_URL,
+    VITE_SOPHON_RPC_URL: e.VITE_SOPHON_RPC_URL,
+    VITE_BERACHAIN_RPC_URL: e.VITE_BERACHAIN_RPC_URL,
+    VITE_CITREA_RPC_URL: e.VITE_CITREA_RPC_URL,
+    VITE_HYPEREVM_RPC_URL: e.VITE_HYPEREVM_RPC_URL,
+    VITE_MONAD_RPC_URL: e.VITE_MONAD_RPC_URL,
   }
 }
 

@@ -2,6 +2,7 @@ import { hyperEvm, mainnet, sophon, tac, zksync } from 'wagmi/chains'
 
 import { PointsApiChain } from '@/config/points-api'
 import type { ProtocolChainConfig } from '@/config/types'
+import { appEnv } from '@/lib/env'
 
 export const config: ProtocolChainConfig = {
   id: hyperEvm.id,
@@ -16,7 +17,7 @@ export const config: ProtocolChainConfig = {
   tokenExplorerUrl: 'https://hyperevmscan.io/token',
   transactionExplorerUrl: 'https://hyperevmscan.io/tx',
   addressExplorerUrl: 'https://hyperevmscan.io/address',
-  rpcUrl: 'https://rpc.hyperliquid.xyz/evm',
+  rpcUrl: appEnv.rpc.hyperevm || 'https://rpc.hyperliquid.xyz/evm',
   dataRefreshInterval: 10 * 60 * 1000,
   hyperlaneMailbox: '0x3a464f746D23Ab22155710f44dB16dcA53e0775E',
   susn: '0x34a2798D47b238A7CbA9D87D49618DEE6C4D999F',

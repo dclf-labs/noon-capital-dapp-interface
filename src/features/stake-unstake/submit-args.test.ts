@@ -46,4 +46,10 @@ describe('unstake withdraw args', () => {
     expect(noisy).toBeGreaterThan(0.3)
     expect(args?.[0]).toBe(strToBn('0.3', 18))
   })
+
+  it('falls back for scientific-notation asset amounts without throwing', () => {
+    const tiny = 1e-8
+    const args = getUnstakeWithdrawArgs(usn, tiny, handler, owner)
+    expect(args?.[0]).toBe(strToBn(tiny, 18))
+  })
 })

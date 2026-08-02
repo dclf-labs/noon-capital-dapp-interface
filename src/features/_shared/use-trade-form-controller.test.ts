@@ -183,6 +183,62 @@ describe('trade form helpers', () => {
     expect(result.current.inputs.route).toEqual(['a'])
   })
 
+  it('clears amountOut when preview quote is non-positive or route empty', () => {
+    const { result, rerender } = renderHook(
+      ({
+        data,
+        isLoading,
+        isDebouncing,
+      }: {
+        data?: { quote: number; route: string[] }
+        isLoading: boolean
+        isDebouncing: boolean
+      }) => {
+        const form = useTradeFormController<{ amountOut?: number; route?: string[] }>({
+          amountOut: 4,
+          route: ['a'],
+        })
+        useSyncPreviewOut(form.setInputs, { data, isLoading }, isDebouncing)
+        return form
+      },
+      {
+        initialProps: {
+          data: { quote: 0, route: ['a'] },
+          isLoading: false,
+          isDebouncing: false,
+        },
+      },
+    )
+
+    expect(result.current.inputs.amountOut).toBeUndefined()
+    expect(result.current.inputs.route).toEqual([])
+
+    rerender({
+      data: { quote: 3, route: [] },
+      isLoading: false,
+      isDebouncing: false,
+    })
+    expect(result.current.inputs.amountOut).toBeUndefined()
+  })
+
+  it('no-ops when preview envelope is unchanged', () => {
+    const { result, rerender } = renderHook(
+      ({ data }: { data?: { quote: number; route: string[] } }) => {
+        const form = useTradeFormController<{ amountOut?: number; route?: string[] }>({
+          amountOut: undefined,
+          route: [],
+        })
+        useSyncPreviewOut(form.setInputs, { data, isLoading: false }, false)
+        return form
+      },
+      { initialProps: { data: { quote: 4, route: ['a'] } } },
+    )
+
+    const before = result.current.inputs
+    rerender({ data: { quote: 4, route: ['a'] } })
+    expect(result.current.inputs).toBe(before)
+  })
+
   it('clears amountOut and route when preview errors', () => {
     const { result, rerender } = renderHook(
       ({

@@ -157,9 +157,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      // Gate unit-testable pure modules (env, session, chain, address, config
-      // registries, wallet project id / AppKit open). Feature hooks and large
-      // formatter/query-key surfaces need separate integration coverage.
+      // Gate unit-testable pure modules. Heavy React hooks / wallet SDK glue stay
+      // out of the threshold set; product math and CTA machines are included.
       include: [
         'src/lib/address.ts',
         'src/lib/chain.ts',
@@ -184,10 +183,25 @@ export default defineConfig({
         'src/constants/**/*.ts',
         'src/features/_shared/trade-amounts.ts',
         'src/features/_shared/trade-display.ts',
+        'src/features/_shared/trade-input-format.ts',
+        'src/features/_shared/trade-primary.ts',
+        'src/features/_shared/use-trade-amount-handlers.ts',
         'src/features/_shared/use-trade-form-controller.ts',
+        'src/features/_shared/use-trade-input-model.ts',
         'src/features/swap/lib/amounts.ts',
         'src/features/swap/lib/ekubo-quote.ts',
         'src/features/swap/lib/spender.ts',
+        'src/features/mint-redeem/primary.ts',
+        'src/features/mint-redeem/preview.ts',
+        'src/features/mint-redeem/submit-args.ts',
+        'src/features/stake-unstake/primary.ts',
+        'src/features/stake-unstake/submit-args.ts',
+        'src/features/stake-unstake/withdraw-claim.ts',
+        'src/features/bridge/primary.ts',
+        'src/features/bridge/route.ts',
+        'src/features/bridge/lib/bridge.ts',
+        'src/features/bridge/lib/sui-oft.ts',
+        'src/pages/bridge/bridge-networks.ts',
         'src/wallet/evm/open-appkit.ts',
         'src/wallet/evm/projectId.ts',
         'src/wallet/readers.ts',
@@ -195,10 +209,10 @@ export default defineConfig({
       ],
       exclude: ['src/**/*.d.ts', 'src/**/*.{test,spec}.{ts,tsx}', 'src/test/**'],
       thresholds: {
-        lines: 75,
-        functions: 75,
-        branches: 60,
-        statements: 75,
+        lines: 80,
+        functions: 80,
+        branches: 70,
+        statements: 80,
       },
     },
   },

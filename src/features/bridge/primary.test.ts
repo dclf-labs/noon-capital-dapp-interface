@@ -27,6 +27,7 @@ const base = {
 describe('getBridgePrimaryAction', () => {
   it('gates connect / networks / receiver / amount / fee', () => {
     expect(getBridgePrimaryAction({ ...base, isConnected: false }).label).toBe('Connect wallet')
+    expect(getBridgePrimaryAction({ ...base, unsupported: true }).label).toBe('Switch network')
     expect(getBridgePrimaryAction({ ...base, hasSourceNetwork: false }).label).toBe(
       'Select source network',
     )
@@ -37,9 +38,15 @@ describe('getBridgePrimaryAction', () => {
     expect(getBridgePrimaryAction({ ...base, hasReceiver: false }).label).toBe(
       'Enter receiver address',
     )
+    expect(getBridgePrimaryAction({ ...base, hasToken: false }).label).toBe('Select token')
+    expect(getBridgePrimaryAction({ ...base, isBalanceLoading: true }).label).toBe('Loading…')
+    expect(getBridgePrimaryAction({ ...base, isAllowanceLoading: true }).label).toBe('Loading…')
     expect(getBridgePrimaryAction({ ...base, amount: undefined }).label).toBe('Enter amount')
     expect(getBridgePrimaryAction({ ...base, isFeeLoading: true }).label).toBe('Fetching fee…')
     expect(getBridgePrimaryAction({ ...base, isFeeError: true }).label).toBe('Fee unavailable')
+    expect(getBridgePrimaryAction({ ...base, isInsufficientBalance: true }).label).toBe(
+      'Insufficient balance',
+    )
   })
 
   it('requires LayerZero approve then next, Hyperlane skips approve', () => {

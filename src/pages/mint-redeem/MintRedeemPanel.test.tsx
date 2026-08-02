@@ -3,10 +3,13 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { Token } from '@/config/token'
+import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
   formatTradePayDisplay,
   formatTradeReceiveDisplay,
   toTradeReceiveStoredAmount,
+  TRADE_PAY_DECIMALS,
+  TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 import { MintRedeemPanel, type MintRedeemPanelProps } from '@/pages/mint-redeem/MintRedeemPanel'
 
@@ -190,23 +193,36 @@ describe('MintRedeemPanel behaviour', () => {
   it('shows confirm copy with amounts and invokes primary', async () => {
     const user = userEvent.setup()
     const onPrimary = vi.fn()
+    const amountIn = 1000.123456
+    const amountOut = 999.654321
     renderPanel({
       step: 1,
-      amountIn: 1000.123456,
-      amountOut: 999.654321,
+      amountIn,
+      amountOut,
       onBack: vi.fn(),
       onPrimary,
       primaryLabel: 'Confirm mint',
     })
 
     expect(screen.getByRole('heading', { name: /Confirm mint/i })).toBeInTheDocument()
-    const section = screen.getByRole('heading', { name: /Confirm mint/i }).closest('section')
-    expect(section).toBeTruthy()
-    expect(within(section as HTMLElement).getByText(/USDC/)).toBeInTheDocument()
-    expect(within(section as HTMLElement).getByText(/Slippage 0%/i)).toBeInTheDocument()
+    const section = screen
+      .getByRole('heading', { name: /Confirm mint/i })
+      .closest('section') as HTMLElement
+    expect(
+      within(section).getByText(
+        `${formatTokenAmount(amountIn, 'USDC', TRADE_PAY_DECIMALS)} → ${formatTokenAmount(amountOut, 'USN', TRADE_RECEIVE_DISPLAY_DECIMALS)}`,
+      ),
+    ).toBeInTheDocument()
+    expect(within(section).getByText(/Slippage 0%/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Confirm mint' }))
     expect(onPrimary).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders USD notional under the pay field', () => {
+    renderPanel({ amountIn: 50, amountInUsd: 49.999 })
+    expect(screen.getByText(formatUsd(49.999))).toBeInTheDocument()
+    expect(screen.getByText('~$49.99')).toBeInTheDocument()
   })
 
   it('shows success state with explorer link and reset', async () => {

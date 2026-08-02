@@ -9,6 +9,7 @@ import {
   isBridgePairAllowed,
   isHyperlaneBridgeRoute,
   isLayerzeroBridgeRouteDisabled,
+  isSuiToEthBridgeDisabled,
 } from '@/features/bridge/route'
 
 const STARKNET = Number(STARKNET_BRIDGE_DESTINATION.id)
@@ -81,5 +82,13 @@ describe('isLayerzeroBridgeRouteDisabled', () => {
     // Default constant is false in this repo.
     expect(isLayerzeroBridgeRouteDisabled(false)).toBe(false)
     expect(isLayerzeroBridgeRouteDisabled(true)).toBe(false)
+  })
+})
+
+describe('isSuiToEthBridgeDisabled', () => {
+  it('blocks Sui source to non-Sui destinations while kill switch is on', () => {
+    expect(isSuiToEthBridgeDisabled(SUI, ethereum.id)).toBe(true)
+    expect(isSuiToEthBridgeDisabled(ethereum.id, SUI)).toBe(false)
+    expect(isSuiToEthBridgeDisabled(SUI, SUI)).toBe(false)
   })
 })

@@ -1,12 +1,15 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { Token } from '@/config/token'
+import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
   formatTradePayDisplay,
   formatTradeReceiveDisplay,
   toTradeReceiveStoredAmount,
+  TRADE_PAY_DECIMALS,
+  TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 import {
   StakeUnstakePanel,
@@ -77,11 +80,35 @@ describe('StakeUnstakePanel behaviour', () => {
   it('formats pay/receive amounts like other trade panels', () => {
     renderPanel({ amountIn: 1234.5678912, amountOut: 1234.5678912 })
     expect(payInput().value).toBe(formatTradePayDisplay(1234.5678912))
+    expect(payInput().value).toBe('1,234.567891')
     expect(receiveInput().value).toBe(formatTradeReceiveDisplay(1234.5678912))
+    expect(receiveInput().value).toBe('1,234.56')
     expect(receiveInput()).toHaveAttribute(
       'title',
       String(toTradeReceiveStoredAmount(1234.5678912)),
     )
+  })
+
+  it('renders USD notional and exact confirm amounts', () => {
+    renderPanel({ amountIn: 10, amountInUsd: 10.129, amountOut: 9.876543 })
+    expect(screen.getByText(formatUsd(10.129))).toBeInTheDocument()
+    expect(screen.getByText('~$10.12')).toBeInTheDocument()
+
+    renderPanel({
+      step: 1,
+      amountIn: 10.123456,
+      amountOut: 9.876543,
+      onBack: vi.fn(),
+      primaryLabel: 'Confirm stake',
+    })
+    const section = screen
+      .getByRole('heading', { name: /Confirm stake/i })
+      .closest('section') as HTMLElement
+    expect(
+      within(section).getByText(
+        `${formatTokenAmount(10.123456, 'USN', TRADE_PAY_DECIMALS)} → ${formatTokenAmount(9.876543, 'sUSN', TRADE_RECEIVE_DISPLAY_DECIMALS)}`,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('wires Half / Max and primary', async () => {

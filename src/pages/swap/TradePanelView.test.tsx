@@ -3,11 +3,15 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { Token } from '@/config/token'
+import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
   formatTradePayDisplay,
   formatTradeReceiveDisplay,
   toTradeReceiveStoredAmount,
+  TRADE_PAY_DECIMALS,
+  TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
+import { down } from '@/lib/format'
 import { TradePanelView, type TradePanelViewProps } from '@/pages/swap/TradePanelView'
 
 const usdc: Token = {
@@ -211,18 +215,29 @@ describe('TradePanelView input formatting', () => {
   })
 
   it('shows confirm copy with human-readable amounts and min received', () => {
+    const amountIn = 1000.123456
+    const amountOut = 999.654321
+    const minReceived = toTradeReceiveStoredAmount(down(amountOut * 0.99, TRADE_PAY_DECIMALS))
     renderTrade({
       step: 1,
-      amountIn: 1000.123456,
-      amountOut: 999.654321,
+      amountIn,
+      amountOut,
       onBack: vi.fn(),
     })
 
     expect(screen.getByText(/Confirm buy/i)).toBeInTheDocument()
-    expect(screen.getByText(/Min received/i)).toBeInTheDocument()
-    // Confirm section still renders readable token amounts
-    const section = screen.getByText(/Confirm buy/i).closest('section')
-    expect(section).toBeTruthy()
-    expect(within(section as HTMLElement).getByText(/USDC/)).toBeInTheDocument()
+    const section = screen.getByText(/Confirm buy/i).closest('section') as HTMLElement
+    const confirmRow = `${formatTokenAmount(amountIn, 'USDC', TRADE_PAY_DECIMALS)} → ${formatTokenAmount(amountOut, 'USN', TRADE_RECEIVE_DISPLAY_DECIMALS)}`
+    const minRow = `Min received (1% slippage) ${formatTokenAmount(minReceived, 'USN', TRADE_RECEIVE_DISPLAY_DECIMALS)}`
+    expect(confirmRow).toBe('1,000.12 USDC → 999.65 USN')
+    expect(minRow).toBe('Min received (1% slippage) 989.65 USN')
+    expect(within(section).getByText(confirmRow)).toBeInTheDocument()
+    expect(within(section).getByText(minRow)).toBeInTheDocument()
+  })
+
+  it('renders USD notional under the pay field', () => {
+    renderTrade({ amountIn: 10, amountInUsd: 10.125 })
+    expect(screen.getByText(formatUsd(10.125))).toBeInTheDocument()
+    expect(screen.getByText('~$10.12')).toBeInTheDocument()
   })
 })

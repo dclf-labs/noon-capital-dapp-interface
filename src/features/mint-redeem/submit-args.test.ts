@@ -40,6 +40,12 @@ describe('directMint calldata args', () => {
     expect(noisy).toBeGreaterThan(0.3)
     expect(args?.[2]).toBe(strToBn('0.3', 18))
   })
+
+  it('falls back for scientific-notation amounts without throwing', () => {
+    const tiny = 1e-7
+    const args = getDirectMintCallArgs(usdc, usn, 1, tiny)
+    expect(args?.[2]).toBe(strToBn(tiny, 18))
+  })
 })
 
 describe('directRedeem calldata args', () => {

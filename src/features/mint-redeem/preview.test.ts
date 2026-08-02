@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { formatTradeReceiveDisplay } from '@/features/_shared/trade-input-format'
 import {
   computeMintPreviewAmountOut,
   computeRedeemPreviewAmountOut,
@@ -11,6 +12,15 @@ describe('mint preview quote', () => {
   it('returns collateralUsd * amountIn for USDC/USDT-style prices', () => {
     expect(computeMintPreviewAmountOut(100, 1)).toBe(100)
     expect(computeMintPreviewAmountOut(50, 1.02)).toBeCloseTo(51)
+  })
+
+  it('keeps fractional mint quotes stable for UI receive binding', () => {
+    // 1,234.567891 USDC @ $0.999 → receive amountOut that panels show @ 2dp.
+    const amountOut = computeMintPreviewAmountOut(1234.567891, 0.999)
+    expect(amountOut).toBeCloseTo(1234.567891 * 0.999, 10)
+    expect(formatTradeReceiveDisplay(amountOut)).toBe(
+      formatTradeReceiveDisplay(1234.567891 * 0.999),
+    )
   })
 
   it('returns 0 when amountIn is missing', () => {
@@ -28,6 +38,13 @@ describe('redeem preview quote', () => {
   it('returns amountIn / tokenOutPrice for USDC at ~1', () => {
     expect(computeRedeemPreviewAmountOut(100, 1)).toBe(100)
     expect(computeRedeemPreviewAmountOut(100, 0.5)).toBe(200)
+  })
+
+  it('keeps fractional redeem quotes stable for UI receive binding', () => {
+    // 100 USN ÷ $1.0025 USDT → collateral out shown @ 2dp in receive field.
+    const amountOut = computeRedeemPreviewAmountOut(100, 1.0025)
+    expect(amountOut).toBeCloseTo(100 / 1.0025, 10)
+    expect(formatTradeReceiveDisplay(amountOut)).toBe('99.75')
   })
 
   it('guards divide-by-zero when tokenOutPrice is 0', () => {

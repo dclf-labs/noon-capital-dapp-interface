@@ -1,4 +1,19 @@
-import type { ShellNavItem } from '@/components/shell/types'
+import {
+  NavBridgeIcon,
+  NavDashboardIcon,
+  NavGiftIcon,
+  NavGovernanceIcon,
+  NavGridIcon,
+  NavProtocolIcon,
+  NavVaultIcon,
+  SocialDiscordIcon,
+  SocialGithubIcon,
+  SocialLinkedInIcon,
+  SocialTelegramIcon,
+  SocialXIcon,
+} from '@/assets/icons'
+import type { ShellIcon, ShellNavItem } from '@/components/shell/types'
+import { SITE_URLS } from '@/config/site-urls'
 
 /** Outer content column — keeps the layout centered on wide / zoomed-out screens. */
 export const APP_SHELL_MAX_PX = 1600
@@ -7,6 +22,10 @@ export const APP_SHELL_MAX_PX = 1600
 export const SIDEBAR_RAIL_PX = 63
 /** Expanded overlay width (Motion animates between rail ↔ expanded). */
 export const SIDEBAR_EXPANDED_PX = 190
+
+/** Fixed sidebar insets from the viewport edges. */
+export const SIDEBAR_INSET_TOP_PX = 4
+export const SIDEBAR_INSET_LEFT_PX = 5
 
 /** Width tween — springs bounce and can flash with overflow-hidden. */
 export const SIDEBAR_TRANSITION = {
@@ -20,75 +39,79 @@ export const SIDEBAR_CONTENT_TRANSITION = {
   ease: [0.22, 1, 0.36, 1] as const,
 }
 
+/** Shared layoutId pill for nav / network / APY segmented controls. */
+export const SHELL_SELECTION_SPRING = {
+  type: 'spring' as const,
+  stiffness: 300,
+  damping: 30,
+}
+
 export const SHELL_NAV: Omit<ShellNavItem, 'active'>[] = [
-  { id: 'home', label: 'Home', iconSrc: '/assets/shell/nav-dashboard.svg', href: '/' },
+  { id: 'home', label: 'Home', icon: NavDashboardIcon, href: '/', enabled: true },
   {
     id: 'dashboard',
     label: 'Dashboard',
-    iconSrc: '/assets/shell/nav-protocol.svg',
+    icon: NavProtocolIcon,
     href: '/',
+    enabled: false,
   },
-  { id: 'usn', label: 'USN / sUSN', iconSrc: '/assets/shell/nav-governance.svg', href: '/stake' },
-  { id: 'vaults', label: 'Vaults', iconSrc: '/assets/shell/nav-vault.svg', href: '/vaults' },
-  { id: 'noon', label: '$NOON', iconSrc: '/assets/shell/nav-bridge.svg', href: '/governance' },
-  { id: 'points', label: 'Noon Points', iconSrc: '/assets/shell/nav-gift.svg', href: '/points' },
-  { id: 'league', label: 'Noon League', iconSrc: '/assets/shell/nav-grid.svg', href: '/league' },
+  { id: 'usn', label: 'USN / sUSN', icon: NavGovernanceIcon, href: '/stake', enabled: true },
+  { id: 'vaults', label: 'Vaults', icon: NavVaultIcon, href: '/vaults', enabled: true },
+  { id: 'noon', label: '$NOON', icon: NavBridgeIcon, href: '/governance', enabled: false },
+  { id: 'points', label: 'Noon Points', icon: NavGiftIcon, href: '/points', enabled: false },
+  { id: 'league', label: 'Noon League', icon: NavGridIcon, href: '/league', enabled: false },
 ]
 
+/** Left column — same destinations as landing `DesktopFooter`. */
 export const FOOTER_LEFT_LINKS = [
-  { label: 'Solvency', href: 'https://noon.accountable.capital/' },
-  { label: 'Docs', href: 'https://docs.noon.capital/' },
-  { label: 'Forum', href: 'https://forum.noon.capital/' },
-  { label: 'Blog', href: 'https://blog.noon.capital/' },
+  { label: 'Solvency', href: SITE_URLS.community.accountable },
+  { label: 'Voting', href: SITE_URLS.community.snapshot },
+  { label: 'Docs', href: SITE_URLS.noon.docs },
+  { label: 'Forum', href: SITE_URLS.noon.forum },
+  { label: 'Blog', href: SITE_URLS.community.paragraph },
 ] as const
 
+/** Legal links on noon.capital (landing `ROUTES.policy` / cookies / terms). */
 export const FOOTER_RIGHT_LINKS = [
-  { label: 'Privacy Policy', href: 'https://noon.capital/privacy' },
-  { label: 'Cookies', href: 'https://noon.capital/cookies' },
-  { label: 'Terms & conditions', href: 'https://noon.capital/terms' },
+  { label: 'Privacy Policy', href: SITE_URLS.marketing.privacy },
+  { label: 'Cookies', href: SITE_URLS.marketing.cookies },
+  { label: 'Terms & conditions', href: SITE_URLS.marketing.terms },
 ] as const
 
-export const FOOTER_SOCIALS = [
-  { label: 'X', href: 'https://x.com/noon_capital', iconSrc: '/assets/shell/social-x.svg' },
-  {
-    label: 'Telegram',
-    href: 'https://t.me/noon_capital',
-    iconSrc: '/assets/shell/social-telegram.svg',
-  },
-  {
-    label: 'LinkedIn',
-    href: 'https://www.linkedin.com/company/noon-capital',
-    iconSrc: '/assets/shell/social-linkedin.svg',
-  },
-  {
-    label: 'Discord',
-    href: 'https://discord.gg/noon',
-    iconSrc: '/assets/shell/social-discord.svg',
-  },
-] as const
+/** Social row — same order/URLs as landing `SITE_URLS.social`. */
+export const FOOTER_SOCIALS: ReadonlyArray<{
+  label: string
+  href: string
+  icon: ShellIcon
+}> = [
+  { label: 'X', href: SITE_URLS.social.x, icon: SocialXIcon },
+  { label: 'Telegram', href: SITE_URLS.social.telegram, icon: SocialTelegramIcon },
+  { label: 'LinkedIn', href: SITE_URLS.social.linkedin, icon: SocialLinkedInIcon },
+  { label: 'GitHub', href: SITE_URLS.social.github, icon: SocialGithubIcon },
+  { label: 'Discord', href: SITE_URLS.social.discord, icon: SocialDiscordIcon },
+]
 
 /** Mark the nav item that matches the current route. */
 export function shellNavForPath(pathname: string): ShellNavItem[] {
   return SHELL_NAV.map((item) => ({
     ...item,
-    active: isShellNavActive(item.id, pathname),
+    enabled: item.enabled !== false,
+    active: item.enabled === false ? false : isShellNavActive(item.id, pathname),
   }))
 }
 
 function isShellNavActive(id: string, pathname: string): boolean {
   switch (id) {
+    case 'home':
+      return pathname === '/'
     case 'vaults':
-      return pathname === '/' || pathname.startsWith('/vaults')
+      return pathname === '/vaults' || pathname.startsWith('/vaults/')
     case 'usn':
       return (
         pathname.startsWith('/stake') ||
         pathname.startsWith('/unstake') ||
         pathname.startsWith('/withdraw')
       )
-    case 'home':
-    case 'dashboard':
-      // Placeholder destinations until dedicated pages ship.
-      return false
     default:
       return pathname === SHELL_NAV.find((n) => n.id === id)?.href
   }

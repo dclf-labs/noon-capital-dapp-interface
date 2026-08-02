@@ -14,7 +14,6 @@ export type VaultListItem = {
 
 export type VaultsPageViewProps = {
   vaults: VaultListItem[]
-  onEarnClick?: (vault: VaultListItem) => void
   /** Optional — toolbar only renders when provided. */
   onSortClick?: () => void
   onFilterClick?: () => void

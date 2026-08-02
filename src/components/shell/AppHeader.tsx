@@ -1,68 +1,49 @@
+import { NetworkSelector } from '@/components/shell/NetworkSelector'
 import { cn } from '@/lib/utils'
 
 type AppHeaderProps = {
   walletLabel?: string
-  networkIconSrc?: string
-  onNetworkClick?: () => void
   onConnectClick?: () => void
 }
 
 const chip = 'flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white'
 
-export function AppHeader({
-  walletLabel,
-  networkIconSrc = '/assets/shell/ethereum.png',
-  onNetworkClick,
-  onConnectClick,
-}: AppHeaderProps) {
+export function AppHeader({ walletLabel, onConnectClick }: AppHeaderProps) {
   return (
-    <header className="flex w-full items-center justify-end gap-3.5 px-6 py-4">
+    <header className="flex w-full items-center justify-end gap-2 px-4 py-3 md:gap-[14px] md:px-6 md:py-4">
+      <NetworkSelector />
+
       <button
         type="button"
-        onClick={onNetworkClick}
-        className={cn(chip, 'h-10 py-2 pr-2 pl-2')}
-        aria-label="Select network"
+        onClick={onConnectClick}
+        className={cn(
+          chip,
+          'group overflow-visible py-2 pr-3 pl-2 text-stone-900 transition-colors hover:text-primary focus-visible:text-primary',
+        )}
       >
-        <span className="size-6 overflow-hidden rounded-[5px] bg-[#627eea]">
-          <img
-            src={networkIconSrc}
-            alt=""
-            width={24}
-            height={24}
-            className="size-full object-cover"
-          />
-        </span>
-        <img
-          src="/assets/shell/chevron-down.svg"
-          alt=""
-          width={20}
-          height={20}
-          className="size-5"
-        />
-      </button>
-
-      <button type="button" onClick={onConnectClick} className={cn(chip, 'py-2 pr-3 pl-2')}>
-        <span className="relative size-6 overflow-hidden rounded">
-          <img
-            src="/assets/shell/wallet-avatar.png"
-            alt=""
-            width={24}
-            height={24}
-            className="size-full object-cover"
-          />
-          <span className="absolute -right-[3px] -bottom-[2.25px] size-3 overflow-hidden border-[0.75px] border-stone-200 bg-white">
+        {/* Outer relative only — overflow on the avatar leaf so the connector badge isn't clipped. */}
+        <span className="relative size-6 shrink-0">
+          <span className="block size-6 overflow-hidden rounded">
             <img
-              src="/assets/shell/metamask.svg"
+              src="/assets/shell/wallet-avatar.png"
               alt=""
-              width={12}
-              height={12}
+              width={24}
+              height={24}
               className="size-full object-cover"
             />
           </span>
+          {/* Figma: 12px badge; fox glyph ~7×6.75 centered (not stretched to fill). */}
+          <span className="absolute -right-[3px] -bottom-[2.25px] flex size-3 items-center justify-center overflow-hidden rounded border-[0.75px] border-stone-200 bg-white">
+            <img
+              src="/assets/shell/metamask.svg"
+              alt=""
+              width={7}
+              height={7}
+              className="h-[6.75px] w-[7px] object-contain"
+            />
+          </span>
         </span>
-        <span className="text-base leading-6 font-medium text-stone-900">
-          {walletLabel || 'Connect'}
-        </span>
+        <span className="text-base leading-6 font-medium">{walletLabel || 'Connect'}</span>
       </button>
     </header>
   )

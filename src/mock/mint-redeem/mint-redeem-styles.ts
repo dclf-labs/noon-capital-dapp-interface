@@ -36,6 +36,7 @@ export const input: CSSProperties = {
 export const select: CSSProperties = {
   ...input,
   fontSize: 14,
+  cursor: 'pointer',
 }
 
 export const button: CSSProperties = {
@@ -75,6 +76,7 @@ export const errorText: CSSProperties = {
 export const link: CSSProperties = {
   color: '#111',
   fontSize: 14,
+  cursor: 'pointer',
 }
 
 export const banner: CSSProperties = {

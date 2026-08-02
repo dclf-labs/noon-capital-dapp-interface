@@ -16,7 +16,7 @@ export function VaultsHero() {
             <Link
               key={tab.id}
               to={tab.href}
-              className="opacity-30 transition-opacity hover:opacity-60"
+              className="text-[rgba(71,71,71,0.3)] transition-colors hover:text-primary focus-visible:text-primary"
             >
               {tab.label}
             </Link>

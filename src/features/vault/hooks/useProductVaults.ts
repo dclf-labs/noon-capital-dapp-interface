@@ -22,14 +22,9 @@ function formatTvl(tvlUsd: number | undefined): string {
   return toIntlCompactStr(tvlUsd, 2, true, 1, '$')
 }
 
-/** Compact TVL for the sidebar (e.g. `6.5M`) — matches Figma chrome, no `$`. */
-function formatSidebarTvl(tvlUsd: number | undefined): string {
-  if (tvlUsd == null || !Number.isFinite(tvlUsd)) return '—'
-  return toIntlCompactStr(tvlUsd, 2, false, 1, '')
-}
-
 /**
  * Landing-page product vaults with live APY/TVL from Accountable yield hooks.
+ * Sidebar protocol APY/TVL lives in `useSidebarProtocolMetrics`.
  */
 export function useProductVaults() {
   const monad = useYieldAppTvl()
@@ -69,20 +64,8 @@ export function useProductVaults() {
       }
     })
 
-    const apys = PRODUCT_VAULT_DEFINITIONS.map((d) => metrics[d.id].apy).filter(
-      (v): v is number => typeof v === 'number' && Number.isFinite(v),
-    )
-    const tvls = PRODUCT_VAULT_DEFINITIONS.map((d) => metrics[d.id].tvlUsd).filter(
-      (v): v is number => typeof v === 'number' && Number.isFinite(v),
-    )
-
-    const maxApy = apys.length ? Math.max(...apys) : undefined
-    const totalTvl = tvls.length ? tvls.reduce((sum, v) => sum + v, 0) : undefined
-
     return {
       vaults,
-      sidebarApy: formatApy(maxApy),
-      sidebarTvl: formatSidebarTvl(totalTvl),
       isLoading: monad.isLoading || ethereumTbtc.isLoading || citreaWcbtc.isLoading,
       isError: monad.isError || ethereumTbtc.isError || citreaWcbtc.isError,
     }

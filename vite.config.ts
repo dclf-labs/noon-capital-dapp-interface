@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
+import svgr from 'vite-plugin-svgr'
 import { defineConfig } from 'vitest/config'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
@@ -70,7 +71,7 @@ const scopedCeRegistry = nm(
 )
 
 export default defineConfig({
-  plugins: [litSingletonPlugin(), react(), tailwindcss()],
+  plugins: [litSingletonPlugin(), svgr(), react(), tailwindcss()],
   resolve: {
     alias: [
       { find: '@', replacement: path.resolve(__dirname, './src') },

@@ -58,9 +58,9 @@ const useYieldAppTvl = () => {
     enabled: true,
     select: (data) => {
       return {
-        tvl: down(data?.tvl || 5730489508825, 3),
-        tvlUsd: down(data?.tvlUsd || 5730489.508825, 3),
-        apy: down(data?.apy || 17.55, 2),
+        tvl: down(data?.tvl ?? 5730489508825, 3),
+        tvlUsd: down(data?.tvlUsd ?? 5730489.508825, 3),
+        apy: down(data?.apy ?? 17.55, 2),
         assetToShareRatio: down(bnToStr(toBn(5.239023594687659 * 10 ** 33), 36), 3),
         sharePrice: 1.0233,
       }
@@ -69,7 +69,7 @@ const useYieldAppTvl = () => {
 
   return useMemo(
     () => ({
-      data: data || {
+      data: data ?? {
         tvl: down(5730489508825, 3),
         tvlUsd: down(5730489.508825, 3),
         apy: down(17.55, 2),

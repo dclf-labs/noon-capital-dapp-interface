@@ -17,6 +17,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 
 import {
+  SHELL_SELECTION_SPRING,
   SIDEBAR_CONTENT_TRANSITION,
   SIDEBAR_EXPANDED_PX,
   SIDEBAR_RAIL_PX,
@@ -30,6 +31,7 @@ export type SidebarLinkItem = {
   href: string
   icon: ReactNode
   active?: boolean
+  enabled?: boolean
 }
 
 function SidebarProvider({
@@ -86,7 +88,7 @@ export function DesktopSidebar({
       className={cn(
         'absolute top-0 left-0 flex h-full flex-col overflow-hidden',
         // Solid fill — backdrop-blur on a resizing panel causes paint flicker.
-        'rounded-lg border border-[#d4d1cf] bg-white p-3',
+        'rounded-lg border border-[#d4d1cf] bg-white p-[12px]',
         className,
       )}
       initial={false}
@@ -151,46 +153,77 @@ export function MobileSidebar({ className, children, ...props }: ComponentProps<
 export function SidebarLink({
   link,
   className,
+  layoutId = 'shell-sidebar-nav-bg',
   ...props
 }: {
   link: SidebarLinkItem
   className?: string
+  /** Shared across nav siblings so the active pill slides between items. */
+  layoutId?: string
 } & Omit<ComponentProps<typeof Link>, 'to'>) {
   const { open, animate } = useSidebar()
+  const enabled = link.enabled !== false
+
+  const classNames = cn(
+    // Stable layout — never flip justify/padding (that flashes icons on close).
+    'group/sidebar relative flex h-10 w-full items-center gap-1 rounded-lg pr-3 pl-2 transition-colors',
+    'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
+    link.active
+      ? 'text-white'
+      : enabled
+        ? 'text-stone-500 hover:text-primary focus-visible:text-primary'
+        : 'cursor-not-allowed text-stone-400 opacity-40',
+    className,
+  )
+
+  const content = (
+    <>
+      {link.active ? (
+        <motion.div
+          layoutId={layoutId}
+          className="absolute inset-0 rounded-lg bg-primary"
+          transition={SHELL_SELECTION_SPRING}
+        />
+      ) : null}
+      <span className="relative z-10 flex min-w-0 items-center gap-1">
+        {link.icon}
+        <motion.span
+          initial={false}
+          animate={
+            animate
+              ? {
+                  opacity: open ? 1 : 0,
+                  maxWidth: open ? 140 : 0,
+                }
+              : { opacity: 1, maxWidth: 140 }
+          }
+          transition={SIDEBAR_CONTENT_TRANSITION}
+          className="overflow-hidden text-base leading-6 font-medium whitespace-nowrap"
+          aria-hidden={!open}
+        >
+          {link.label}
+        </motion.span>
+      </span>
+    </>
+  )
+
+  if (!enabled) {
+    return (
+      <span title={`${link.label} — coming soon`} aria-disabled="true" className={classNames}>
+        {content}
+      </span>
+    )
+  }
 
   return (
     <Link
       to={link.href}
       title={link.label}
       aria-current={link.active ? 'page' : undefined}
-      className={cn(
-        // Stable layout — never flip justify/padding (that flashes icons on close).
-        'group/sidebar flex h-10 w-full items-center gap-1 rounded-lg pr-3 pl-2',
-        link.active ? 'bg-[#111]' : 'opacity-50 hover:opacity-80',
-        className,
-      )}
+      className={classNames}
       {...props}
     >
-      {link.icon}
-      <motion.span
-        initial={false}
-        animate={
-          animate
-            ? {
-                opacity: open ? 1 : 0,
-                maxWidth: open ? 140 : 0,
-              }
-            : { opacity: 1, maxWidth: 140 }
-        }
-        transition={SIDEBAR_CONTENT_TRANSITION}
-        className={cn(
-          'overflow-hidden text-base leading-6 font-medium whitespace-nowrap',
-          link.active ? 'text-white' : 'text-[#111]',
-        )}
-        aria-hidden={!open}
-      >
-        {link.label}
-      </motion.span>
+      {content}
     </Link>
   )
 }

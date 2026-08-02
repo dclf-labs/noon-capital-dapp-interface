@@ -58,20 +58,21 @@ const useYieldAppCitreaVault = () => {
     enabled: true,
     select: (data) => {
       return {
-        tvl: down(data?.tvl || 10 * 10 ** 18, 3),
-        tvlUsd: down(data?.tvlUsd || 10, 3),
-        apy: down(data?.apy || 2.125, 2),
-        assetToShareRatio: down(data?.assetToShareRatio || 0, 3),
-        sharePrice: down(data?.sharePrice || 1, 3),
+        tvl: down(data?.tvl ?? 10 * 10 ** 18, 3),
+        // Keep fallback aligned with catch-path TVL (~$775k), not a $10 stub.
+        tvlUsd: down(data?.tvlUsd ?? 775293.57196999, 3),
+        apy: down(data?.apy ?? 2.125, 2),
+        assetToShareRatio: down(data?.assetToShareRatio ?? 0, 3),
+        sharePrice: down(data?.sharePrice ?? 1, 3),
       }
     },
   })
 
   return useMemo(
     () => ({
-      data: data || {
+      data: data ?? {
         tvl: down(10 * 10 ** 18, 3),
-        tvlUsd: down(10, 3),
+        tvlUsd: down(775293.57196999, 3),
         apy: down(2.125, 2),
         assetToShareRatio: down(0, 3),
         sharePrice: down(1, 3),

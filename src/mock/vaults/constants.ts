@@ -5,7 +5,7 @@ export const PRODUCT_TABS: ReadonlyArray<{
   href: string
   active?: boolean
 }> = [
-  { id: 'vaults', label: 'Vaults', href: '/', active: true },
+  { id: 'vaults', label: 'Vaults', href: '/vaults', active: true },
   { id: 'buy', label: 'Buy', href: '/swap/buy' },
   { id: 'bridge', label: 'Bridge', href: '/bridge' },
 ]

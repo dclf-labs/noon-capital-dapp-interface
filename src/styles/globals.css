@@ -69,6 +69,8 @@
     --font-s: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-l: 'Louize', Georgia, 'Times New Roman', serif;
     --font-d: 'Denton', Georgia, 'Times New Roman', serif;
+    /* Menu-bar / selected-nav ink — use for icon hover + active. */
+    --color-primary: #111111;
   }
 
   html {
@@ -86,6 +88,50 @@
   #root {
     min-height: 100dvh;
   }
+
+  /* Interactive affordance — enabled pointer, disabled not-allowed. */
+  :where(
+      a[href],
+      button,
+      summary,
+      label[for],
+      select,
+      option,
+      input[type='button'],
+      input[type='submit'],
+      input[type='reset'],
+      input[type='checkbox'],
+      input[type='radio'],
+      input[type='file'],
+      input[type='range'],
+      [role='button'],
+      [role='option'],
+      [role='menuitem'],
+      [role='tab'],
+      [role='switch'],
+      [role='checkbox'],
+      [role='radio']
+    ):not(:disabled):not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  :where(
+    button,
+    select,
+    option,
+    input,
+    textarea,
+    [role='button'],
+    [role='option'],
+    [role='menuitem'],
+    [role='tab'],
+    [role='switch'],
+    [role='checkbox'],
+    [role='radio']
+  ):disabled,
+  :where([aria-disabled='true']) {
+    cursor: not-allowed;
+  }
 }
 
 @theme {
@@ -99,4 +145,7 @@
 
   /* Suisse Book — Figma “Suisse Int'l Book” */
   --font-weight-book: 450;
+
+  /* Same ink as the sidebar menu-bar selected pill (`bg-primary`). */
+  --color-primary: #111111;
 }

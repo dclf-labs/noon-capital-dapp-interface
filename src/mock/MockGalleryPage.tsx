@@ -195,7 +195,7 @@ export function MockGalleryPage() {
         </p>
         <div style={{ display: 'grid', gap: 24, paddingRight: 120 }}>
           {DEMO_VAULTS.map((vault) => (
-            <VaultCard key={vault.id} vault={vault} onEarnClick={noop} />
+            <VaultCard key={vault.id} vault={vault} />
           ))}
         </div>
       </section>

@@ -58,11 +58,11 @@ const useYieldAppEthTbtcTvl = () => {
     enabled: true,
     select: (data) => {
       return {
-        tvl: down(data?.tvl || Number(bnToStr(BigInt('12805351597553699000'), 0)), 3),
-        tvlUsd: down(data?.tvlUsd || 851030.861821821, 3),
-        apy: down(data?.apy || 4.157265, 2),
+        tvl: down(data?.tvl ?? Number(bnToStr(BigInt('12805351597553699000'), 0)), 3),
+        tvlUsd: down(data?.tvlUsd ?? 851030.861821821, 3),
+        apy: down(data?.apy ?? 4.157265, 2),
         assetToShareRatio: down(
-          data?.assetToShareRatio || bnToStr(BigInt('234686768243255340000000000000000'), 36),
+          data?.assetToShareRatio ?? bnToStr(BigInt('234686768243255340000000000000000'), 36),
           3,
         ),
         sharePrice: 1.0037,
@@ -72,7 +72,7 @@ const useYieldAppEthTbtcTvl = () => {
 
   return useMemo(
     () => ({
-      data: data || {
+      data: data ?? {
         tvl: down(bnToStr(BigInt('12805351597553699000'), 0), 3),
         tvlUsd: down(851030.861821821, 3),
         apy: down(4.157265, 2),

@@ -8,7 +8,7 @@ types.ts           View-model props
 demo-vaults.ts     Stub rows for /mock
 VaultsPageView.tsx List content
 VaultsHero.tsx     Title / product tabs
-VaultCard.tsx      Single vault row (+ Earn Now on hover)
+VaultCard.tsx      Single vault row (+ Earn now on hover)
 index.ts           Public exports
 ```
 

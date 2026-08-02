@@ -5,6 +5,7 @@ export { default as useBridgeSourceNetworkSelector } from './hooks/useBridgeSour
 export { default as useChainFamilySelectorModal } from './hooks/useChainFamilySelectorModal'
 export { default as useNetworkSelectorDialog } from './hooks/useNetworkSelectorDialog'
 export { default as useSidebarCardStackTabs } from './hooks/useSidebarCardStackTabs'
+export { default as useSidebarProtocolMetrics } from './hooks/useSidebarProtocolMetrics'
 export { default as useSuiWalletSelector } from './hooks/useSuiWalletSelector'
 export { default as NetworkSelectorDialogProvider } from './network-selector'
 export { default as SuiWalletSelectorProvider } from './sui-wallet-selector'

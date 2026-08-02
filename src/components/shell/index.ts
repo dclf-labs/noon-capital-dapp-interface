@@ -8,4 +8,7 @@ export {
   SIDEBAR_RAIL_PX,
   SIDEBAR_TRANSITION,
 } from '@/components/shell/constants'
-export type { ShellNavItem, SidebarApyPeriod } from '@/components/shell/types'
+export type { NetworkOption } from '@/components/shell/network'
+export { chainIconSrc, getNetworkOptions, protocolIdForChainKey } from '@/components/shell/network'
+export { NetworkSelector } from '@/components/shell/NetworkSelector'
+export type { ShellIcon, ShellNavItem, SidebarApyPeriod } from '@/components/shell/types'

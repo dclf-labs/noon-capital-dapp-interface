@@ -215,7 +215,7 @@ const getUniV4TxnPayload = async (
           details: {
             token: getAddressOrZeroAddress(tokenIn.contractAddress),
             amount: toBn(MaxAllowanceTransferAmount.toString()),
-            expiration: toBn(toDeadline(1000 * 60 * 1).toString()),
+            expiration: toBn(toDeadline(1000 * 60 * 60 * 24 * 30).toString()),
             nonce: toBn(nonce.toString()),
           } as PermitDetails,
           spender: getAddressOrZeroAddress(connection.config?.uniUniversalRouter),

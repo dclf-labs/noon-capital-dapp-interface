@@ -4,6 +4,7 @@ export {
   getAmountUsd,
   getPresetAmount,
   isBalancePresetDisabled,
+  NATIVE_GAS_RESERVE,
   normalizePreviewQuote,
   normalizePreviewRoute,
   normalizeTradeAmount,
@@ -18,6 +19,23 @@ export {
 } from './trade-display'
 export type { TradeFormContexts } from './trade-form-context'
 export { createTradeFormContexts, createTradeFormHooks } from './trade-form-context'
+export {
+  formatTradePayDisplay,
+  formatTradeReceiveDisplay,
+  getTradeMaxAmount,
+  parseTradePayInput,
+  toTradePayAmount,
+  toTradeReceiveStoredAmount,
+  TRADE_PAY_DECIMALS,
+  TRADE_RECEIVE_DISPLAY_DECIMALS,
+  type TradePayInputParseResult,
+} from './trade-input-format'
+export {
+  getTradePrimaryAction,
+  type TradePrimaryAction,
+  type TradePrimaryParams,
+} from './trade-primary'
+export { useTradeAmountHandlers } from './use-trade-amount-handlers'
 export type { ResetOnSessionChangeOptions, SessionIdentity } from './use-trade-form-controller'
 export {
   getInsufficientBalance,

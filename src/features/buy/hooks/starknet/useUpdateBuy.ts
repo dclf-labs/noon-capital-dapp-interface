@@ -12,6 +12,8 @@ const useUpdateBuy = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         tokenIn,
+        amountOut: undefined,
+        route: [],
       }))
     },
     [setInputs],
@@ -22,6 +24,8 @@ const useUpdateBuy = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         tokenOut,
+        amountOut: undefined,
+        route: [],
       }))
     },
     [setInputs],
@@ -32,6 +36,8 @@ const useUpdateBuy = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         amountIn,
+        amountOut: undefined,
+        route: [],
       }))
     },
     [setInputs],

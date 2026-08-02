@@ -13,15 +13,21 @@ export function normalizeTradeAmount(
   return down(toNum(amount), decimals)
 }
 
+/** Conservative native gas reserve so Max does not leave a wallet unable to pay fees. */
+export const NATIVE_GAS_RESERVE = 0.01
+
 /**
  * HALF / MAX amounts from a wallet balance, clipped to input precision.
+ * Pass `reserve` (e.g. {@link NATIVE_GAS_RESERVE}) for native token Max.
  */
 export function getPresetAmount(
   balance: number | undefined,
   option: 'half' | 'max',
   decimals: number = TRADE_INPUT_DECIMALS,
+  reserve: number = 0,
 ): number {
-  const clipped = normalizeTradeAmount(balance, decimals)
+  const available = Math.max(0, toNum(balance) - toNum(reserve))
+  const clipped = normalizeTradeAmount(available, decimals)
   return option === 'half' ? normalizeTradeAmount(clipped / 2, decimals) : clipped
 }
 

@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   getInsufficientBalance,
   getIsApproved,
+  getQuoteSourceKey,
   useResetOnSessionChange,
   useSyncAmountOut,
   useSyncPreviewOut,
@@ -20,6 +21,65 @@ describe('trade form helpers', () => {
     expect(getInsufficientBalance(5, 2)).toBe(false)
     expect(getIsApproved(10, 3)).toBe(true)
     expect(getIsApproved(1, 3)).toBe(false)
+  })
+
+  it('builds quote source keys from amount/token fields only', () => {
+    expect(
+      getQuoteSourceKey({
+        amountIn: 1,
+        amountOut: 9,
+        tokenIn: { contractAddress: '0xin' },
+        tokenOut: { contractAddress: '0xout' },
+      }),
+    ).toBe(
+      getQuoteSourceKey({
+        amountIn: 1,
+        amountOut: 99,
+        route: ['a'],
+        tokenIn: { contractAddress: '0xin' },
+        tokenOut: { contractAddress: '0xout' },
+      }),
+    )
+    expect(getQuoteSourceKey({ amount: 2, tokenIn: { symbol: 'USDC' } })).toBe('2|USDC|')
+  })
+
+  it('does not treat amountOut-only updates as quote-source debounce', () => {
+    const { result } = renderHook(() =>
+      useTradeFormController<{
+        amountIn?: number
+        amountOut?: number
+        tokenIn?: { contractAddress?: string }
+        tokenOut?: { contractAddress?: string }
+      }>({
+        amountIn: 1,
+        amountOut: undefined,
+        tokenIn: { contractAddress: '0xin' },
+        tokenOut: { contractAddress: '0xout' },
+      }),
+    )
+
+    // With debounce mocked as identity, quote keys match immediately.
+    expect(result.current.isDebouncing).toBe(false)
+
+    act(() => {
+      result.current.setInputs((prev) => ({ ...prev, amountOut: 9.123456 }))
+    })
+    expect(result.current.isDebouncing).toBe(false)
+    expect(getQuoteSourceKey(result.current.inputs)).toBe(
+      getQuoteSourceKey(result.current.debouncedInputs),
+    )
+  })
+
+  it('marks debouncing when amountIn changes relative to debounced inputs', () => {
+    // Local override: keep a lagged debounced snapshot to assert quote-source compare.
+    const initial = {
+      amountIn: 1 as number | undefined,
+      amountOut: undefined as number | undefined,
+      tokenIn: { contractAddress: '0xin' },
+      tokenOut: { contractAddress: '0xout' },
+    }
+    expect(getQuoteSourceKey({ ...initial, amountIn: 2 })).not.toBe(getQuoteSourceKey(initial))
+    expect(getQuoteSourceKey({ ...initial, amountOut: 5 })).toBe(getQuoteSourceKey(initial))
   })
 
   it('exposes step / inputs / txnUrl controllers', () => {
@@ -61,6 +121,28 @@ describe('trade form helpers', () => {
 
     rerender({ preview: 10, isDebouncing: false })
     expect(result.current.inputs.amountOut).toBe(10)
+
+    const before = result.current.inputs
+    rerender({ preview: 10, isDebouncing: false })
+    expect(result.current.inputs).toBe(before)
+  })
+
+  it('clears amountOut when preview quote is zero', () => {
+    const { result, rerender } = renderHook(
+      ({ preview, isDebouncing }: { preview?: number; isDebouncing: boolean }) => {
+        const form = useTradeFormController<{ amountIn?: number; amountOut?: number }>({
+          amountIn: undefined,
+          amountOut: 5,
+        })
+        useSyncAmountOut(form.setInputs, preview, isDebouncing)
+        return form
+      },
+      { initialProps: { preview: 0, isDebouncing: false } },
+    )
+
+    expect(result.current.inputs.amountOut).toBeUndefined()
+    rerender({ preview: 3, isDebouncing: false })
+    expect(result.current.inputs.amountOut).toBe(3)
   })
 
   it('syncs Starknet quote + route from preview envelopes', () => {
@@ -99,6 +181,48 @@ describe('trade form helpers', () => {
     })
     expect(result.current.inputs.amountOut).toBe(4)
     expect(result.current.inputs.route).toEqual(['a'])
+  })
+
+  it('clears amountOut and route when preview errors', () => {
+    const { result, rerender } = renderHook(
+      ({
+        data,
+        isLoading,
+        isError,
+        isDebouncing,
+      }: {
+        data?: { quote: number; route: string[] }
+        isLoading: boolean
+        isError: boolean
+        isDebouncing: boolean
+      }) => {
+        const form = useTradeFormController<{ amountOut?: number; route?: string[] }>({
+          amountOut: undefined,
+          route: [],
+        })
+        useSyncPreviewOut(form.setInputs, { data, isLoading, isError }, isDebouncing)
+        return form
+      },
+      {
+        initialProps: {
+          data: { quote: 4, route: ['a'] },
+          isLoading: false,
+          isError: false,
+          isDebouncing: false,
+        },
+      },
+    )
+
+    expect(result.current.inputs.amountOut).toBe(4)
+
+    rerender({
+      data: { quote: 4, route: ['a'] },
+      isLoading: false,
+      isError: true,
+      isDebouncing: false,
+    })
+    expect(result.current.inputs.amountOut).toBeUndefined()
+    expect(result.current.inputs.route).toEqual([])
   })
 
   it('clears amounts and txn on session identity change', () => {

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { getTokens } from '@/config'
 import { getAmountUsd } from '@/features/_shared/trade-amounts'
@@ -20,8 +20,10 @@ import { type FormInputs } from '@/features/sell/context/evm/types'
 import usePreviewSell from '@/features/sell/hooks/evm/usePreviewSell'
 import useSellAllowance from '@/features/sell/hooks/evm/useSellAllowance'
 import useSellSubmitFee from '@/features/sell/hooks/evm/useSellSubmitFee'
-import { useEvmFamilySession } from '@/hooks/connection/useWalletSession'
+import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
+import { isEvmChainId } from '@/lib/chain'
+import { useActiveChainStore } from '@/state/active-chain'
 
 const INITIAL_SELL_INPUTS: FormInputs = {
   tokenIn: undefined,
@@ -36,13 +38,16 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { step, setStep, inputs, setInputs, debouncedInputs, txnUrl, setTxnUrl, isDebouncing } =
     useTradeFormController(INITIAL_SELL_INPUTS)
 
-  const connection = useEvmFamilySession()
+  const selectedChainId = useActiveChainStore((s) => s.selectedChainId)
+  const connection = useEvmTargetSession(
+    isEvmChainId(selectedChainId) ? selectedChainId : undefined,
+  )
 
-  const tokenInBalance = useTokenBalance(connection, debouncedInputs.tokenIn)
-  const tokenOutBalance = useTokenBalance(connection, debouncedInputs.tokenOut)
-  const tokenInAllowance = useSellAllowance(connection, debouncedInputs.tokenIn)
+  const tokenInBalance = useTokenBalance(connection, inputs.tokenIn)
+  const tokenOutBalance = useTokenBalance(connection, inputs.tokenOut)
+  const tokenInAllowance = useSellAllowance(connection, inputs.tokenIn)
 
-  const tokenPrice = useGeckoPrice(debouncedInputs.tokenIn)
+  const tokenPrice = useGeckoPrice(inputs.tokenIn)
   const price = usePreviewSell(connection, debouncedInputs.tokenIn, debouncedInputs.tokenOut, 1)
   const preview = usePreviewSell(
     connection,
@@ -62,7 +67,16 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [inputs.amountIn, tokenInAllowance.data],
   )
 
-  useSyncAmountOut(setInputs, preview.isLoading ? undefined : preview.data, isDebouncing)
+  useSyncAmountOut(
+    setInputs,
+    preview.isLoading || preview.isError ? undefined : preview.data,
+    isDebouncing || step > 0,
+  )
+
+  useEffect(() => {
+    if (!preview.isError || step > 0) return
+    setInputs((prev) => (prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }))
+  }, [preview.isError, setInputs, step])
 
   useResetOnSessionChange({
     session: {
@@ -113,8 +127,9 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tokenPrice,
       amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
+      isQuoteError: preview.isError,
     }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, price, tokenPrice, preview.isLoading, preview.isError, isDebouncing],
   )
 
   const txnValue = useMemo(

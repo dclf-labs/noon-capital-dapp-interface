@@ -10,6 +10,33 @@ import { toNum } from '@/lib/format'
 
 const DEFAULT_DEBOUNCE_MS = 350
 
+type QuoteSourceFields = {
+  amountIn?: unknown
+  amount?: unknown
+  tokenIn?: { contractAddress?: string; symbol?: string }
+  tokenOut?: { contractAddress?: string; symbol?: string }
+}
+
+/**
+ * Identity of fields that drive quote requests. Excludes derived fields like
+ * `amountOut` / `route` so preview sync does not look like user input debounce.
+ */
+export function getQuoteSourceKey(inputs: unknown): string {
+  if (!inputs || typeof inputs !== 'object') return ''
+  const value = inputs as QuoteSourceFields
+  return [
+    String(value.amountIn ?? value.amount ?? ''),
+    value.tokenIn?.contractAddress ?? value.tokenIn?.symbol ?? '',
+    value.tokenOut?.contractAddress ?? value.tokenOut?.symbol ?? '',
+  ].join('|')
+}
+
+function sameRoute<TRoute>(left: TRoute[] | undefined, right: TRoute[]): boolean {
+  if (!left) return right.length === 0
+  if (left.length !== right.length) return false
+  return left.every((item, index) => item === right[index])
+}
+
 /**
  * Shared trade-form controller: step, inputs, debounced inputs, txn URL.
  */
@@ -22,7 +49,12 @@ export function useTradeFormController<TInputs>(
   const [txnUrl, setTxnUrl] = useState<string | undefined>(undefined)
   const debouncedInputs = useDebounce(inputs, debounceMs)
 
-  const isDebouncing = useMemo(() => debouncedInputs !== inputs, [debouncedInputs, inputs])
+  // Only amount/token changes should count as debouncing for quote UX.
+  // Syncing amountOut into `inputs` must not flip this and blank the receive field.
+  const isDebouncing = useMemo(
+    () => getQuoteSourceKey(inputs) !== getQuoteSourceKey(debouncedInputs),
+    [debouncedInputs, inputs],
+  )
 
   return {
     step,
@@ -46,10 +78,18 @@ export function useSyncAmountOut<TInputs extends { amountOut?: number | undefine
 ) {
   useEffect(() => {
     if (isDebouncing || previewAmount === undefined) return
-    setInputs((prev) => ({
-      ...prev,
-      amountOut: toNum(previewAmount),
-    }))
+    const nextAmountOut = toNum(previewAmount)
+    setInputs((prev) => {
+      // Treat non-positive quotes as "no quote" so empty amountIn does not stick amountOut=0.
+      if (!(nextAmountOut > 0)) {
+        return prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }
+      }
+      if (toNum(prev.amountOut) === nextAmountOut) return prev
+      return {
+        ...prev,
+        amountOut: nextAmountOut,
+      }
+    })
   }, [isDebouncing, previewAmount, setInputs])
 }
 
@@ -63,19 +103,44 @@ type PreviewOutInputs<TRoute> = {
  */
 export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRoute>>(
   setInputs: Dispatch<SetStateAction<TInputs>>,
-  preview: { data?: PreviewQuoteData<TRoute>; isLoading?: boolean },
+  preview: { data?: PreviewQuoteData<TRoute>; isLoading?: boolean; isError?: boolean },
   isDebouncing: boolean,
 ) {
   useEffect(() => {
-    if (isDebouncing || preview.isLoading || preview.data === undefined) return
+    if (isDebouncing) return
+
+    if (preview.isError) {
+      setInputs((prev) => {
+        if (prev.amountOut === undefined && (!prev.route || prev.route.length === 0)) return prev
+        return {
+          ...prev,
+          amountOut: undefined,
+          route: [],
+        }
+      })
+      return
+    }
+
+    if (preview.isLoading || preview.data === undefined) return
     const amountOut = normalizePreviewQuote(preview.data)
-    if (amountOut === undefined) return
-    setInputs((prev) => ({
-      ...prev,
-      amountOut,
-      route: normalizePreviewRoute(preview.data),
-    }))
-  }, [isDebouncing, preview.data, preview.isLoading, setInputs])
+    const route = normalizePreviewRoute(preview.data)
+    setInputs((prev) => {
+      if (amountOut === undefined || !(amountOut > 0) || route.length === 0) {
+        if (prev.amountOut === undefined && (!prev.route || prev.route.length === 0)) return prev
+        return {
+          ...prev,
+          amountOut: undefined,
+          route: [],
+        }
+      }
+      if (toNum(prev.amountOut) === amountOut && sameRoute(prev.route, route)) return prev
+      return {
+        ...prev,
+        amountOut,
+        route,
+      }
+    })
+  }, [isDebouncing, preview.data, preview.isError, preview.isLoading, setInputs])
 }
 
 export type SessionIdentity = {

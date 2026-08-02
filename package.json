@@ -75,6 +75,8 @@
     "motion": "^12.43.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-number-format": "^5.4.4",
+    "react-router-dom": "^7.18.2",
     "starknet": "^10.0.2",
     "starknetkit": "^3.4.3",
     "tailwind-merge": "^3.6.0",

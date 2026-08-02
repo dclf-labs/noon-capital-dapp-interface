@@ -2,7 +2,10 @@ import { useMemo } from 'react'
 
 import { type Token } from '@/config/token'
 import { type SwapSide } from '@/features/swap/hooks/usePreviewSwap'
-import { resolveEkuboCalculatedAmount } from '@/features/swap/lib/ekubo-quote'
+import {
+  resolveEkuboCalculatedAmount,
+  resolveEkuboExecutableRoute,
+} from '@/features/swap/lib/ekubo-quote'
 import { useChainQuery } from '@/hooks/query/useChainQuery'
 import { isAddressValid } from '@/lib/address'
 import { type EkuboSwapInfoResponse, type EkuboSwapInfoRoute } from '@/lib/api'
@@ -38,7 +41,7 @@ async function fetchEkuboPreview(
 
   return {
     quote,
-    route: (data.splits?.flatMap((split) => split.route || []) || []) as EkuboSwapInfoRoute[],
+    route: resolveEkuboExecutableRoute(data),
   }
 }
 

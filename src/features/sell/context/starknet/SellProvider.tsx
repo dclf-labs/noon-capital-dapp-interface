@@ -39,11 +39,11 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const connection = useStarknetFamilySession()
 
-  const tokenInBalance = useTokenBalance(connection, debouncedInputs.tokenIn)
-  const tokenOutBalance = useTokenBalance(connection, debouncedInputs.tokenOut)
-  const tokenInAllowance = useSellAllowance(connection, debouncedInputs.tokenIn)
+  const tokenInBalance = useTokenBalance(connection, inputs.tokenIn)
+  const tokenOutBalance = useTokenBalance(connection, inputs.tokenOut)
+  const tokenInAllowance = useSellAllowance(connection, inputs.tokenIn)
 
-  const tokenPrice = useTokenPrice(debouncedInputs.tokenIn)
+  const tokenPrice = useTokenPrice(inputs.tokenIn)
   const price = usePreviewSell(connection, debouncedInputs.tokenIn, debouncedInputs.tokenOut, 1)
   const preview = usePreviewSell(
     connection,
@@ -70,7 +70,7 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [inputs.amountIn, tokenInAllowance.data],
   )
 
-  useSyncPreviewOut(setInputs, preview, isDebouncing)
+  useSyncPreviewOut(setInputs, preview, isDebouncing || step > 0)
 
   const amountInUsd = useMemo(
     () => getAmountUsd(inputs.amountIn, tokenPrice),
@@ -122,8 +122,9 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tokenPrice,
       amountInUsd,
       isFetchingQuote: preview.isLoading || isDebouncing,
+      isQuoteError: preview.isError,
     }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, isDebouncing],
+    [amountInUsd, price, tokenPrice, preview.isLoading, preview.isError, isDebouncing],
   )
 
   const txnValue = useMemo(

@@ -12,6 +12,7 @@ const useUpdateSell = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         tokenIn,
+        amountOut: undefined,
       }))
     },
     [setInputs],
@@ -22,6 +23,7 @@ const useUpdateSell = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         tokenOut,
+        amountOut: undefined,
       }))
     },
     [setInputs],
@@ -32,6 +34,7 @@ const useUpdateSell = () => {
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         amountIn,
+        amountOut: undefined,
       }))
     },
     [setInputs],

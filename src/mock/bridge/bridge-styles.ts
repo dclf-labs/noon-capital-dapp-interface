@@ -11,4 +11,4 @@ export {
   page,
   row,
   select,
-} from '@/pages/mint-redeem/mint-redeem-styles'
+} from '@/mock/mint-redeem/mint-redeem-styles'

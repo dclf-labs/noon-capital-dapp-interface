@@ -31,10 +31,10 @@ Heavy React submit/approve hooks and wallet SDK glue stay **outside** the thresh
 | Format / units  | `src/lib/format.test.ts`, `src/lib/format.display.test.ts`                                  |
 | Wallet session  | `wallet-session`, `wallet-query-sync`, `evm-submit`, `active-network.scenarios`             |
 | Trade forms     | `_shared/use-trade-form-controller`, `trade-amounts`, `trade-input-format`, `trade-display` |
-| Buy / sell UI   | `pages/swap/TradePanelView.test.tsx`                                                        |
-| Mint / redeem   | `mint-redeem/*`, `pages/mint-redeem/MintRedeemPanel.test.tsx`                               |
-| Stake / unstake | `stake-unstake/*`, `StakeUnstakePanel`, `WithdrawClaimsPanel`                               |
-| Bridge          | `bridge/route`, `primary`, `sui-oft`, `BridgePanel`, `bridge-networks`                      |
+| Buy / sell UI   | `mock/swap/TradePanelView.test.tsx`                                                         |
+| Mint / redeem   | `features/mint-redeem/*`, `mock/mint-redeem/MintRedeemPanel.test.tsx`                       |
+| Stake / unstake | `features/stake-unstake/*`, `mock/stake-unstake/*Panel*.test.tsx`                           |
+| Bridge          | `features/bridge/*`, `mock/bridge/BridgePanel.test.tsx`, `pages/bridge/bridge-networks`     |
 | Zustand         | `state/active-chain`, `points-estimator-assumptions`                                        |
 | Protocol config | `src/config/index.test.ts`                                                                  |
 

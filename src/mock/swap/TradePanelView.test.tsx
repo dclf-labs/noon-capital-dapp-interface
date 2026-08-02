@@ -12,7 +12,7 @@ import {
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 import { down } from '@/lib/format'
-import { TradePanelView, type TradePanelViewProps } from '@/pages/swap/TradePanelView'
+import { TradePanelView, type TradePanelViewProps } from '@/mock/swap/TradePanelView'
 
 const usdc: Token = {
   symbol: 'USDC',

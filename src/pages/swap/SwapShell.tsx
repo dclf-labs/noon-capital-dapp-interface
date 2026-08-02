@@ -1,8 +1,8 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 
 import { useResolvedChain } from '@/hooks/connection'
-import { NetworkSwitcher } from '@/pages/swap/NetworkSwitcher'
-import * as styles from '@/pages/swap/trade-styles'
+import { NetworkSwitcher } from '@/mock/swap/NetworkSwitcher'
+import * as styles from '@/mock/swap/trade-styles'
 
 export function SwapShell() {
   const { chainFamily, config } = useResolvedChain()

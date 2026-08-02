@@ -1,7 +1,7 @@
 import { chainList, isEvmChain } from '@/chains'
 import { useSelectActiveChain } from '@/hooks/connection'
 import { type ChainId, getChainConfig, getStarknetChainId, getSuiChainId } from '@/lib/chain'
-import * as styles from '@/pages/bridge/bridge-styles'
+import * as styles from '@/mock/bridge/bridge-styles'
 
 function protocolIdForChainKey(key: (typeof chainList)[number]['key']): ChainId {
   if (key === 'starknet') return getStarknetChainId()!

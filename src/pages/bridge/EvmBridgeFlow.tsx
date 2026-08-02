@@ -27,11 +27,11 @@ import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { type Address, sanitizeEVMAddress, sanitizeSuiAddress } from '@/lib/address'
 import type { EVMConnection } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
+import { BridgePanel } from '@/mock/bridge/BridgePanel'
 import {
   getBridgeDestinationNetworks,
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
-import { BridgePanel } from '@/pages/bridge/BridgePanel'
 
 export function EvmBridgeFlow() {
   const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =

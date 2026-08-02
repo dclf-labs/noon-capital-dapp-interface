@@ -11,7 +11,7 @@ import {
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 import { down } from '@/lib/format'
-import * as styles from '@/pages/bridge/bridge-styles'
+import * as styles from '@/mock/bridge/bridge-styles'
 
 /**
  * Bridge form UI. Receive mirrors send 1:1 (OFT); pay uses `amount` (not amountIn/Out).

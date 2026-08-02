@@ -14,7 +14,7 @@ import { useWithdrawPeriod, useWithdrawRequests, useWithdrawSubmit } from '@/fea
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import { TxnStatus } from '@/lib/connection'
 import { down } from '@/lib/format'
-import * as styles from '@/pages/stake-unstake/stake-unstake-styles'
+import * as styles from '@/mock/stake-unstake/stake-unstake-styles'
 
 function RequestRow({
   request,

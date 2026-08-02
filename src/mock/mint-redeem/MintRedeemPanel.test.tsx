@@ -11,7 +11,7 @@ import {
   TRADE_PAY_DECIMALS,
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
-import { MintRedeemPanel, type MintRedeemPanelProps } from '@/pages/mint-redeem/MintRedeemPanel'
+import { MintRedeemPanel, type MintRedeemPanelProps } from '@/mock/mint-redeem/MintRedeemPanel'
 
 const usdc: Token = {
   symbol: 'USDC',

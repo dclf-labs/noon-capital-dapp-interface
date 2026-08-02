@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import { MockGalleryPage } from '@/mock/MockGalleryPage'
 import { BridgePage } from '@/pages/bridge/BridgePage'
 import { BridgeShell } from '@/pages/bridge/BridgeShell'
 import { HomePage } from '@/pages/HomePage'
@@ -19,6 +20,9 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+
+        {/* Presentational UI gallery (stubbed props — see src/mock/) */}
+        <Route path="/mock" element={<MockGalleryPage />} />
 
         {/* Buy / Sell (DEX swap) */}
         <Route path="/swap" element={<SwapShell />}>

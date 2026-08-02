@@ -44,4 +44,4 @@ Import from `@/features/_shared`.
 - `trade-primary.test.ts` — shared CTA machine
 - `use-trade-amount-handlers.test.ts` / `use-trade-input-model.test.ts`
 
-See also `docs/TESTING.md` and panel tests under `src/pages/*/`.
+See also `docs/TESTING.md` and panel tests under `src/mock/*/`.

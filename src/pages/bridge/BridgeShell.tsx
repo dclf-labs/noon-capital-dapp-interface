@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom'
 
-import * as styles from '@/pages/bridge/bridge-styles'
-import { BridgeNetworkSwitcher } from '@/pages/bridge/BridgeNetworkSwitcher'
+import * as styles from '@/mock/bridge/bridge-styles'
+import { BridgeNetworkSwitcher } from '@/mock/bridge/BridgeNetworkSwitcher'
 
 export function BridgeShell() {
   return (

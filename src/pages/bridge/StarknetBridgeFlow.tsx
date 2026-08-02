@@ -16,11 +16,11 @@ import { getBridgePrimaryAction } from '@/features/bridge/primary'
 import { isBridgePairAllowed } from '@/features/bridge/route'
 import { type Address, sanitizeEVMAddress } from '@/lib/address'
 import { canWriteSession } from '@/lib/wallet-session'
+import { BridgePanel } from '@/mock/bridge/BridgePanel'
 import {
   getBridgeDestinationNetworks,
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
-import { BridgePanel } from '@/pages/bridge/BridgePanel'
 
 export function StarknetBridgeFlow() {
   const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =

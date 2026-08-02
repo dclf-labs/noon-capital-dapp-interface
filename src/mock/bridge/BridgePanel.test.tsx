@@ -10,7 +10,7 @@ import {
   TRADE_PAY_DECIMALS,
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
-import { BridgePanel, type BridgePanelProps } from '@/pages/bridge/BridgePanel'
+import { BridgePanel, type BridgePanelProps } from '@/mock/bridge/BridgePanel'
 
 const susn: Token = {
   symbol: 'sUSN',

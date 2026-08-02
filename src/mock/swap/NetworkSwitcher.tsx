@@ -1,7 +1,7 @@
 import { chainList, isEvmChain } from '@/chains'
 import { useSelectActiveChain } from '@/hooks/connection'
 import { type ChainId, getChainConfig, getStarknetChainId, getSuiChainId } from '@/lib/chain'
-import * as styles from '@/pages/swap/trade-styles'
+import * as styles from '@/mock/swap/trade-styles'
 
 function protocolIdForChainKey(key: (typeof chainList)[number]['key']): ChainId {
   if (key === 'starknet') return getStarknetChainId()!

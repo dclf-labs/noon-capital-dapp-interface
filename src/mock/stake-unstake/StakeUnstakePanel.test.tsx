@@ -14,7 +14,7 @@ import {
 import {
   StakeUnstakePanel,
   type StakeUnstakePanelProps,
-} from '@/pages/stake-unstake/StakeUnstakePanel'
+} from '@/mock/stake-unstake/StakeUnstakePanel'
 
 const usn: Token = {
   symbol: 'USN',

@@ -19,7 +19,7 @@ import useUpdateRedeem from '@/features/redeem/hooks/useUpdateRedeem'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { MintRedeemPanel } from '@/pages/mint-redeem/MintRedeemPanel'
+import { MintRedeemPanel } from '@/mock/mint-redeem/MintRedeemPanel'
 
 export function EvmRedeemFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn } = useRedeemForm()

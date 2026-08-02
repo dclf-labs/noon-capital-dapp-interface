@@ -26,6 +26,9 @@ export function HomePage() {
         <Link to="/bridge" style={{ color: '#111', fontSize: 14 }}>
           Open Bridge →
         </Link>
+        <Link to="/mock" style={{ color: '#111', fontSize: 14 }}>
+          Open UI mock gallery →
+        </Link>
       </div>
       <WalletStatusPanel />
     </div>

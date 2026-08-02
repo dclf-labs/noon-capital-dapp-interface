@@ -20,7 +20,7 @@ import {
 } from '@/features/buy/hooks/starknet/useBuy'
 import useBuySubmit from '@/features/buy/hooks/starknet/useBuySubmit'
 import useUpdateBuy from '@/features/buy/hooks/starknet/useUpdateBuy'
-import { TradePanelView } from '@/pages/swap/TradePanelView'
+import { TradePanelView } from '@/mock/swap/TradePanelView'
 
 export function StarknetBuyTrade() {
   const { inputs, connection, step, setStep, setInputs } = useBuyForm()

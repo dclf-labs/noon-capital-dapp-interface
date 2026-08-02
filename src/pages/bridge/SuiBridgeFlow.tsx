@@ -16,11 +16,11 @@ import { getBridgePrimaryAction } from '@/features/bridge/primary'
 import { isBridgePairAllowed, isSuiToEthBridgeDisabled } from '@/features/bridge/route'
 import { type Address, sanitizeEVMAddress } from '@/lib/address'
 import { canWriteSession } from '@/lib/wallet-session'
+import { BridgePanel } from '@/mock/bridge/BridgePanel'
 import {
   getBridgeDestinationNetworks,
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
-import { BridgePanel } from '@/pages/bridge/BridgePanel'
 
 export function SuiBridgeFlow() {
   const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =

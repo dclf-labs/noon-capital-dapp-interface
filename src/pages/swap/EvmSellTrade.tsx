@@ -22,7 +22,7 @@ import { getSwapSpender } from '@/features/swap/lib/spender'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { TradePanelView } from '@/pages/swap/TradePanelView'
+import { TradePanelView } from '@/mock/swap/TradePanelView'
 
 export function EvmSellTrade() {
   const { inputs, connection, step, setStep, setInputs } = useSellForm()

@@ -1,8 +1,8 @@
 import { EvmBuyProvider, StarknetBuyProvider } from '@/features/buy'
 import { useResolvedChain } from '@/hooks/connection'
+import * as styles from '@/mock/swap/trade-styles'
 import { EvmBuyTrade } from '@/pages/swap/EvmBuyTrade'
 import { StarknetBuyTrade } from '@/pages/swap/StarknetBuyTrade'
-import * as styles from '@/pages/swap/trade-styles'
 
 export function BuyPage() {
   const { chainFamily } = useResolvedChain()

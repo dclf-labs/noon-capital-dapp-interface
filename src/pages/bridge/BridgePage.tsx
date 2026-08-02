@@ -1,6 +1,6 @@
 import { EvmBridgeProvider, StarknetBridgeProvider, SuiBridgeProvider } from '@/features/bridge'
 import { useResolvedChain } from '@/hooks/connection'
-import * as styles from '@/pages/bridge/bridge-styles'
+import * as styles from '@/mock/bridge/bridge-styles'
 import { EvmBridgeFlow } from '@/pages/bridge/EvmBridgeFlow'
 import { StarknetBridgeFlow } from '@/pages/bridge/StarknetBridgeFlow'
 import { SuiBridgeFlow } from '@/pages/bridge/SuiBridgeFlow'

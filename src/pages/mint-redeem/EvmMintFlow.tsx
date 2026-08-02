@@ -19,7 +19,7 @@ import { getMintRedeemPrimaryAction } from '@/features/mint-redeem'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { MintRedeemPanel } from '@/pages/mint-redeem/MintRedeemPanel'
+import { MintRedeemPanel } from '@/mock/mint-redeem/MintRedeemPanel'
 
 export function EvmMintFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenOut } = useMintForm()

@@ -19,7 +19,7 @@ import {
 } from '@/features/unstake'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import { queryKeys } from '@/lib/query-keys'
-import { StakeUnstakePanel } from '@/pages/stake-unstake/StakeUnstakePanel'
+import { StakeUnstakePanel } from '@/mock/stake-unstake/StakeUnstakePanel'
 
 export function EvmUnstakeFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn, tokenOut } = useUnstakeForm()

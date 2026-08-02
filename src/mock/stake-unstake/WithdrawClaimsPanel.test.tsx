@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type * as ConfigModule from '@/config'
-import { WithdrawClaimsPanel } from '@/pages/stake-unstake/WithdrawClaimsPanel'
+import { WithdrawClaimsPanel } from '@/mock/stake-unstake/WithdrawClaimsPanel'
 
 const submit = vi.fn()
 const refetch = vi.fn()

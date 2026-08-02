@@ -13,7 +13,7 @@ import {
 } from '@/features/_shared/trade-input-format'
 import type { MintRedeemMode } from '@/features/mint-redeem'
 import { down } from '@/lib/format'
-import * as styles from '@/pages/mint-redeem/mint-redeem-styles'
+import * as styles from '@/mock/mint-redeem/mint-redeem-styles'
 
 export type MintRedeemPanelProps = {
   mode: MintRedeemMode

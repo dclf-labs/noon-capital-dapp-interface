@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 
-import * as styles from '@/pages/stake-unstake/stake-unstake-styles'
+import * as styles from '@/mock/stake-unstake/stake-unstake-styles'
 
 export function StakeUnstakeShell() {
   return (

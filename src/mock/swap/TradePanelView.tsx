@@ -11,17 +11,19 @@ import {
   TRADE_PAY_DECIMALS,
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
-import type { StakeUnstakeMode } from '@/features/stake-unstake'
+import type { TradeMode } from '@/features/_shared/trade-primary'
 import { down } from '@/lib/format'
-import * as styles from '@/pages/stake-unstake/stake-unstake-styles'
+import * as styles from '@/mock/swap/trade-styles'
 
-export type StakeUnstakePanelProps = {
-  mode: StakeUnstakeMode
+export type TradePanelViewProps = {
+  mode: TradeMode
   step: number
   isConnected: boolean
   unsupported?: boolean
   tokenIn?: Token
   tokenOut?: Token
+  tokensIn?: Token[]
+  tokensOut?: Token[]
   amountIn?: number
   amountOut?: number
   amountInUsd: number
@@ -32,7 +34,6 @@ export type StakeUnstakePanelProps = {
   isFetchingQuote: boolean
   isInsufficientBalance: boolean
   isApproved: boolean
-  requiresApproval: boolean
   primaryLabel: string
   primaryDisabled: boolean
   primaryLoading?: boolean
@@ -41,19 +42,27 @@ export type StakeUnstakePanelProps = {
   onAmountInChange: (amount: number | undefined) => void
   onHalf: () => void
   onMax: () => void
+  onTokenInChange: (token: Token) => void
+  onTokenOutChange: (token: Token) => void
   onPrimary: () => void
   onBack?: () => void
   onReset?: () => void
   presetsDisabled?: boolean
 }
 
-export function StakeUnstakePanel({
+function tokenOptionKey(token: Token): string {
+  return `${token.contractAddress}:${token.symbol}`
+}
+
+export function TradePanelView({
   mode,
   step,
   isConnected,
   unsupported,
   tokenIn,
   tokenOut,
+  tokensIn,
+  tokensOut,
   amountIn,
   amountOut,
   amountInUsd,
@@ -64,7 +73,6 @@ export function StakeUnstakePanel({
   isFetchingQuote,
   isInsufficientBalance,
   isApproved,
-  requiresApproval,
   primaryLabel,
   primaryDisabled,
   primaryLoading,
@@ -73,14 +81,16 @@ export function StakeUnstakePanel({
   onAmountInChange,
   onHalf,
   onMax,
+  onTokenInChange,
+  onTokenOutChange,
   onPrimary,
   onBack,
   onReset,
   presetsDisabled,
-}: StakeUnstakePanelProps) {
-  const title = mode === 'stake' ? 'Stake' : 'Unstake'
-  const amountInValue = toTradePayAmount(amountIn)
+}: TradePanelViewProps) {
+  const title = mode === 'buy' ? 'Buy' : 'Sell'
   const amountOutValue = toTradeReceiveStoredAmount(amountOut)
+  const amountInValue = toTradePayAmount(amountIn)
 
   const [payFocused, setPayFocused] = useState(false)
   const [payDraft, setPayDraft] = useState<string | undefined>(undefined)
@@ -97,7 +107,8 @@ export function StakeUnstakePanel({
   if (unsupported) {
     return (
       <p style={styles.errorText}>
-        {title} is only available on Ethereum mainnet. Switch your wallet to Ethereum.
+        Wallet network does not match the selected network. Use the network switcher above and
+        approve the wallet prompt.
       </p>
     )
   }
@@ -105,12 +116,7 @@ export function StakeUnstakePanel({
   if (step >= 2) {
     return (
       <section style={{ display: 'grid', gap: 12 }}>
-        <h2 style={{ margin: 0, fontSize: 18 }}>{title} submitted</h2>
-        {mode === 'unstake' ? (
-          <p style={styles.muted}>
-            Your USN is in cooldown. Claim it from the Withdraw tab after the cooling-off period.
-          </p>
-        ) : null}
+        <h2 style={{ margin: 0, fontSize: 18 }}>Transaction submitted</h2>
         {txnUrl ? (
           <a href={txnUrl} target="_blank" rel="noreferrer noopener" style={styles.link}>
             View on explorer
@@ -133,11 +139,18 @@ export function StakeUnstakePanel({
           {formatTokenAmount(amountInValue, tokenIn?.symbol, TRADE_PAY_DECIMALS)} →{' '}
           {formatTokenAmount(amountOutValue, tokenOut?.symbol, TRADE_RECEIVE_DISPLAY_DECIMALS)}
         </p>
-        {mode === 'unstake' ? (
-          // On-chain withdraw uses previewed USN out (not sUSN shares); then cooldown → Withdraw tab.
-          <p style={styles.banner}>Unstake starts a cooldown. USN is claimable after it ends.</p>
-        ) : null}
         {feeLabel ? <p style={styles.muted}>Network fee {feeLabel}</p> : null}
+        <p style={styles.muted}>
+          {/* Display approx of submit `slippageAdjustedAmount(..., 1)` — not the signed bigint. */}
+          Min received (1% slippage){' '}
+          {formatTokenAmount(
+            amountOutValue != null
+              ? toTradeReceiveStoredAmount(down(amountOutValue * 0.99, TRADE_PAY_DECIMALS))
+              : undefined,
+            tokenOut?.symbol,
+            TRADE_RECEIVE_DISPLAY_DECIMALS,
+          )}
+        </p>
         {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
         <div style={styles.row}>
           {onBack ? (
@@ -158,7 +171,7 @@ export function StakeUnstakePanel({
     )
   }
 
-  const receiveDisplay =
+  const receiveDisplayValue =
     amountOutValue != null ? down(amountOutValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
   const receivePlaceholder = isFetchingQuote && amountOutValue == null ? '…' : '0.00'
 
@@ -166,7 +179,7 @@ export function StakeUnstakePanel({
     <section style={{ display: 'grid', gap: 12 }}>
       <div style={styles.field}>
         <div style={styles.row}>
-          <strong>Sending</strong>
+          <strong>You pay</strong>
           <span style={styles.muted}>{balanceInLabel}</span>
         </div>
         <div style={styles.row}>
@@ -198,11 +211,20 @@ export function StakeUnstakePanel({
               return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
             }}
           />
-          <input
-            style={{ ...styles.select, opacity: 0.85 }}
-            readOnly
-            value={tokenIn?.symbol || (mode === 'stake' ? 'USN' : 'sUSN')}
-          />
+          <select
+            style={styles.select}
+            value={tokenIn ? tokenOptionKey(tokenIn) : ''}
+            onChange={(event) => {
+              const next = tokensIn?.find((token) => tokenOptionKey(token) === event.target.value)
+              if (next) onTokenInChange(next)
+            }}
+          >
+            {(tokensIn || []).map((token) => (
+              <option key={tokenOptionKey(token)} value={tokenOptionKey(token)}>
+                {token.symbol}
+              </option>
+            ))}
+          </select>
         </div>
         <div style={styles.row}>
           <span style={styles.muted}>{formatUsd(amountInUsd)}</span>
@@ -237,7 +259,7 @@ export function StakeUnstakePanel({
 
       <div style={styles.field}>
         <div style={styles.row}>
-          <strong>Receiving</strong>
+          <strong>You receive</strong>
           <span style={styles.muted}>{balanceOutLabel}</span>
         </div>
         <div style={styles.row}>
@@ -248,24 +270,31 @@ export function StakeUnstakePanel({
             decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
-            value={receiveDisplay}
+            value={receiveDisplayValue}
             // Field shows ≤2dp; title keeps full stored 6dp for hover/debug.
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
-          <input
-            style={{ ...styles.select, opacity: 0.85 }}
-            readOnly
-            value={tokenOut?.symbol || (mode === 'stake' ? 'sUSN' : 'USN')}
-          />
+          <select
+            style={styles.select}
+            value={tokenOut ? tokenOptionKey(tokenOut) : ''}
+            onChange={(event) => {
+              const next = tokensOut?.find((token) => tokenOptionKey(token) === event.target.value)
+              if (next) onTokenOutChange(next)
+            }}
+          >
+            {(tokensOut || []).map((token) => (
+              <option key={tokenOptionKey(token)} value={tokenOptionKey(token)}>
+                {token.symbol}
+              </option>
+            ))}
+          </select>
         </div>
         {unitRateLabel ? <p style={styles.muted}>Rate {unitRateLabel}</p> : null}
         {feeLabel ? <p style={styles.muted}>Est. fee {feeLabel}</p> : null}
       </div>
 
       {isInsufficientBalance ? <p style={styles.errorText}>Insufficient balance</p> : null}
-      {requiresApproval && !isApproved && amountIn ? (
-        <p style={styles.muted}>Approval required before stake.</p>
-      ) : null}
+      {!isApproved && amountIn ? <p style={styles.muted}>Approval required before swap.</p> : null}
       {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
 
       <button

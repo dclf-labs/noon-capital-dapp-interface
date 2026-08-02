@@ -8,7 +8,7 @@ import {
   getStarknetChainId,
   getSuiChainId,
 } from '@/lib/chain'
-import type { BridgeNetworkOption } from '@/pages/bridge/BridgePanel'
+import type { BridgeNetworkOption } from '@/mock/bridge/BridgePanel'
 
 /** Source networks available for the connected wallet family. */
 export function getBridgeSourceNetworks(family: 'evm' | 'starknet' | 'sui'): BridgeNetworkOption[] {

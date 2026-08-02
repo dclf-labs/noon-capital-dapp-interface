@@ -120,6 +120,7 @@ Surfaces are separate shells/routes — do not fold mint/redeem, stake/unstake, 
 | Mint / Redeem           | `/mint`, `/redeem`                |
 | Stake / Unstake / Claim | `/stake`, `/unstake`, `/withdraw` |
 | Bridge                  | `/bridge`                         |
+| UI mock gallery         | `/mock`                           |
 
 ## Project structure
 
@@ -132,7 +133,8 @@ src/
     mint-redeem/      # Pure mint/redeem preview + CTA + submit-args
     stake-unstake/    # Pure stake/unstake CTA + submit-args + claims
     bridge/           # Route rules, CTA, Hyperlane / LayerZero
-  pages/              # Route shells, panels, flows (thin UI)
+  pages/              # Route shells + flows (wire hooks → UI)
+  mock/               # Presentational panels / styles (+ /mock gallery)
   hooks/
     connection/       # useWalletSession / read-only / WalletQuerySync
     on-chain/         # balances, allowances, gas
@@ -166,7 +168,8 @@ See:
 - `docs/ARCHITECTURE.md` — sessions, product rules, layout
 - `docs/TESTING.md` — Vitest coverage include list + UI-value conventions
 - `src/features/README.md` — domain modules
-- `src/pages/README.md` — route shells / panels
+- `src/pages/README.md` — route shells / flows
+- `src/mock/README.md` — presentational UI + gallery
 - `src/features/_shared/README.md` — shared trade primitives
 
 ## Extending for protocol work

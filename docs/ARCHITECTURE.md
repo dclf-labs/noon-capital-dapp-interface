@@ -13,7 +13,7 @@ Product surfaces are **separate routes and shells** — buy/sell (DEX), mint/red
 | Stake / Unstake / Claim | `/stake`, `/unstake`, `/withdraw` | `features/stake-unstake`               | `features/stake`, `features/unstake`, … |
 | Bridge                  | `/bridge`                         | `features/bridge` (`route`, `primary`) | EVM / Starknet / Sui bridge contexts    |
 
-Thin route screens live under `src/pages/<surface>/`. See `src/pages/README.md`.
+Thin route screens live under `src/pages/<surface>/`; presentational panels under `src/mock/`. See `src/pages/README.md` and `src/mock/README.md`.
 
 ## State ownership
 
@@ -34,7 +34,8 @@ Thin route screens live under `src/pages/<surface>/`. See `src/pages/README.md`.
 | `src/features/mint-redeem/`   | Mint/redeem preview + CTA + submit-args (pure)                     |
 | `src/features/stake-unstake/` | Stake/unstake CTA + submit-args + withdraw-claim (pure)            |
 | `src/features/bridge/`        | Route rules, CTA, Hyperlane/LZ libs + family providers             |
-| `src/pages/`                  | Route shells, panels, flows (UI binding only)                      |
+| `src/pages/`                  | Route shells + flows (wire hooks → UI props)                       |
+| `src/mock/`                   | Presentational panels / styles; `/mock` gallery                    |
 | `src/hooks/connection/`       | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession` |
 | `src/hooks/on-chain/`         | Balances / allowances / gas (return `0` when disabled)             |
 | `src/hooks/query/`            | `useChainQuery` / `useApiQuery` envelopes                          |

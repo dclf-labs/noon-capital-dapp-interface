@@ -18,7 +18,7 @@ import { getStakeUnstakePrimaryAction } from '@/features/stake-unstake'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { StakeUnstakePanel } from '@/pages/stake-unstake/StakeUnstakePanel'
+import { StakeUnstakePanel } from '@/mock/stake-unstake/StakeUnstakePanel'
 
 export function EvmStakeFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn, tokenOut } = useStakeForm()

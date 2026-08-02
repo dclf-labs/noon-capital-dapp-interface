@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 
-import * as styles from '@/pages/mint-redeem/mint-redeem-styles'
+import * as styles from '@/mock/mint-redeem/mint-redeem-styles'
 
 export function MintRedeemShell() {
   return (

@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from 'motion/react'
 
 import { ChevronDownIcon } from '@/assets/icons'
 import {
+  LIST_OPTION_ACTIVE,
+  LIST_OPTION_ACTIVE_PILL,
   LIST_OPTION_IDLE,
   LIST_OPTION_STACK,
   NETWORK_SELECTOR_Z_INDEX,
@@ -132,13 +134,13 @@ export function NetworkSelector() {
                   className={cn(
                     'relative flex h-10 w-full items-center gap-2 rounded-lg px-2',
                     'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
-                    selected ? 'text-white' : LIST_OPTION_IDLE,
+                    selected ? LIST_OPTION_ACTIVE : LIST_OPTION_IDLE,
                   )}
                 >
                   {selected ? (
                     <motion.div
                       layoutId={`network-selector-bg-${menuId}`}
-                      className="absolute inset-0 rounded-lg bg-primary"
+                      className={LIST_OPTION_ACTIVE_PILL}
                       transition={SHELL_SELECTION_SPRING}
                     />
                   ) : null}

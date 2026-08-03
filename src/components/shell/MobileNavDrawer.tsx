@@ -7,6 +7,9 @@ import { CloseIcon } from '@/assets/icons'
 import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
 import {
   APY_TIP,
+  MODAL_BACKDROP_CLASS,
+  MODAL_CLOSE_BUTTON,
+  MODAL_PANEL_TRANSITION,
   SHELL_SELECTION_CLOSE_MS,
   SHELL_SELECTION_SPRING,
 } from '@/components/shell/constants'
@@ -89,16 +92,17 @@ export function MobileNavDrawer({
     <AnimatePresence>
       {open ? (
         <motion.div
+          key="mobile-nav-drawer"
           className="fixed inset-0 z-[100] lg:hidden"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          exit={{ opacity: 1 }}
+          transition={MODAL_PANEL_TRANSITION}
         >
           <button
             type="button"
             aria-label="Close menu"
-            className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
+            className={MODAL_BACKDROP_CLASS}
             onClick={onClose}
           />
 
@@ -106,10 +110,10 @@ export function MobileNavDrawer({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            transition={MODAL_PANEL_TRANSITION}
             className={cn(
               'absolute top-[13px] right-[9px] left-[9px] flex flex-col gap-3 rounded-lg border border-[#d4d1cf] p-3',
               'bg-white/95 shadow-[0_12px_40px_rgba(17,17,17,0.08)] backdrop-blur-[11.7px]',
@@ -121,8 +125,7 @@ export function MobileNavDrawer({
                 onClick={onClose}
                 aria-label="Close menu"
                 className={cn(
-                  'flex shrink-0 items-center rounded-[5px] border border-stone-200 bg-white p-2 text-primary',
-                  'shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)]',
+                  MODAL_CLOSE_BUTTON,
                   'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
                 )}
               >

@@ -4,6 +4,11 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { CloseIcon } from '@/assets/icons'
+import {
+  MODAL_BACKDROP_CLASS,
+  MODAL_CLOSE_BUTTON,
+  MODAL_PANEL_TRANSITION,
+} from '@/components/shell/constants'
 import useDebounce from '@/hooks/ui/useDebounce'
 import {
   filterReceiverAddressInput,
@@ -15,7 +20,6 @@ import {
 import { cn } from '@/lib/utils'
 import { StatusCallout } from '@/mock/bridge/StatusCallout'
 
-const PANEL_EASE = [0.22, 1, 0.36, 1] as const
 const focusReset =
   'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
 
@@ -124,15 +128,15 @@ export function ChangeReceiverAddressModal({
         <motion.div
           key={`change-receiver-${family}`}
           className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
+          exit={{ opacity: 1 }}
+          transition={MODAL_PANEL_TRANSITION}
         >
           <button
             type="button"
             aria-label="Close"
-            className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
+            className={MODAL_BACKDROP_CLASS}
             onClick={close}
           />
 
@@ -140,10 +144,10 @@ export function ChangeReceiverAddressModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.98 }}
-            transition={{ duration: 0.22, ease: PANEL_EASE }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={MODAL_PANEL_TRANSITION}
             className={cn(
               'relative z-10 flex w-full max-w-lg flex-col gap-5 overflow-hidden',
               'rounded-xl border border-stone-200 bg-white p-6',
@@ -164,11 +168,7 @@ export function ChangeReceiverAddressModal({
                 type="button"
                 onClick={close}
                 aria-label="Close"
-                className={cn(
-                  'flex shrink-0 items-center rounded-md border border-stone-200 bg-white p-2 text-primary',
-                  'shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-opacity hover:opacity-80',
-                  focusReset,
-                )}
+                className={cn(MODAL_CLOSE_BUTTON, focusReset)}
               >
                 <CloseIcon width={16} height={16} className="size-4" aria-hidden />
               </button>

@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 
 import {
+  LIST_OPTION_ACTIVE,
+  LIST_OPTION_ACTIVE_PILL,
   LIST_OPTION_IDLE,
   LIST_OPTION_STACK,
   SHELL_SELECTION_CLOSE_MS,
@@ -227,14 +229,14 @@ export function BridgeNetworkPicker({
                           unavailable
                             ? 'cursor-not-allowed text-stone-400'
                             : active
-                              ? 'text-white'
+                              ? LIST_OPTION_ACTIVE
                               : LIST_OPTION_IDLE,
                         )}
                       >
                         {active && !unavailable ? (
                           <motion.div
                             layoutId={`bridge-network-picker-bg-${menuId}`}
-                            className="absolute inset-0 rounded-lg bg-primary"
+                            className={LIST_OPTION_ACTIVE_PILL}
                             transition={SHELL_SELECTION_SPRING}
                           />
                         ) : null}

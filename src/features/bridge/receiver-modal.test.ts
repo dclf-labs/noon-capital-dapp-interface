@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
 import {
   getDestinationNetworkType,
+  type ReceiverAddressBundle,
   type ReceiverModalAutoOpenReason,
   shouldAutoOpenReceiverModal,
   syncReceiverForDestination,
 } from '@/features/bridge/receiver-modal'
+import type { Address, StarknetAddress, SuiAddress } from '@/lib/address'
 
 const AUTO_OPEN_REASONS: ReceiverModalAutoOpenReason[] = [
   'destination-network-change',
@@ -32,32 +34,33 @@ describe('getDestinationNetworkType', () => {
 })
 
 describe('syncReceiverForDestination', () => {
-  const addresses = {
-    evm: '0xevm',
-    starknet: '0xstark',
-    sui: '0xsui',
+  const addresses: ReceiverAddressBundle = {
+    evm: '0xevm' as Address,
+    starknet: '0xstark' as StarknetAddress,
+    sui: '0xsui' as SuiAddress,
   }
 
   it('selects the family receiver and closes unrelated modals without opening one', () => {
     expect(syncReceiverForDestination('starknet', addresses)).toEqual({
-      receiverAddress: '0xstark',
+      receiverAddress: addresses.starknet,
       closeModals: ['evm', 'sui'],
       openModal: undefined,
     })
     expect(syncReceiverForDestination('sui', addresses)).toEqual({
-      receiverAddress: '0xsui',
+      receiverAddress: addresses.sui,
       closeModals: ['evm', 'starknet'],
       openModal: undefined,
     })
     expect(syncReceiverForDestination('evm', addresses)).toEqual({
-      receiverAddress: '0xevm',
+      receiverAddress: addresses.evm,
       closeModals: ['starknet', 'sui'],
       openModal: undefined,
     })
   })
 
   it('preserves undefined when the destination family has no stored address', () => {
-    expect(syncReceiverForDestination('starknet', { evm: '0xevm' }).receiverAddress).toBeUndefined()
-    expect(syncReceiverForDestination('starknet', { evm: '0xevm' }).openModal).toBeUndefined()
+    const evmOnly: ReceiverAddressBundle = { evm: addresses.evm }
+    expect(syncReceiverForDestination('starknet', evmOnly).receiverAddress).toBeUndefined()
+    expect(syncReceiverForDestination('starknet', evmOnly).openModal).toBeUndefined()
   })
 })

@@ -4,9 +4,20 @@ import { DEFAULT_USERNAME } from '@/constants/api'
 import { getShellWalletChrome } from '@/layout/shell-wallet-chrome'
 import type { UnifiedConnection } from '@/lib/connection'
 
-function session(
-  partial: Partial<UnifiedConnection> & Pick<UnifiedConnection, 'chainFamily'>,
-): UnifiedConnection {
+/** Test fixture overrides — avoid `Partial<UnifiedConnection>` (connector is a family union). */
+type SessionOverrides = {
+  chainFamily: UnifiedConnection['chainFamily']
+  isConnected?: boolean
+  address?: string
+  name?: string
+  connector?: {
+    id?: string
+    name?: string
+    icon?: string | { light?: string; dark?: string }
+  }
+}
+
+function session(partial: SessionOverrides): UnifiedConnection {
   return {
     name: DEFAULT_USERNAME,
     avatar: '',
@@ -83,7 +94,7 @@ describe('getShellWalletChrome', () => {
           id: 'coinbaseWalletSDK',
           name: 'Coinbase Wallet',
           icon: 'https://example.com/coinbase.svg',
-        } as UnifiedConnection['connector'],
+        },
       }),
     )
     expect(chrome.walletIconSrc).toBe('https://example.com/coinbase.svg')
@@ -99,7 +110,7 @@ describe('getShellWalletChrome', () => {
           id: 'braavos',
           name: 'Braavos',
           icon: { light: 'data:image/svg+xml;braavos', dark: 'data:image/svg+xml;braavos' },
-        } as UnifiedConnection['connector'],
+        },
       }),
     )
     expect(chrome.walletIconSrc).toBe('data:image/svg+xml;braavos')
@@ -112,7 +123,7 @@ describe('getShellWalletChrome', () => {
         chainFamily: 'evm',
         isConnected: true,
         address: '0x1234567890abcdef1234567890abcdef12345678',
-        connector: { id: 'rainbow', name: 'Rainbow' } as UnifiedConnection['connector'],
+        connector: { id: 'rainbow', name: 'Rainbow' },
       }),
     )
     expect(chrome.walletIconSrc).toBeUndefined()

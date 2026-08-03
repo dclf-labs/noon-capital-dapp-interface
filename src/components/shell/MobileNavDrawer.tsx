@@ -27,12 +27,14 @@ type MobileNavDrawerProps = {
   tvl: string
   isConnected?: boolean
   walletLabel?: string
+  walletIconSrc?: string
   onConnectClick?: () => void
 }
 
 /**
  * Mobile / tablet menu — Figma “Side Bar Opened”.
- * Connect wallet / connected account sit at the bottom of the card.
+ * Header: close · wordmark · APY/TVL · network switcher.
+ * Bottom: Connect wallet (disconnected) or account chip (connected).
  */
 export function MobileNavDrawer({
   open,
@@ -42,6 +44,7 @@ export function MobileNavDrawer({
   tvl,
   isConnected = false,
   walletLabel,
+  walletIconSrc,
   onConnectClick,
 }: MobileNavDrawerProps) {
   const titleId = useId()
@@ -119,7 +122,7 @@ export function MobileNavDrawer({
               'bg-white/95 shadow-[0_12px_40px_rgba(17,17,17,0.08)] backdrop-blur-[11.7px]',
             )}
           >
-            <div className="flex w-full items-center gap-3">
+            <div className="flex w-full items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={onClose}
@@ -159,8 +162,9 @@ export function MobileNavDrawer({
                 </div>
               </div>
 
-              <div className="mx-1 h-10 w-px shrink-0 bg-[#d4d1cf]" aria-hidden />
+              <div className="mx-0.5 h-10 w-px shrink-0 bg-[#d4d1cf]" aria-hidden />
 
+              {/* Open menu: network switcher replaces the closed-bar wallet avatar slot. */}
               <NetworkSelector />
             </div>
 
@@ -232,6 +236,7 @@ export function MobileNavDrawer({
                 size="md"
                 showLabel
                 label={walletLabel}
+                walletIconSrc={walletIconSrc}
                 onClick={() => {
                   onConnectClick?.()
                   onClose()

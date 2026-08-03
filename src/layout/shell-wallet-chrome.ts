@@ -1,5 +1,6 @@
 import { DEFAULT_USERNAME } from '@/constants/api'
 import type { UnifiedConnection } from '@/lib/connection'
+import { resolveConnectorIconSrc } from '@/wallet/connector-icon'
 
 function shortenAddress(address?: string) {
   if (!address) return undefined
@@ -11,6 +12,8 @@ export type ShellWalletChrome = {
   isConnected: boolean
   /** Label for the connected chip; undefined while disconnected. */
   walletLabel: string | undefined
+  /** Active connector badge URL; undefined when disconnected or unknown. */
+  walletIconSrc: string | undefined
   chainFamily: UnifiedConnection['chainFamily']
 }
 
@@ -27,6 +30,10 @@ export function getShellWalletChrome(session: UnifiedConnection): ShellWalletChr
     isConnected,
     walletLabel: isConnected
       ? realName || shortenAddress(session.address) || 'Connected'
+      : undefined,
+    // Active product family only — never borrow MetaMask from a parallel EVM session.
+    walletIconSrc: isConnected
+      ? resolveConnectorIconSrc(session.connector, session.chainFamily)
       : undefined,
     chainFamily: session.chainFamily,
   }

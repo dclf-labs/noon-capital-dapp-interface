@@ -12,8 +12,9 @@ import {
 } from '@/components/shell'
 import { MobileNavDrawer } from '@/components/shell/MobileNavDrawer'
 import useSidebarProtocolMetrics from '@/features/shell/hooks/useSidebarProtocolMetrics'
-import { useWalletSession } from '@/hooks/connection'
+import { useLiveWalletAccounts, useWalletSession } from '@/hooks/connection'
 import { getShellWalletChrome } from '@/layout/shell-wallet-chrome'
+import { resolveConnectorIconSrc } from '@/wallet/connector-icon'
 import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 /**
@@ -24,7 +25,18 @@ export function AppShell() {
   const location = useLocation()
   // Active product network only — EVM connected + Starknet selected ⇒ Connect.
   const session = useWalletSession()
+  const liveAccounts = useLiveWalletAccounts()
   const { isConnected, walletLabel, chainFamily } = getShellWalletChrome(session)
+  // Badge must follow the *active family's* live connector (never a parallel EVM MetaMask).
+  const familyConnector =
+    chainFamily === 'starknet'
+      ? liveAccounts.starknet.connector
+      : chainFamily === 'sui'
+        ? liveAccounts.sui.connector
+        : liveAccounts.evm.connector
+  const walletIconSrc = isConnected
+    ? resolveConnectorIconSrc(familyConnector, chainFamily)
+    : undefined
   const connectWalletFamily = useConnectWalletFamily()
   const [apyPeriod, setApyPeriod] = useState<SidebarApyPeriod>('7d')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -57,6 +69,7 @@ export function AppShell() {
       <div className="relative z-10 flex min-h-dvh w-full min-w-0 flex-1 flex-col">
         <AppHeader
           walletLabel={walletLabel}
+          walletIconSrc={walletIconSrc}
           isConnected={isConnected}
           apy={sidebarApy}
           tvl={sidebarTvl}
@@ -94,6 +107,7 @@ export function AppShell() {
         tvl={sidebarTvl}
         isConnected={isConnected}
         walletLabel={walletLabel}
+        walletIconSrc={walletIconSrc}
         onConnectClick={openWallet}
       />
     </div>

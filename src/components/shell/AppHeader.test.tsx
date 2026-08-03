@@ -74,7 +74,7 @@ describe('AppHeader', () => {
     expect(onMenuClick).toHaveBeenCalledTimes(1)
   })
 
-  it('always exposes a network selector control', () => {
+  it('shows APY and TVL on the closed mobile bar', () => {
     render(
       <AppHeader
         isConnected={false}
@@ -84,6 +84,23 @@ describe('AppHeader', () => {
         onMenuClick={vi.fn()}
       />,
     )
-    expect(screen.getAllByRole('button', { name: /network:/i }).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('APY').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('6.94%').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('TVL').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('35.1M').length).toBeGreaterThan(0)
+  })
+
+  it('exposes a network selector on desktop (not the closed mobile bar)', () => {
+    render(
+      <AppHeader
+        isConnected={false}
+        apy="6.94%"
+        tvl="35.1M"
+        onConnectClick={vi.fn()}
+        onMenuClick={vi.fn()}
+      />,
+    )
+    // Desktop header only — closed mobile bar uses the wallet control per Figma.
+    expect(screen.getAllByRole('button', { name: /network:/i }).length).toBe(1)
   })
 })

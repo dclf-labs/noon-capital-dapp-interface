@@ -72,4 +72,49 @@ describe('getShellWalletChrome', () => {
     )
     expect(chrome.walletLabel).toBe('alice')
   })
+
+  it('exposes the active connector icon for the wallet badge', () => {
+    const chrome = getShellWalletChrome(
+      session({
+        chainFamily: 'evm',
+        isConnected: true,
+        address: '0x1234567890abcdef1234567890abcdef12345678',
+        connector: {
+          id: 'coinbaseWalletSDK',
+          name: 'Coinbase Wallet',
+          icon: 'https://example.com/coinbase.svg',
+        } as UnifiedConnection['connector'],
+      }),
+    )
+    expect(chrome.walletIconSrc).toBe('https://example.com/coinbase.svg')
+  })
+
+  it('uses the Starknet connector icon (Braavos), not MetaMask', () => {
+    const chrome = getShellWalletChrome(
+      session({
+        chainFamily: 'starknet',
+        isConnected: true,
+        address: '0xabc',
+        connector: {
+          id: 'braavos',
+          name: 'Braavos',
+          icon: { light: 'data:image/svg+xml;braavos', dark: 'data:image/svg+xml;braavos' },
+        } as UnifiedConnection['connector'],
+      }),
+    )
+    expect(chrome.walletIconSrc).toBe('data:image/svg+xml;braavos')
+    expect(chrome.walletIconSrc).not.toContain('metamask')
+  })
+
+  it('does not hardcode MetaMask when the connector is unknown', () => {
+    const chrome = getShellWalletChrome(
+      session({
+        chainFamily: 'evm',
+        isConnected: true,
+        address: '0x1234567890abcdef1234567890abcdef12345678',
+        connector: { id: 'rainbow', name: 'Rainbow' } as UnifiedConnection['connector'],
+      }),
+    )
+    expect(chrome.walletIconSrc).toBeUndefined()
+  })
 })

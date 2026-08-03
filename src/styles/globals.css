@@ -79,6 +79,10 @@
     --shadow-panel: 0px 4px 4px 0px rgba(111, 125, 185, 0.05);
   }
 
+  /*
+   * Default face for the entire dapp: Suisse Int'l Book.
+   * Louize / Denton are opt-in via `font-louize` / `font-denton` only.
+   */
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -88,17 +92,18 @@
     letter-spacing: 0;
   }
 
-  body {
+  body,
+  #root {
     margin: 0;
     min-height: 100dvh;
-    font-family: inherit;
-    font-weight: inherit;
+    font-family: var(--font-s);
+    font-weight: 450;
     letter-spacing: inherit;
   }
 
   /*
-   * Form controls use the UA font by default — force Suisse Int'l
-   * so inputs / buttons match the rest of the dapp.
+   * UA form controls don't inherit the page font — pin Suisse Int'l
+   * so every control matches the dapp default.
    */
   :where(button, input, textarea, select, option) {
     font-family: var(--font-s);
@@ -106,12 +111,7 @@
 
   /* Tight tracking on typed fields (amounts, addresses) — not buttons/selects. */
   :where(input, textarea) {
-    font-family: var(--font-s);
     letter-spacing: -0.05em;
-  }
-
-  #root {
-    min-height: 100dvh;
   }
 
   /* Interactive affordance — enabled pointer, disabled not-allowed. */
@@ -321,13 +321,15 @@
 }
 
 @theme {
+  /* Tailwind default / sans / text → Suisse Int'l (dapp body face). */
   --font-suisse: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-louize: 'Louize', Georgia, 'Times New Roman', serif;
-  --font-denton: 'Denton', Georgia, 'Times New Roman', serif;
-  --font-display: 'Louize', Georgia, 'Times New Roman', serif;
   --font-text: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-sans: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --default-font-family: 'SuisseIntl', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Display / numerals — only when `font-louize` / `font-denton` is applied. */
+  --font-louize: 'Louize', Georgia, 'Times New Roman', serif;
+  --font-denton: 'Denton', Georgia, 'Times New Roman', serif;
+  --font-display: 'Louize', Georgia, 'Times New Roman', serif;
 
   /* Suisse Book — Figma “Suisse Int'l Book” */
   --font-weight-book: 450;

@@ -1,6 +1,6 @@
 import { MenuIcon } from '@/assets/icons'
 import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
-import { APY_TIP } from '@/components/shell/constants'
+import { APY_TIP, SHELL_ICON_BUTTON } from '@/components/shell/constants'
 import { NetworkSelector } from '@/components/shell/NetworkSelector'
 import { WalletAvatarButton } from '@/components/shell/WalletAvatarButton'
 import { InfoTipIcon } from '@/components/ui/info-tip-icon'
@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils'
 
 type AppHeaderProps = {
   walletLabel?: string
+  /** Active connector badge for the connected chip. */
+  walletIconSrc?: string
   /** True when a wallet is connected for the selected product network. */
   isConnected?: boolean
   onConnectClick?: () => void
@@ -18,11 +20,12 @@ type AppHeaderProps = {
 
 /**
  * Desktop (lg+): network selector + connect CTA or connected wallet chip.
- * Mobile / tablet: hamburger · mark · APY/TVL · network · wallet CTA
- * (drawer still repeats connect / account at the bottom).
+ * Mobile / tablet closed bar (Figma Side Bar Closed):
+ * hamburger · mark · APY/TVL · wallet — network lives in the open drawer.
  */
 export function AppHeader({
   walletLabel,
+  walletIconSrc,
   isConnected = false,
   onConnectClick,
   onMenuClick,
@@ -30,7 +33,12 @@ export function AppHeader({
   tvl = '—',
 }: AppHeaderProps) {
   const walletControl = isConnected ? (
-    <WalletAvatarButton onClick={onConnectClick} label={walletLabel} showLabel />
+    <WalletAvatarButton
+      onClick={onConnectClick}
+      label={walletLabel}
+      walletIconSrc={walletIconSrc}
+      showLabel
+    />
   ) : (
     <ConnectWalletButton onClick={onConnectClick} />
   )
@@ -50,8 +58,7 @@ export function AppHeader({
             onClick={onMenuClick}
             aria-label="Open menu"
             className={cn(
-              'flex shrink-0 items-center rounded-[5px] border border-stone-200 bg-white p-2 text-primary',
-              'shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)]',
+              SHELL_ICON_BUTTON,
               'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
             )}
           >
@@ -68,7 +75,7 @@ export function AppHeader({
             />
           </div>
 
-          <div className="hidden shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1.5 min-[480px]:flex">
+          <div className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1.5">
             <div className="flex flex-col items-start justify-center">
               <div className="mb-[-2px] flex items-center gap-0.5">
                 <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
@@ -82,17 +89,17 @@ export function AppHeader({
             </div>
           </div>
 
-          <div
-            className="mx-0.5 hidden h-10 w-px shrink-0 bg-[#d4d1cf] min-[480px]:block"
-            aria-hidden
-          />
+          <div className="mx-0.5 h-10 w-px shrink-0 bg-[#d4d1cf]" aria-hidden />
 
-          <NetworkSelector />
-
-          {/* Active-family connect / account — updates when switching to Starknet/Sui/etc. */}
+          {/* Active-family connect / account — network switcher is in the open drawer. */}
           <div className="shrink-0">
             {isConnected ? (
-              <WalletAvatarButton onClick={onConnectClick} label={walletLabel} />
+              <WalletAvatarButton
+                size="md"
+                onClick={onConnectClick}
+                label={walletLabel}
+                walletIconSrc={walletIconSrc}
+              />
             ) : (
               <ConnectWalletButton compact onClick={onConnectClick} />
             )}

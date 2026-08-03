@@ -1,3 +1,4 @@
+import { WalletIcon } from '@/assets/icons'
 import { cn } from '@/lib/utils'
 
 type WalletAvatarButtonProps = {
@@ -7,30 +8,34 @@ type WalletAvatarButtonProps = {
   size?: 'sm' | 'md'
   label?: string
   showLabel?: boolean
+  /** Active connector badge (MetaMask, Ready, WalletConnect, …). */
+  walletIconSrc?: string
 }
 
 const sizes = {
   sm: {
-    button: 'p-2',
+    button: 'size-10 p-2',
     avatar: 'size-6 rounded',
     badge: 'size-3 border-[0.75px]',
     fox: 'h-[6.75px] w-[7px]',
   },
+  /** Figma mobile closed bar — 48×48, 1.29px #E7E5E4 border. */
   md: {
-    button: 'p-[8.5px]',
+    button: 'size-12 p-[8.5px] rounded-[13px]',
     avatar: 'size-[31px] rounded-[5px]',
     badge: 'size-[15px] border',
     fox: 'h-[8.7px] w-[9px]',
   },
 } as const
 
-/** Wallet chip — avatar + MetaMask badge; optional text label (desktop). */
+/** Wallet chip — avatar + active-connector badge; optional text label (desktop). */
 export function WalletAvatarButton({
   onClick,
   className,
   size = 'sm',
   label,
   showLabel = false,
+  walletIconSrc,
 }: WalletAvatarButtonProps) {
   const s = sizes[size]
 
@@ -40,10 +45,11 @@ export function WalletAvatarButton({
       onClick={onClick}
       aria-label={label || 'Connect wallet'}
       className={cn(
-        'flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white',
+        'flex items-center justify-center gap-1.5 bg-white',
+        'border-[1.29px] border-[#E7E5E4]',
         'text-stone-900 transition-colors hover:text-primary focus-visible:text-primary',
         'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
-        showLabel ? 'py-2 pr-3 pl-2' : s.button,
+        showLabel ? 'rounded-xl py-2 pr-3 pl-2' : cn('rounded-xl', s.button),
         className,
       )}
     >
@@ -68,13 +74,22 @@ export function WalletAvatarButton({
             s.badge,
           )}
         >
-          <img
-            src="/assets/shell/metamask.svg"
-            alt=""
-            width={7}
-            height={7}
-            className={cn('object-contain', s.fox)}
-          />
+          {walletIconSrc ? (
+            <img
+              src={walletIconSrc}
+              alt=""
+              width={size === 'sm' ? 7 : 9}
+              height={size === 'sm' ? 7 : 9}
+              className={cn('object-contain', s.fox)}
+            />
+          ) : (
+            <WalletIcon
+              width={size === 'sm' ? 7 : 9}
+              height={size === 'sm' ? 7 : 9}
+              className={cn('text-accent', s.fox)}
+              aria-hidden
+            />
+          )}
         </span>
       </span>
       {showLabel ? (

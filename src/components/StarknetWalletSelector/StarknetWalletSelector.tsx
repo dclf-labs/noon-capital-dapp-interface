@@ -15,26 +15,18 @@ import {
   SHELL_SELECTION_SPRING,
 } from '@/components/shell/constants'
 import { cn } from '@/lib/utils'
+import { resolveConnectorIconSrc } from '@/wallet/connector-icon'
 
 const focusReset =
   'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
-
-/** Official brand marks — starknet-react still ships the old Argent wings for Ready. */
-const WALLET_ICON_BY_ID: Record<string, string> = {
-  argentX: '/assets/wallets/ready.png',
-  ready: '/assets/wallets/ready.png',
-}
 
 function connectorIconSrc(
   connectorId: string | undefined,
   icon: Connector['icon'] | undefined,
 ): string {
-  if (connectorId && WALLET_ICON_BY_ID[connectorId]) {
-    return WALLET_ICON_BY_ID[connectorId]
-  }
-  if (!icon) return '/assets/chains/starknet.svg'
-  if (typeof icon === 'string') return icon
-  return icon.light || icon.dark || '/assets/chains/starknet.svg'
+  return (
+    resolveConnectorIconSrc({ id: connectorId, icon }, 'starknet') ?? '/assets/chains/starknet.svg'
+  )
 }
 
 type StarknetWalletSelectorProps = {

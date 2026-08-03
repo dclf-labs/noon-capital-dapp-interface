@@ -63,8 +63,9 @@ describe('MobileNavDrawer', () => {
     expect(screen.getByRole('button', { name: /connect wallet/i })).toBeInTheDocument()
   })
 
-  it('shows the connected wallet control at the bottom when connected', () => {
+  it('shows network switcher in the header and account chip at the bottom when connected', () => {
     renderDrawer({ isConnected: true, walletLabel: 'alice.eth' })
+    expect(screen.getByRole('button', { name: /network:/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'alice.eth' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^connect wallet$/i })).not.toBeInTheDocument()
   })

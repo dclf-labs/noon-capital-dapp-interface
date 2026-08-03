@@ -82,9 +82,15 @@ export const MODAL_BACKDROP_CLASS = 'absolute inset-0 bg-black/25 backdrop-blur-
 /** Dialog panel enter / exit — snappy; backdrop stays static. */
 export const MODAL_PANEL_TRANSITION = { duration: 0.18, ease: MODAL_EASE }
 
-/** Borderless modal close control — icon color only on hover (no background). */
-export const MODAL_CLOSE_BUTTON =
-  'flex shrink-0 items-center rounded-md p-2 text-stone-500 transition-colors hover:text-stone-900'
+/**
+ * Chrome icon control (menu open / close, modal dismiss) — Figma 4819:57195.
+ * White tile, 0.67px #E7E5E4 border, soft indigo shadow, 8px pad, 16px icon.
+ */
+export const SHELL_ICON_BUTTON =
+  'flex shrink-0 items-center rounded-[5.33px] border-[0.67px] border-[#E7E5E4] bg-white p-2 text-primary shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-colors hover:text-primary/80'
+
+/** Modal / drawer dismiss control — same bordered tile as the menu chrome. */
+export const MODAL_CLOSE_BUTTON = SHELL_ICON_BUTTON
 
 /**
  * Network dropdown panel — above shell chrome (sidebar 30, mobile drawer 100),

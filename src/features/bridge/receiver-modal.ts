@@ -1,15 +1,18 @@
 import type { ChainId } from '@/config/chain-id'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
+import type { Address, StarknetAddress, SuiAddress } from '@/lib/address'
 
 export type DestinationNetworkType = 'evm' | 'starknet' | 'sui'
 
 export type ReceiverModalAutoOpenReason =
   'destination-network-change' | 'missing-receiver-address' | 'wallet-address-change'
 
+export type BridgeReceiverAddress = Address | StarknetAddress | SuiAddress
+
 export type ReceiverAddressBundle = {
-  evm?: string
-  starknet?: string
-  sui?: string
+  evm?: Address
+  starknet?: StarknetAddress
+  sui?: SuiAddress
 }
 
 export function getDestinationNetworkType(
@@ -37,7 +40,7 @@ export function syncReceiverForDestination(
   destinationType: DestinationNetworkType,
   addresses: ReceiverAddressBundle,
 ): {
-  receiverAddress: string | undefined
+  receiverAddress: BridgeReceiverAddress | undefined
   closeModals: DestinationNetworkType[]
   openModal: undefined
 } {

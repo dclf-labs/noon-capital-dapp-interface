@@ -9,7 +9,7 @@ import {
 type ExplorerActionsProps = {
   txnUrl?: string
   moreLabel: string
-  onMore: () => void
+  onMore?: () => void
   className?: string
 }
 
@@ -39,6 +39,7 @@ export function ExplorerActions({ txnUrl, moreLabel, onMore, className }: Explor
 
       <button
         type="button"
+        disabled={!onMore}
         onMouseDown={preventMouseDownFocus}
         onClick={onMore}
         className={accentCtaClassName()}

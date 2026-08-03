@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import type { Token } from '@/config/token'
 import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
+  isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
   toTradeReceiveStoredAmount,
@@ -13,6 +14,7 @@ import {
 } from '@/features/_shared/trade-input-format'
 import type { TradeMode } from '@/features/_shared/trade-primary'
 import { down } from '@/lib/format'
+import { SafeExplorerLink } from '@/mock/_shared'
 import { TokenDropdown } from '@/mock/buy/TokenDropdown'
 import * as styles from '@/mock/swap/trade-styles'
 
@@ -114,13 +116,13 @@ export function TradePanelView({
     return (
       <section style={{ display: 'grid', gap: 12 }}>
         <h2 style={{ margin: 0, fontSize: 18 }}>Transaction submitted</h2>
-        {txnUrl ? (
-          <a href={txnUrl} target="_blank" rel="noreferrer noopener" style={styles.link}>
-            View on explorer
-          </a>
-        ) : (
-          <p style={styles.muted}>Waiting for explorer link…</p>
-        )}
+        <SafeExplorerLink
+          href={txnUrl}
+          style={styles.link}
+          fallback={<p style={styles.muted}>Waiting for explorer link…</p>}
+        >
+          View on explorer
+        </SafeExplorerLink>
         <button type="button" style={styles.button} onClick={onReset}>
           {title} more
         </button>
@@ -204,10 +206,7 @@ export function TradePanelView({
               }
               onAmountInChange(parsed.amount)
             }}
-            isAllowed={(values) => {
-              const parts = values.value.split('.')
-              return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
-            }}
+            isAllowed={isTradePayInputAllowed}
           />
           <TokenDropdown
             token={tokenIn}

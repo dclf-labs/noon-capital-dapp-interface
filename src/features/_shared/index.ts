@@ -27,10 +27,12 @@ export {
   formatTradePayDisplay,
   formatTradeReceiveDisplay,
   getTradeMaxAmount,
+  isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
   toTradeReceiveStoredAmount,
   TRADE_PAY_DECIMALS,
+  TRADE_PAY_INTEGER_DIGITS,
   TRADE_RECEIVE_DISPLAY_DECIMALS,
   type TradePayInputParseResult,
 } from './trade-input-format'

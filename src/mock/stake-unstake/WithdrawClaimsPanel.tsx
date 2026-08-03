@@ -14,6 +14,7 @@ import { useWithdrawPeriod, useWithdrawRequests, useWithdrawSubmit } from '@/fea
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import { TxnStatus } from '@/lib/connection'
 import { down } from '@/lib/format'
+import { SafeExplorerLink } from '@/mock/_shared'
 import * as styles from '@/mock/stake-unstake/stake-unstake-styles'
 
 function RequestRow({
@@ -151,11 +152,9 @@ export function WithdrawClaimsPanel() {
           onClaim={() => onClaim(request.requestId)}
         />
       ))}
-      {txnUrl ? (
-        <a href={txnUrl} target="_blank" rel="noreferrer noopener" style={styles.link}>
-          View last claim on explorer
-        </a>
-      ) : null}
+      <SafeExplorerLink href={txnUrl} style={styles.link}>
+        View last claim on explorer
+      </SafeExplorerLink>
     </section>
   )
 }

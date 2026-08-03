@@ -71,6 +71,12 @@
     --font-d: 'Denton', Georgia, 'Times New Roman', serif;
     /* Menu-bar / selected-nav ink — use for icon hover + active. */
     --color-primary: #111111;
+    /* Figma indigo CTA / accent (ConnectWallet, buy/bridge panels). */
+    --color-accent: #6c77e9;
+    --color-cta-disabled: #e9e9e9;
+    --color-cta-disabled-fg: #7b7b7b;
+    --color-success-soft: #d1fae5;
+    --shadow-panel: 0px 4px 4px 0px rgba(111, 125, 185, 0.05);
   }
 
   html {
@@ -309,4 +315,10 @@
 
   /* Same ink as the sidebar menu-bar selected pill (`bg-primary`). */
   --color-primary: #111111;
+  /* Figma indigo CTA — distinct from nav `primary` ink. */
+  --color-accent: #6c77e9;
+  --color-cta-disabled: #e9e9e9;
+  --color-cta-disabled-fg: #7b7b7b;
+  --color-success-soft: #d1fae5;
+  --shadow-panel: 0px 4px 4px 0px rgba(111, 125, 185, 0.05);
 }

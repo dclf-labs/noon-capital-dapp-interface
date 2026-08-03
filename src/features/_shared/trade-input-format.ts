@@ -74,6 +74,19 @@ export function getTradeMaxAmount(
 export type TradePayInputParseResult =
   { kind: 'clear' } | { kind: 'commit'; amount: number } | { kind: 'draft' }
 
+/** Max digits allowed left of the decimal in pay NumericFormat fields. */
+export const TRADE_PAY_INTEGER_DIGITS = 18
+
+/**
+ * NumericFormat `isAllowed` guard: caps integer width and fraction scale.
+ * Shared by buy / bridge / swap / mint / stake amount inputs.
+ */
+export function isTradePayInputAllowed(values: { value: string }): boolean {
+  const parts = values.value.split('.')
+  if (parts[0] && parts[0].length > TRADE_PAY_INTEGER_DIGITS) return false
+  return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
+}
+
 /**
  * Parse NumericFormat onValueChange payloads.
  * - `clear` — empty field

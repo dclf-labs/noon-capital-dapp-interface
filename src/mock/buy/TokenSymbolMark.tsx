@@ -42,7 +42,7 @@ const SIZE: Record<
     iconPx: 32,
     overlay: 'size-3',
     overlayPx: 12,
-    iconTone: 'bg-[#6c77e9]',
+    iconTone: 'bg-accent',
     type: 'text-[28px] leading-none tracking-[-1.4px] text-stone-900 md:text-[36px] md:tracking-[-1.8px]',
   },
 }

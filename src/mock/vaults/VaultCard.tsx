@@ -72,7 +72,7 @@ export function VaultCard({ vault }: VaultCardProps) {
         <a
           {...linkProps}
           className={cn(
-            'flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#6c77e9] px-5 py-3',
+            'flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-5 py-3',
             'text-base tracking-[0.32px] whitespace-nowrap text-white md:hidden',
           )}
           aria-label={`Earn now in ${vault.name}`}
@@ -98,7 +98,7 @@ export function VaultCard({ vault }: VaultCardProps) {
         >
           <span
             className={cn(
-              'flex h-full min-w-[148px] flex-row items-center justify-center gap-1.5 rounded-2xl bg-[#6c77e9] px-7',
+              'flex h-full min-w-[148px] flex-row items-center justify-center gap-1.5 rounded-2xl bg-accent px-7',
               'text-base tracking-[0.32px] whitespace-nowrap text-white',
               'origin-left transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
               'scale-95 group-focus-within/card:scale-100 group-hover/card:scale-100',

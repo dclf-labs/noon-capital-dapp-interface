@@ -5,10 +5,12 @@ import {
   formatTradePayDisplay,
   formatTradeReceiveDisplay,
   getTradeMaxAmount,
+  isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
   toTradeReceiveStoredAmount,
   TRADE_PAY_DECIMALS,
+  TRADE_PAY_INTEGER_DIGITS,
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 
@@ -117,6 +119,23 @@ describe('parseTradePayInput', () => {
     expect(parseTradePayInput({ floatValue: 0, value: '0' })).toEqual({ kind: 'draft' })
     expect(parseTradePayInput({ floatValue: 0, value: '0.' })).toEqual({ kind: 'draft' })
     expect(parseTradePayInput({ floatValue: 1, value: '1.' })).toEqual({ kind: 'draft' })
+  })
+})
+
+describe('isTradePayInputAllowed', () => {
+  it(`allows up to ${TRADE_PAY_INTEGER_DIGITS} integer digits and ${TRADE_PAY_DECIMALS} fraction digits`, () => {
+    expect(isTradePayInputAllowed({ value: '1' })).toBe(true)
+    expect(isTradePayInputAllowed({ value: '1.123456' })).toBe(true)
+    expect(isTradePayInputAllowed({ value: `${'1'.repeat(TRADE_PAY_INTEGER_DIGITS)}.12` })).toBe(
+      true,
+    )
+  })
+
+  it('rejects oversized integer or fraction parts', () => {
+    expect(isTradePayInputAllowed({ value: `${'1'.repeat(TRADE_PAY_INTEGER_DIGITS + 1)}` })).toBe(
+      false,
+    )
+    expect(isTradePayInputAllowed({ value: '1.1234567' })).toBe(false)
   })
 })
 

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
+import { ProductStepShell } from '@/mock/_shared'
 import { BUY_HERO_SUBTITLE } from '@/mock/buy/constants'
 import type { BuyPoweredBy } from '@/mock/buy/powered-by'
 import { PoweredByRow } from '@/mock/buy/PoweredByRow'
-import { ProductHero } from '@/mock/vaults/ProductHero'
 
 type BuyStepShellProps = {
   children: ReactNode
@@ -14,25 +14,13 @@ type BuyStepShellProps = {
 
 /** Shared Buy page chrome: product tabs/hero + card slot + Powered by. */
 export function BuyStepShell({ children, poweredBy, showHero = true }: BuyStepShellProps) {
-  const card = (
-    <div className="flex w-full min-w-0 flex-col items-stretch gap-4 lg:max-w-[70%] lg:min-w-[45%]">
-      <div className="w-full min-w-0">{children}</div>
-      <div className="flex w-full justify-center">
-        <PoweredByRow poweredBy={poweredBy} />
-      </div>
-    </div>
-  )
-
-  if (!showHero) {
-    return card
-  }
-
   return (
-    <div className="flex w-full flex-col items-center pt-6 md:pt-10">
-      <div className="flex w-full flex-col items-center gap-6 md:gap-12">
-        <ProductHero subtitle={BUY_HERO_SUBTITLE} />
-        {card}
-      </div>
-    </div>
+    <ProductStepShell
+      subtitle={BUY_HERO_SUBTITLE}
+      showHero={showHero}
+      footer={<PoweredByRow poweredBy={poweredBy} />}
+    >
+      {children}
+    </ProductStepShell>
   )
 }

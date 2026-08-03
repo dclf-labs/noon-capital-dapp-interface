@@ -3,10 +3,8 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { cn } from '@/lib/utils'
+import { FOCUS_RESET, preventMouseDownFocus } from '@/mock/_shared'
 import { DEFAULT_BRIDGE_FEE_LABEL } from '@/mock/bridge/constants'
-
-const focusReset =
-  'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
 
 const PROTOCOL_FEE_LABEL = '$0'
 
@@ -75,9 +73,9 @@ export function BridgingFeesCollapsible({
         type="button"
         aria-expanded={open}
         aria-label="Bridging fees details"
-        onMouseDown={(event) => event.preventDefault()}
+        onMouseDown={preventMouseDownFocus}
         onClick={() => setOpen((prev) => !prev)}
-        className={cn('flex w-full items-center gap-1 text-left', focusReset)}
+        className={cn('flex w-full items-center gap-1 text-left', FOCUS_RESET)}
       >
         <img
           src="/assets/buy/gas-pump.svg"

@@ -232,8 +232,8 @@ export function ChangeReceiverAddressModal({
                   'text-base leading-6 font-medium',
                   focusReset,
                   submitDisabled
-                    ? 'cursor-not-allowed bg-[#e9e9e9] text-[#7b7b7b]'
-                    : 'bg-[#6c77e9] text-stone-50 transition-opacity hover:opacity-90',
+                    ? 'cursor-not-allowed bg-cta-disabled text-cta-disabled-fg'
+                    : 'bg-accent text-stone-50 transition-opacity hover:opacity-90',
                 )}
               >
                 {isDebouncing ? 'Processing address' : copy.submitLabel}

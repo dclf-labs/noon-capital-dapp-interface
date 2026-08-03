@@ -108,4 +108,23 @@ describe('BridgePanel behaviour', () => {
     expect(screen.getByText('$0.1')).toBeInTheDocument()
     expect(screen.getByText('$0.2')).toBeInTheDocument()
   })
+
+  it('flips networks when enabled and disables primary while loading', async () => {
+    const user = userEvent.setup()
+    const onFlipNetworks = vi.fn()
+    renderPanel({
+      onFlipNetworks,
+      primaryLoading: true,
+      primaryLabel: 'Bridging…',
+    })
+
+    await user.click(screen.getByRole('button', { name: /flip sending and receiving/i }))
+    expect(onFlipNetworks).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: 'Bridging…' })).toBeDisabled()
+  })
+
+  it('shows SET ADDRESS when no receiver is set', () => {
+    renderPanel({ receiverValue: undefined })
+    expect(screen.getByRole('button', { name: /set receiving address/i })).toBeInTheDocument()
+  })
 })

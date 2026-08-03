@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import type { Token } from '@/config/token'
 import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
+  isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
   toTradeReceiveStoredAmount,
@@ -13,6 +14,7 @@ import {
 } from '@/features/_shared/trade-input-format'
 import type { StakeUnstakeMode } from '@/features/stake-unstake'
 import { down } from '@/lib/format'
+import { SafeExplorerLink } from '@/mock/_shared'
 import * as styles from '@/mock/stake-unstake/stake-unstake-styles'
 
 export type StakeUnstakePanelProps = {
@@ -111,13 +113,13 @@ export function StakeUnstakePanel({
             Your USN is in cooldown. Claim it from the Withdraw tab after the cooling-off period.
           </p>
         ) : null}
-        {txnUrl ? (
-          <a href={txnUrl} target="_blank" rel="noreferrer noopener" style={styles.link}>
-            View on explorer
-          </a>
-        ) : (
-          <p style={styles.muted}>Waiting for explorer link…</p>
-        )}
+        <SafeExplorerLink
+          href={txnUrl}
+          style={styles.link}
+          fallback={<p style={styles.muted}>Waiting for explorer link…</p>}
+        >
+          View on explorer
+        </SafeExplorerLink>
         <button type="button" style={styles.button} onClick={onReset}>
           {title} more
         </button>
@@ -194,10 +196,7 @@ export function StakeUnstakePanel({
               }
               onAmountInChange(parsed.amount)
             }}
-            isAllowed={(values) => {
-              const parts = values.value.split('.')
-              return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
-            }}
+            isAllowed={isTradePayInputAllowed}
           />
           <input
             style={{ ...styles.select, opacity: 0.85 }}

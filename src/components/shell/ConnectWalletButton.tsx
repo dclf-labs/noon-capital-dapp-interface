@@ -23,7 +23,7 @@ export function ConnectWalletButton({
       onClick={onClick}
       aria-label="Connect wallet"
       className={cn(
-        'flex items-center justify-center gap-1.5 rounded-lg bg-[#6c77e9] px-4 py-3',
+        'flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-3',
         'text-base leading-6 font-medium whitespace-nowrap text-stone-50',
         'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
         fullWidth ? 'w-full' : 'h-10 shrink-0 py-2',

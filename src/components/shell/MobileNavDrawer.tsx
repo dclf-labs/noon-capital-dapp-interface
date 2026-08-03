@@ -3,12 +3,17 @@ import { useEffect, useId, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 
-import { CloseIcon, InfoIcon } from '@/assets/icons'
+import { CloseIcon } from '@/assets/icons'
 import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
-import { SHELL_SELECTION_CLOSE_MS, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
+import {
+  APY_TIP,
+  SHELL_SELECTION_CLOSE_MS,
+  SHELL_SELECTION_SPRING,
+} from '@/components/shell/constants'
 import { NetworkSelector } from '@/components/shell/NetworkSelector'
 import type { ShellNavItem } from '@/components/shell/types'
 import { WalletAvatarButton } from '@/components/shell/WalletAvatarButton'
+import { InfoTipIcon } from '@/components/ui/info-tip-icon'
 import { cn } from '@/lib/utils'
 
 type MobileNavDrawerProps = {
@@ -139,12 +144,7 @@ export function MobileNavDrawer({
                 <div className="flex flex-col items-start justify-center">
                   <div className="mb-[-2px] flex items-center gap-0.5">
                     <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
-                    <InfoIcon
-                      width={16}
-                      height={16}
-                      className="size-4 text-stone-500"
-                      aria-hidden
-                    />
+                    <InfoTipIcon content={APY_TIP} label="About APY" size={16} />
                   </div>
                   <p className="font-denton text-base leading-5 text-black">{apy}</p>
                 </div>

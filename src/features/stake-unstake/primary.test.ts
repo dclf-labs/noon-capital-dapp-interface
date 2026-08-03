@@ -30,7 +30,7 @@ describe('getStakeUnstakePrimaryAction', () => {
       'Enter amount',
     )
     expect(getStakeUnstakePrimaryAction({ ...base, isFetchingQuote: true }).label).toBe(
-      'Fetching quote…',
+      'Fetching quote',
     )
     expect(getStakeUnstakePrimaryAction({ ...base, isQuoteError: true }).label).toBe(
       'Quote unavailable',
@@ -59,7 +59,7 @@ describe('getStakeUnstakePrimaryAction', () => {
     ).toBe('Next')
   })
 
-  it('shows Retry approve / Approving… states', () => {
+  it('shows Retry approve / Approving states', () => {
     expect(
       getStakeUnstakePrimaryAction({
         ...base,
@@ -74,7 +74,7 @@ describe('getStakeUnstakePrimaryAction', () => {
         isApproved: false,
         isBusyApprove: true,
       }),
-    ).toMatchObject({ label: 'Approving…', disabled: true, loading: true })
+    ).toMatchObject({ label: 'Approving', disabled: true, loading: true })
   })
 
   it('disables Next without amountOut', () => {
@@ -105,6 +105,6 @@ describe('getStakeUnstakePrimaryAction', () => {
         step: 1,
         isBusySubmit: true,
       }),
-    ).toMatchObject({ label: 'Submitting…', disabled: true, loading: true })
+    ).toMatchObject({ label: 'Submitting', disabled: true, loading: true })
   })
 })

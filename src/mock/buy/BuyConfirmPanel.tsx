@@ -1,5 +1,5 @@
 import { formatConfirmAmount } from '@/features/_shared/trade-display'
-import { tokenIconSrc } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
 import { cn } from '@/lib/utils'
 import { NetworkFeeHover } from '@/mock/buy/NetworkFeeHover'
 import { TokenSymbolMark } from '@/mock/buy/TokenSymbolMark'
@@ -13,11 +13,13 @@ function TokenAmountColumn({
   amount,
   tokenSymbol,
   tokenIcon,
+  chainIcon,
 }: {
   label: string
   amount: string
   tokenSymbol?: string
   tokenIcon: string
+  chainIcon?: string
 }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
@@ -26,7 +28,12 @@ function TokenAmountColumn({
         <p className="max-w-full truncate font-denton text-[40px] leading-none text-stone-900 tabular-nums md:text-[56px]">
           {amount}
         </p>
-        <TokenSymbolMark symbol={tokenSymbol} iconSrc={tokenIcon} size="sm" />
+        <TokenSymbolMark
+          symbol={tokenSymbol}
+          iconSrc={tokenIcon}
+          chainIconSrc={chainIcon}
+          size="sm"
+        />
       </div>
     </div>
   )
@@ -47,7 +54,7 @@ export function BuyConfirmPanel({
   onPrimary,
   onBack,
 }: BuyConfirmPanelProps) {
-  // Same compact / `<0.01` rules as old-dapp SubmitTxnInfo.
+  // Same compact / `<0.1` dust rules as other non-input amount labels.
   const payAmount = formatConfirmAmount(amountIn, 6)
   const receiveAmount = formatConfirmAmount(amountOut, 6)
 
@@ -88,6 +95,7 @@ export function BuyConfirmPanel({
               amount={payAmount}
               tokenSymbol={tokenIn?.symbol}
               tokenIcon={tokenIconSrc(tokenIn)}
+              chainIcon={tokenChainIconSrc(tokenIn)}
             />
 
             <div className="flex size-[34px] shrink-0 items-center justify-center" aria-hidden>
@@ -105,6 +113,7 @@ export function BuyConfirmPanel({
               amount={receiveAmount}
               tokenSymbol={tokenOut?.symbol}
               tokenIcon={tokenIconSrc(tokenOut)}
+              chainIcon={tokenChainIconSrc(tokenOut)}
             />
           </div>
         </div>

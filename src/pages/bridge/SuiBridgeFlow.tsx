@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
+import { ChangeReceiverAddressModal } from '@/components/bridge/ChangeReceiverAddressModal'
 import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
-import { formatBalanceLabel, formatNativeFee } from '@/features/_shared/trade-display'
+import { formatBalanceLabel, formatFeeUsd } from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
 import {
   useBridgeBalance,
@@ -17,7 +18,7 @@ import { getBridgePrimaryAction } from '@/features/bridge/primary'
 import { isBridgePairAllowed, isSuiToEthBridgeDisabled } from '@/features/bridge/route'
 import { useSelectActiveChain } from '@/hooks/connection'
 import { useStickyValue } from '@/hooks/ui/useStickyValue'
-import { type Address, isEVMAddressValid, sanitizeEVMAddress } from '@/lib/address'
+import { type Address, isEVMAddressValid } from '@/lib/address'
 import { getChainConfig } from '@/lib/chain'
 import { canWriteSession } from '@/lib/wallet-session'
 import { BRIDGE_RECEIVER_NOTICE } from '@/mock/bridge/constants'
@@ -26,10 +27,20 @@ import {
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
 import { BridgeFlowView } from '@/pages/bridge/BridgeFlowView'
+import { sumBridgeFeeUsd, useBridgeFeeUsd } from '@/pages/bridge/useBridgeFeeUsdLabel'
 
 export function SuiBridgeFlow() {
-  const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =
-    useBridgeForm()
+  const {
+    inputs,
+    connection,
+    destinationConnection,
+    step,
+    setStep,
+    setInputs,
+    tokenOut,
+    isReceiverAddressModalOpen,
+    setIsReceiverAddressModalOpen,
+  } = useBridgeForm()
   const { isApproved, isInsufficientBalance, tokenInBalance, tokenOutBalance } = useBridgeBalance()
   const { amountInUsd, feeQuote } = useBridgePrice()
   const { submitFee, txnUrl, setTxnUrl } = useBridgeTxn()
@@ -45,7 +56,6 @@ export function SuiBridgeFlow() {
     destinationConnection,
   )
 
-  const [receiverDraft, setReceiverDraft] = useState('')
   const dismissedHashRef = useRef<string | undefined>(undefined)
 
   const inputModel = useTradeInputModel({
@@ -149,7 +159,6 @@ export function SuiBridgeFlow() {
   const onDestinationChange = useCallback(
     (chainId: number | undefined) => {
       setDestinationChainId(chainId)
-      setReceiverDraft('')
       setInputs((prev) => ({ ...prev, amount: undefined }))
     },
     [setDestinationChainId, setInputs],
@@ -165,94 +174,114 @@ export function SuiBridgeFlow() {
   const gasSymbol = connection.config?.defaultGasToken?.symbol || 'SUI'
   const feeRouteKey = `${inputs.sourceChainId ?? ''}:${inputs.destinationChainId ?? ''}:${inputs.token?.contractAddress ?? ''}`
 
-  // Sui submitFee is a native LZ fee proxy (not USD) — keep native formatting for both rows.
+  // Gas fee = LZ bridge quote; network fee = Sui submit gas proxy (also native → USD).
+  const liveGasFeeUsd = useBridgeFeeUsd(feeQuote.data, connection.config?.id, gasSymbol)
+  const liveNetworkFeeUsd = useBridgeFeeUsd(submitFee.data, connection.config?.id, gasSymbol)
+  const liveTotalFeeUsd = sumBridgeFeeUsd(liveNetworkFeeUsd, liveGasFeeUsd)
+
   const feeLabel = useStickyValue(
-    feeQuote.data !== undefined ? formatNativeFee(feeQuote.data, gasSymbol) : undefined,
+    liveTotalFeeUsd != null ? formatFeeUsd(liveTotalFeeUsd) : undefined,
     feeRouteKey,
   )
-  const gasLabel = useStickyValue(
-    submitFee.data !== undefined ? formatNativeFee(submitFee.data, gasSymbol) : undefined,
+  const networkFeeLabel = useStickyValue(
+    liveNetworkFeeUsd != null ? formatFeeUsd(liveNetworkFeeUsd) : undefined,
+    feeRouteKey,
+  )
+  const gasFeeLabel = useStickyValue(
+    liveGasFeeUsd != null ? formatFeeUsd(liveGasFeeUsd) : undefined,
     feeRouteKey,
   )
 
   return (
-    <BridgeFlowView
-      step={step}
-      chainFamily="sui"
-      showHero={false}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
-      connectedAddress={connection.address}
-      sourceNetworks={getBridgeSourceNetworks('sui')}
-      destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId, 'sui')}
-      sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
-      destinationChainId={inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined}
-      onSourceChange={(chainId) => {
-        void selectActiveChain(chainId)
-      }}
-      onDestinationChange={onDestinationChange}
-      tokens={inputs.tokens}
-      token={inputs.token}
-      onTokenChange={setToken}
-      amount={inputs.amount}
-      amountUsd={amountInUsd}
-      balanceInLabel={inputModel.balanceLabel}
-      balanceOutLabel={formatBalanceLabel(
-        tokenOutBalance.data,
-        tokenOut?.symbol,
-        tokenOut?.decimals,
-      )}
-      receiverLabel="EVM receiver"
-      receiverValue={receiverDraft || String(inputs.receiverAddress || '')}
-      receiverPlaceholder="0x…"
-      onReceiverChange={(value) => {
-        setReceiverDraft(value)
-        setReceiverAddress(sanitizeEVMAddress(value) as Address | undefined)
-      }}
-      feeLabel={feeLabel}
-      networkFeeLabel={gasLabel}
-      bridgeFeeLabel={feeLabel}
-      sourceName={inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined}
-      destinationName={
-        inputs.destinationChainId ? getChainConfig(inputs.destinationChainId).name : undefined
-      }
-      protocolLabel="LayerZero"
-      warning={
-        routeDisabled
-          ? {
-              type: 'warning',
-              title: 'Bridge under maintenance',
-              description:
-                'Sui → Ethereum bridging is temporarily unavailable. Please try again later.',
-            }
-          : !oftConfigured
+    <>
+      <BridgeFlowView
+        step={step}
+        chainFamily="sui"
+        showHero={false}
+        isConnected={connection.isConnected}
+        unsupported={connection.unsupported}
+        connectedAddress={connection.address}
+        sourceNetworks={getBridgeSourceNetworks(inputs.destinationChainId)}
+        destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId)}
+        sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
+        destinationChainId={
+          inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined
+        }
+        onSourceChange={(chainId) => {
+          void selectActiveChain(chainId)
+        }}
+        onDestinationChange={onDestinationChange}
+        tokens={inputs.tokens}
+        token={inputs.token}
+        onTokenChange={setToken}
+        amount={inputs.amount}
+        amountUsd={amountInUsd}
+        balanceInLabel={inputModel.balanceLabel}
+        balanceOutLabel={formatBalanceLabel(
+          tokenOutBalance.data,
+          tokenOut?.symbol,
+          tokenOut?.decimals,
+        )}
+        receiverLabel="EVM receiver"
+        receiverValue={String(inputs.receiverAddress || '')}
+        receiverPlaceholder="0x…"
+        onOpenReceiverModal={() => setIsReceiverAddressModalOpen(true)}
+        feeLabel={feeLabel}
+        networkFeeLabel={networkFeeLabel}
+        gasFeeLabel={gasFeeLabel}
+        protocolFeeLabel="$0"
+        sourceName={inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined}
+        destinationName={
+          inputs.destinationChainId ? getChainConfig(inputs.destinationChainId).name : undefined
+        }
+        protocolLabel="LayerZero"
+        warning={
+          routeDisabled
             ? {
                 type: 'warning',
-                title: 'Token not configured',
-                description: 'This token is not configured for Sui OFT bridging.',
+                title: 'Bridge under maintenance',
+                description:
+                  'Sui → Ethereum bridging is temporarily unavailable. Please try again later.',
               }
-            : BRIDGE_RECEIVER_NOTICE
-      }
-      isFetchingFee={feeQuote.isLoading}
-      isLoadingFee={!feeLabel && feeQuote.isLoading}
-      isInsufficientBalance={isInsufficientBalance}
-      primaryLabel={primary.label}
-      primaryDisabled={primary.disabled || !isApproved}
-      primaryLoading={primary.loading}
-      txnUrl={txnUrl}
-      presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
-      onAmountChange={onAmountChange}
-      onHalf={() => {
-        const next = getPresetAmount(tokenInBalance.data, 'half')
-        if (next > 0) setAmount(next)
-      }}
-      onMax={() => {
-        const next = getTradeMaxAmount(tokenInBalance.data, inputs.token?.isNative)
-        if (next > 0) setAmount(next)
-      }}
-      onPrimary={onPrimary}
-      onBack={() => setStep(0)}
-      onReset={onReset}
-    />
+            : !oftConfigured
+              ? {
+                  type: 'warning',
+                  title: 'Token not configured',
+                  description: 'This token is not configured for Sui OFT bridging.',
+                }
+              : BRIDGE_RECEIVER_NOTICE
+        }
+        isFetchingFee={feeQuote.isLoading}
+        isLoadingFee={!feeLabel && feeQuote.isLoading}
+        isInsufficientBalance={isInsufficientBalance}
+        primaryLabel={primary.label}
+        primaryDisabled={primary.disabled || !isApproved}
+        primaryLoading={primary.loading}
+        txnUrl={txnUrl}
+        presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+        onAmountChange={onAmountChange}
+        onHalf={() => {
+          const next = getPresetAmount(tokenInBalance.data, 'half')
+          if (next > 0) setAmount(next)
+        }}
+        onMax={() => {
+          const next = getTradeMaxAmount(tokenInBalance.data, inputs.token?.isNative)
+          if (next > 0) setAmount(next)
+        }}
+        onPrimary={onPrimary}
+        onBack={() => setStep(0)}
+        onReset={onReset}
+      />
+
+      <ChangeReceiverAddressModal
+        family="evm"
+        isOpen={isReceiverAddressModalOpen}
+        currentAddress={
+          (inputs.receiverAddress as Address | undefined) || destinationConnection.address
+        }
+        onOpenChange={setIsReceiverAddressModalOpen}
+        onSubmitAddress={(address) => setReceiverAddress(address as Address)}
+      />
+    </>
   )
 }

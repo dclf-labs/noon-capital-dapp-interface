@@ -27,7 +27,7 @@ describe('AppHeader', () => {
     selectActiveChain.mockReset()
   })
 
-  it('shows Connect wallet on desktop when disconnected', () => {
+  it('shows Connect wallet in the navbar when disconnected', () => {
     render(
       <AppHeader
         isConnected={false}
@@ -37,10 +37,13 @@ describe('AppHeader', () => {
         onMenuClick={vi.fn()}
       />,
     )
-    expect(screen.getAllByRole('button', { name: /connect wallet/i }).length).toBeGreaterThan(0)
+    // Mobile + desktop headers both expose the active-family connect CTA.
+    expect(
+      screen.getAllByRole('button', { name: /connect wallet/i }).length,
+    ).toBeGreaterThanOrEqual(2)
   })
 
-  it('shows the connected wallet chip on desktop when connected', () => {
+  it('shows the connected wallet chip when connected', () => {
     render(
       <AppHeader
         isConnected
@@ -51,8 +54,8 @@ describe('AppHeader', () => {
         onMenuClick={vi.fn()}
       />,
     )
-    expect(screen.getByRole('button', { name: '0x1234…abcd' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^connect wallet$/i })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: '0x1234…abcd' }).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: /connect wallet/i })).not.toBeInTheDocument()
   })
 
   it('opens the mobile menu from the hamburger control', async () => {

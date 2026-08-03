@@ -33,7 +33,6 @@ export function BuyPanel({
   primaryLabel = 'Enter amount',
   primaryDisabled = true,
   primaryLoading = false,
-  unsupported,
   presetsDisabled = false,
   isFetchingQuote = false,
   isLoadingFee = false,
@@ -115,13 +114,6 @@ export function BuyPanel({
 
   return (
     <>
-      {unsupported ? (
-        <p className="w-full text-center text-sm text-red-700">
-          Wallet network does not match the selected network. Switch network in the header and
-          approve the wallet prompt.
-        </p>
-      ) : null}
-
       <div className="w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-50 shadow-[0px_4px_4px_0px_rgba(111,125,185,0.05)]">
         <div className="flex w-full flex-col gap-4 overflow-hidden border border-stone-200 bg-white px-2 pt-2 pb-6 shadow-[0px_4px_4px_0px_rgba(111,125,185,0.05)]">
           <div className="relative flex min-h-60 w-full flex-col items-center justify-center gap-2">

@@ -7,9 +7,9 @@ import {
 } from '@/features/_shared'
 import {
   formatBalanceLabel,
+  formatFeeUsd,
   formatNativeFeeDetail,
   formatUnitRate,
-  formatUsd,
 } from '@/features/_shared/trade-display'
 import useGeckoPrice from '@/features/api/hooks/useGeckoPrice'
 import { useBuyBalance, useBuyForm, useBuyPrice, useBuyTxn } from '@/features/buy/hooks/evm/useBuy'
@@ -167,7 +167,7 @@ export function EvmBuyTrade() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
-  const liveFeeLabel = submitFee.isReady ? formatUsd(submitFee.data) : undefined
+  const liveFeeLabel = submitFee.isReady ? formatFeeUsd(submitFee.data) : undefined
   const liveFeeNativeLabel = submitFee.isReady
     ? formatNativeFeeDetail(submitFee.native, connection.config?.defaultGasToken?.symbol || 'ETH')
     : undefined

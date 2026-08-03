@@ -12,7 +12,7 @@ type BridgeStepShellProps = {
 /** Shared Bridge page chrome: product tabs/hero + card slot. */
 export function BridgeStepShell({ children, showHero = true }: BridgeStepShellProps) {
   const card = (
-    <div className="flex w-full max-w-[70%] min-w-[45%] flex-col items-stretch">
+    <div className="flex w-full min-w-0 flex-col items-stretch lg:max-w-[70%] lg:min-w-[45%]">
       <div className="w-full min-w-0">{children}</div>
     </div>
   )

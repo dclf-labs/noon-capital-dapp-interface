@@ -54,13 +54,13 @@ export function getTradePrimaryAction({
     return { label: 'Connect wallet', disabled: true, loading: false }
   }
   if (isBalanceLoading || isAllowanceLoading) {
-    return { label: 'Loading…', disabled: true, loading: true }
+    return { label: 'Loading', disabled: true, loading: true }
   }
   if (!amountIn) {
     return { label: 'Enter amount', disabled: true, loading: false }
   }
   if (isFetchingQuote) {
-    return { label: 'Fetching quote…', disabled: true, loading: true }
+    return { label: 'Fetching quote', disabled: true, loading: true }
   }
   if (isQuoteError) {
     return { label: 'Quote unavailable', disabled: true, loading: false }
@@ -77,7 +77,7 @@ export function getTradePrimaryAction({
         approveStatus === 'TXN_FAILURE'
           ? 'Retry approve'
           : isBusyApprove
-            ? 'Approving…'
+            ? 'Approving'
             : `Approve ${tokenInSymbol || ''}`.trim(),
       disabled: isBusyApprove,
       loading: isBusyApprove,
@@ -92,7 +92,7 @@ export function getTradePrimaryAction({
     label: submitFailed
       ? 'Retry swap'
       : isBusySubmit
-        ? 'Submitting…'
+        ? 'Submitting'
         : mode === 'buy'
           ? 'Confirm the transaction'
           : 'Confirm sell',

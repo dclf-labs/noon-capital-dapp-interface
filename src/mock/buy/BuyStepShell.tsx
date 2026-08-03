@@ -15,7 +15,7 @@ type BuyStepShellProps = {
 /** Shared Buy page chrome: product tabs/hero + card slot + Powered by. */
 export function BuyStepShell({ children, poweredBy, showHero = true }: BuyStepShellProps) {
   const card = (
-    <div className="flex w-full max-w-[70%] min-w-[45%] flex-col items-stretch gap-4">
+    <div className="flex w-full min-w-0 flex-col items-stretch gap-4 lg:max-w-[70%] lg:min-w-[45%]">
       <div className="w-full min-w-0">{children}</div>
       <div className="flex w-full justify-center">
         <PoweredByRow poweredBy={poweredBy} />

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { base, mainnet as ethereum } from 'wagmi/chains'
 
+import { activeProtocolConfigs } from '@/config/chains'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
 import {
   getAllBridgeNetworks,
@@ -9,34 +10,48 @@ import {
 } from '@/pages/bridge/bridge-networks'
 
 describe('bridge network lists', () => {
-  it('includes EVM, Starknet, and Sui in the full bridge network list', () => {
+  it('includes every active protocol chain that supports bridging', () => {
     const all = getAllBridgeNetworks()
+    const expected = Object.values(activeProtocolConfigs).filter((c) => c?.bridgeTokens?.length)
+    expect(all).toHaveLength(expected.length)
     expect(all.some((n) => n.id === ethereum.id)).toBe(true)
     expect(all.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id))).toBe(true)
     expect(all.some((n) => n.id === Number(SUI_BRIDGE_DESTINATION.id))).toBe(true)
+    expect(all.map((n) => n.name)).toEqual(
+      expect.arrayContaining(['Ethereum', 'Starknet', 'Sui', 'Base', 'ZKsync Era']),
+    )
   })
 
-  it('returns the same full list for every family source selector', () => {
-    const evm = getBridgeSourceNetworks('evm')
-    const starknet = getBridgeSourceNetworks('starknet')
-    const sui = getBridgeSourceNetworks('sui')
-    expect(evm).toEqual(starknet)
-    expect(evm).toEqual(sui)
-    expect(evm.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id))).toBe(true)
-    expect(evm.some((n) => n.id === Number(SUI_BRIDGE_DESTINATION.id))).toBe(true)
+  it('returns the full list for source with all options enabled when no destination', () => {
+    const source = getBridgeSourceNetworks()
+    expect(source).toHaveLength(getAllBridgeNetworks().length)
+    expect(source.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id))).toBe(true)
+    expect(source.some((n) => n.id === Number(SUI_BRIDGE_DESTINATION.id))).toBe(true)
+    expect(source.every((n) => !n.disabled)).toBe(true)
   })
 
-  it('filters destination networks by pair rules for an Ethereum source', () => {
-    const dest = getBridgeDestinationNetworks(ethereum.id, 'evm')
-    expect(dest.some((n) => n.id === base.id)).toBe(true)
-    expect(dest.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id))).toBe(true)
-    expect(dest.some((n) => n.id === Number(SUI_BRIDGE_DESTINATION.id))).toBe(true)
-    expect(dest.some((n) => n.id === ethereum.id)).toBe(false)
+  it('keeps all destination networks listed and disables incompatible pairs', () => {
+    const dest = getBridgeDestinationNetworks(ethereum.id)
+    expect(dest.some((n) => n.id === base.id && !n.disabled)).toBe(true)
+    expect(dest.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id) && !n.disabled)).toBe(
+      true,
+    )
+    expect(dest.some((n) => n.id === Number(SUI_BRIDGE_DESTINATION.id) && !n.disabled)).toBe(true)
+    // Same chain stays visible but not selectable.
+    expect(dest.some((n) => n.id === ethereum.id && n.disabled)).toBe(true)
   })
 
-  it('keeps EVM destinations available when sourcing from Starknet', () => {
-    const dest = getBridgeDestinationNetworks(Number(STARKNET_BRIDGE_DESTINATION.id), 'starknet')
-    expect(dest.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id))).toBe(false)
-    expect(dest.some((n) => n.id === ethereum.id)).toBe(true)
+  it('disables Starknet as a destination when sourcing from Starknet', () => {
+    const dest = getBridgeDestinationNetworks(Number(STARKNET_BRIDGE_DESTINATION.id))
+    expect(dest.some((n) => n.id === Number(STARKNET_BRIDGE_DESTINATION.id) && n.disabled)).toBe(
+      true,
+    )
+    expect(dest.some((n) => n.id === ethereum.id && !n.disabled)).toBe(true)
+  })
+
+  it('disables incompatible sources once a destination is chosen', () => {
+    const source = getBridgeSourceNetworks(ethereum.id)
+    expect(source.some((n) => n.id === ethereum.id && n.disabled)).toBe(true)
+    expect(source.some((n) => n.id === base.id && !n.disabled)).toBe(true)
   })
 })

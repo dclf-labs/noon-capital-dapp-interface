@@ -39,10 +39,10 @@ describe('getBridgePrimaryAction', () => {
       'Enter receiver address',
     )
     expect(getBridgePrimaryAction({ ...base, hasToken: false }).label).toBe('Select token')
-    expect(getBridgePrimaryAction({ ...base, isBalanceLoading: true }).label).toBe('Loading…')
-    expect(getBridgePrimaryAction({ ...base, isAllowanceLoading: true }).label).toBe('Loading…')
+    expect(getBridgePrimaryAction({ ...base, isBalanceLoading: true }).label).toBe('Loading')
+    expect(getBridgePrimaryAction({ ...base, isAllowanceLoading: true }).label).toBe('Loading')
     expect(getBridgePrimaryAction({ ...base, amount: undefined }).label).toBe('Enter amount')
-    expect(getBridgePrimaryAction({ ...base, isFeeLoading: true }).label).toBe('Fetching fee…')
+    expect(getBridgePrimaryAction({ ...base, isFeeLoading: true }).label).toBe('Fetching fee')
     expect(getBridgePrimaryAction({ ...base, isFeeError: true }).label).toBe('Fee unavailable')
     expect(getBridgePrimaryAction({ ...base, isInsufficientBalance: true }).label).toBe(
       'Insufficient balance',

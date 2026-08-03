@@ -1,14 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import { ChangeReceiverAddressModal } from '@/components/bridge/ChangeReceiverAddressModal'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
 import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
-import {
-  formatBalanceLabel,
-  formatNativeFee,
-  formatNativeFeeDetail,
-  formatUsd,
-} from '@/features/_shared/trade-display'
+import { formatBalanceLabel, formatFeeUsd } from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
 import {
   useBridgeBalance,
@@ -30,16 +26,10 @@ import {
 import { useSelectActiveChain } from '@/hooks/connection'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { useStickyValue } from '@/hooks/ui/useStickyValue'
-import {
-  type Address,
-  isEVMAddressValid,
-  isStarknetAddressValid,
-  isSuiAddressValid,
-  sanitizeEVMAddress,
-  sanitizeSuiAddress,
-} from '@/lib/address'
+import { type Address, type StarknetAddress, type SuiAddress } from '@/lib/address'
 import { getChainConfig, isEvmChainId } from '@/lib/chain'
 import type { EVMConnection } from '@/lib/connection'
+import { isStoredReceiverAddressValid } from '@/lib/receiver-address'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
 import { BRIDGE_RECEIVER_NOTICE } from '@/mock/bridge/constants'
 import {
@@ -47,10 +37,24 @@ import {
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
 import { BridgeFlowView } from '@/pages/bridge/BridgeFlowView'
+import { sumBridgeFeeUsd, useBridgeFeeUsd } from '@/pages/bridge/useBridgeFeeUsdLabel'
 
 export function EvmBridgeFlow() {
-  const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =
-    useBridgeForm()
+  const {
+    inputs,
+    connection,
+    destinationConnection,
+    step,
+    setStep,
+    setInputs,
+    tokenOut,
+    isEvmReceiverAddressModalOpen,
+    setIsEvmReceiverAddressModalOpen,
+    isStarknetReceiverAddressModalOpen,
+    setIsStarknetReceiverAddressModalOpen,
+    isSuiReceiverAddressModalOpen,
+    setIsSuiReceiverAddressModalOpen,
+  } = useBridgeForm()
   const { isApproved, isInsufficientBalance, tokenInAllowance, tokenInBalance, tokenOutBalance } =
     useBridgeBalance()
   const { amountInUsd, feeQuote } = useBridgePrice()
@@ -71,7 +75,6 @@ export function EvmBridgeFlow() {
 
   const [approveStatus, setApproveStatus] = useState<ApproveTxnStatus>('IDLE')
   const [submitStatus, setSubmitStatus] = useState<ApproveTxnStatus>('IDLE')
-  const [receiverDraft, setReceiverDraft] = useState('')
 
   const inputModel = useTradeInputModel({
     amount: inputs.amount,
@@ -91,11 +94,7 @@ export function EvmBridgeFlow() {
   }, [inputs.destinationChainId])
 
   const hasValidReceiver = useMemo(() => {
-    const value = inputs.receiverAddress
-    if (!value) return false
-    if (destinationType === 'starknet') return isStarknetAddressValid(String(value))
-    if (destinationType === 'sui') return isSuiAddressValid(String(value))
-    return isEVMAddressValid(value as Address)
+    return isStoredReceiverAddressValid(destinationType, String(inputs.receiverAddress || ''))
   }, [destinationType, inputs.receiverAddress])
 
   const requiresApproval =
@@ -181,29 +180,24 @@ export function EvmBridgeFlow() {
     if (next > 0) setAmount(next)
   }, [inputs.token?.isNative, setAmount, tokenInBalance.data])
 
-  const onReceiverChange = useCallback(
-    (value: string) => {
-      setReceiverDraft(value)
-      if (destinationType === 'sui') {
-        setSuiReceiverAddress(sanitizeSuiAddress(value))
-        return
-      }
-      if (destinationType === 'starknet') {
-        const trimmed = value.trim()
-        setStarknetReceiverAddress(
-          isStarknetAddressValid(trimmed) ? (trimmed as Address) : undefined,
-        )
-        return
-      }
-      setEvmReceiverAddress(sanitizeEVMAddress(value) as Address | undefined)
-    },
-    [destinationType, setEvmReceiverAddress, setStarknetReceiverAddress, setSuiReceiverAddress],
-  )
+  const receiverValue = String(inputs.receiverAddress || '')
 
-  const receiverValue = useMemo(() => {
-    if (receiverDraft) return receiverDraft
-    return String(inputs.receiverAddress || '')
-  }, [inputs.receiverAddress, receiverDraft])
+  const onOpenReceiverModal = useCallback(() => {
+    if (destinationType === 'starknet') {
+      setIsStarknetReceiverAddressModalOpen(true)
+      return
+    }
+    if (destinationType === 'sui') {
+      setIsSuiReceiverAddressModalOpen(true)
+      return
+    }
+    setIsEvmReceiverAddressModalOpen(true)
+  }, [
+    destinationType,
+    setIsEvmReceiverAddressModalOpen,
+    setIsStarknetReceiverAddressModalOpen,
+    setIsSuiReceiverAddressModalOpen,
+  ])
 
   const onPrimary = useCallback(() => {
     if (step === 0 && requiresApproval && !isApproved) {
@@ -269,7 +263,6 @@ export function EvmBridgeFlow() {
   const onDestinationChange = useCallback(
     (chainId: number | undefined) => {
       setDestinationChainId(chainId)
-      setReceiverDraft('')
       setInputs((prev) => ({ ...prev, amount: undefined }))
     },
     [setDestinationChainId, setInputs],
@@ -280,19 +273,16 @@ export function EvmBridgeFlow() {
     const destination = inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined
     if (source == null || destination == null || !isEvmChainId(destination)) return
     if (!isBridgePairAllowed(destination, source)) return
-    setDestinationChainId(source)
-    setSourceChainId(destination)
+    // Swap both chains in one update so BridgeProvider sync effects don't see a
+    // half-applied flip and clear the new destination while the wallet switches.
+    setInputs((prev) => ({
+      ...prev,
+      sourceChainId: destination,
+      destinationChainId: source,
+      amount: undefined,
+    }))
     void selectActiveChain(destination)
-    setReceiverDraft('')
-    setInputs((prev) => ({ ...prev, amount: undefined }))
-  }, [
-    inputs.destinationChainId,
-    inputs.sourceChainId,
-    selectActiveChain,
-    setDestinationChainId,
-    setInputs,
-    setSourceChainId,
-  ])
+  }, [inputs.destinationChainId, inputs.sourceChainId, selectActiveChain, setInputs])
 
   const onBack = useCallback(() => setStep(0), [setStep])
   const onReset = useCallback(() => {
@@ -306,16 +296,22 @@ export function EvmBridgeFlow() {
   const gasSymbol = connection.config?.defaultGasToken?.symbol || 'ETH'
   const feeRouteKey = `${inputs.sourceChainId ?? ''}:${inputs.destinationChainId ?? ''}:${inputs.token?.contractAddress ?? ''}`
 
-  const liveBridgeFee =
-    feeQuote.data !== undefined ? formatNativeFee(feeQuote.data, gasSymbol) : undefined
-  const liveGasUsd = submitFee.isReady ? formatUsd(submitFee.data) : undefined
-  const liveGasNative = submitFee.isReady
-    ? formatNativeFeeDetail(submitFee.native, gasSymbol)
-    : undefined
+  const liveGasFeeUsd = useBridgeFeeUsd(feeQuote.data, connection.config?.id, gasSymbol)
+  const liveNetworkFeeUsd = submitFee.isReady ? submitFee.data : undefined
+  const liveTotalFeeUsd = sumBridgeFeeUsd(liveNetworkFeeUsd, liveGasFeeUsd)
 
-  const feeLabel = useStickyValue(liveBridgeFee, feeRouteKey)
-  const gasLabel = useStickyValue(liveGasUsd, feeRouteKey)
-  const gasNativeLabel = useStickyValue(liveGasNative, feeRouteKey)
+  const feeLabel = useStickyValue(
+    liveTotalFeeUsd != null ? formatFeeUsd(liveTotalFeeUsd) : undefined,
+    feeRouteKey,
+  )
+  const networkFeeLabel = useStickyValue(
+    liveNetworkFeeUsd != null ? formatFeeUsd(liveNetworkFeeUsd) : undefined,
+    feeRouteKey,
+  )
+  const gasFeeLabel = useStickyValue(
+    liveGasFeeUsd != null ? formatFeeUsd(liveGasFeeUsd) : undefined,
+    feeRouteKey,
+  )
 
   const sourceName = inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined
   const destinationName = inputs.destinationChainId
@@ -323,88 +319,114 @@ export function EvmBridgeFlow() {
     : undefined
 
   return (
-    <BridgeFlowView
-      step={step}
-      chainFamily="evm"
-      showHero={false}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
-      connectedAddress={connection.address}
-      sourceNetworks={getBridgeSourceNetworks('evm')}
-      destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId, 'evm')}
-      sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
-      destinationChainId={inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined}
-      onSourceChange={onSourceChange}
-      onDestinationChange={onDestinationChange}
-      onFlipNetworks={
-        inputs.destinationChainId && isEvmChainId(Number(inputs.destinationChainId))
-          ? onFlipNetworks
-          : undefined
-      }
-      tokens={inputs.tokens}
-      token={inputs.token}
-      onTokenChange={setToken}
-      amount={inputs.amount}
-      amountUsd={amountInUsd}
-      balanceInLabel={inputModel.balanceLabel}
-      balanceOutLabel={formatBalanceLabel(
-        tokenOutBalance.data,
-        tokenOut?.symbol,
-        tokenOut?.decimals,
-      )}
-      receiverLabel={
-        destinationType === 'starknet'
-          ? 'Starknet receiver'
-          : destinationType === 'sui'
-            ? 'Sui receiver'
-            : 'EVM receiver'
-      }
-      receiverValue={receiverValue}
-      receiverPlaceholder={
-        destinationType === 'starknet'
-          ? '0x…'
-          : destinationType === 'sui'
-            ? '0x… sui address'
-            : '0x…'
-      }
-      onReceiverChange={onReceiverChange}
-      feeLabel={feeLabel}
-      networkFeeLabel={gasLabel}
-      networkFeeNativeLabel={gasNativeLabel}
-      bridgeFeeLabel={feeLabel}
-      sourceName={sourceName}
-      destinationName={destinationName}
-      protocolLabel={
-        inputs.destinationChainId
-          ? isHyperlaneBridgeRoute(connection.config?.useHyperlane, inputs.destinationChainId)
-            ? 'Hyperlane'
-            : 'LayerZero'
-          : undefined
-      }
-      warning={
-        routeDisabled
-          ? {
-              type: 'warning',
-              title: 'Bridge under maintenance',
-              description:
-                'LayerZero bridge routes are temporarily unavailable. Please try again later.',
-            }
-          : BRIDGE_RECEIVER_NOTICE
-      }
-      isFetchingFee={feeQuote.isLoading}
-      isLoadingFee={!feeLabel && feeQuote.isLoading}
-      isInsufficientBalance={isInsufficientBalance}
-      primaryLabel={primary.label}
-      primaryDisabled={primary.disabled}
-      primaryLoading={primary.loading}
-      txnUrl={txnUrl}
-      presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
-      onAmountChange={onAmountChange}
-      onHalf={onHalf}
-      onMax={onMax}
-      onPrimary={onPrimary}
-      onBack={onBack}
-      onReset={onReset}
-    />
+    <>
+      <BridgeFlowView
+        step={step}
+        chainFamily="evm"
+        showHero={false}
+        isConnected={connection.isConnected}
+        unsupported={connection.unsupported}
+        connectedAddress={connection.address}
+        sourceNetworks={getBridgeSourceNetworks(inputs.destinationChainId)}
+        destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId)}
+        sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
+        destinationChainId={
+          inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined
+        }
+        onSourceChange={onSourceChange}
+        onDestinationChange={onDestinationChange}
+        onFlipNetworks={
+          inputs.destinationChainId && isEvmChainId(Number(inputs.destinationChainId))
+            ? onFlipNetworks
+            : undefined
+        }
+        tokens={inputs.tokens}
+        token={inputs.token}
+        onTokenChange={setToken}
+        amount={inputs.amount}
+        amountUsd={amountInUsd}
+        balanceInLabel={inputModel.balanceLabel}
+        balanceOutLabel={formatBalanceLabel(
+          tokenOutBalance.data,
+          tokenOut?.symbol,
+          tokenOut?.decimals,
+        )}
+        receiverLabel={
+          destinationType === 'starknet'
+            ? 'Starknet receiver'
+            : destinationType === 'sui'
+              ? 'Sui receiver'
+              : 'EVM receiver'
+        }
+        receiverValue={receiverValue}
+        receiverPlaceholder={
+          destinationType === 'starknet'
+            ? '0x…'
+            : destinationType === 'sui'
+              ? '0x… sui address'
+              : '0x…'
+        }
+        onOpenReceiverModal={onOpenReceiverModal}
+        feeLabel={feeLabel}
+        networkFeeLabel={networkFeeLabel}
+        gasFeeLabel={gasFeeLabel}
+        protocolFeeLabel="$0"
+        sourceName={sourceName}
+        destinationName={destinationName}
+        protocolLabel={
+          inputs.destinationChainId
+            ? isHyperlaneBridgeRoute(connection.config?.useHyperlane, inputs.destinationChainId)
+              ? 'Hyperlane'
+              : 'LayerZero'
+            : undefined
+        }
+        warning={
+          routeDisabled
+            ? {
+                type: 'warning',
+                title: 'Bridge under maintenance',
+                description:
+                  'LayerZero bridge routes are temporarily unavailable. Please try again later.',
+              }
+            : BRIDGE_RECEIVER_NOTICE
+        }
+        isFetchingFee={feeQuote.isLoading}
+        isLoadingFee={!feeLabel && (feeQuote.isLoading || submitFee.isLoading)}
+        isInsufficientBalance={isInsufficientBalance}
+        primaryLabel={primary.label}
+        primaryDisabled={primary.disabled}
+        primaryLoading={primary.loading}
+        txnUrl={txnUrl}
+        presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+        onAmountChange={onAmountChange}
+        onHalf={onHalf}
+        onMax={onMax}
+        onPrimary={onPrimary}
+        onBack={onBack}
+        onReset={onReset}
+      />
+
+      <ChangeReceiverAddressModal
+        family="evm"
+        isOpen={isEvmReceiverAddressModalOpen}
+        currentAddress={inputs.evmReceiverAddress || connection.address}
+        onOpenChange={setIsEvmReceiverAddressModalOpen}
+        onSubmitAddress={(address) => setEvmReceiverAddress(address as Address)}
+      />
+      <ChangeReceiverAddressModal
+        family="starknet"
+        isOpen={isStarknetReceiverAddressModalOpen}
+        currentAddress={inputs.starknetReceiverAddress}
+        onOpenChange={setIsStarknetReceiverAddressModalOpen}
+        onSubmitAddress={(address) => setStarknetReceiverAddress(address as StarknetAddress)}
+      />
+      <ChangeReceiverAddressModal
+        family="sui"
+        isOpen={isSuiReceiverAddressModalOpen}
+        currentAddress={inputs.suiReceiverAddress}
+        onOpenChange={setIsSuiReceiverAddressModalOpen}
+        onSubmitAddress={(address) => setSuiReceiverAddress(address as SuiAddress)}
+      />
+    </>
   )
 }

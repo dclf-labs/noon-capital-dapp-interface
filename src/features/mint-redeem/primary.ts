@@ -54,7 +54,7 @@ export function getMintRedeemPrimaryAction({
     return { label: 'Connect wallet', disabled: true, loading: false }
   }
   if (isBalanceLoading || isAllowanceLoading || isWhitelistLoading) {
-    return { label: 'Loading…', disabled: true, loading: true }
+    return { label: 'Loading', disabled: true, loading: true }
   }
   if (isWhitelistError) {
     return { label: 'Whitelist check failed', disabled: true, loading: false }
@@ -66,7 +66,7 @@ export function getMintRedeemPrimaryAction({
     return { label: 'Enter amount', disabled: true, loading: false }
   }
   if (isFetchingQuote) {
-    return { label: 'Fetching quote…', disabled: true, loading: true }
+    return { label: 'Fetching quote', disabled: true, loading: true }
   }
   if (isQuoteError) {
     return { label: 'Quote unavailable', disabled: true, loading: false }
@@ -81,7 +81,7 @@ export function getMintRedeemPrimaryAction({
         approveStatus === 'TXN_FAILURE'
           ? 'Retry approve'
           : isBusyApprove
-            ? 'Approving…'
+            ? 'Approving'
             : `Approve ${tokenInSymbol || ''}`.trim(),
       disabled: isBusyApprove,
       loading: isBusyApprove,
@@ -96,7 +96,7 @@ export function getMintRedeemPrimaryAction({
   const retry = mode === 'mint' ? 'Retry mint' : 'Retry redeem'
 
   return {
-    label: submitFailed ? retry : isBusySubmit ? 'Submitting…' : confirm,
+    label: submitFailed ? retry : isBusySubmit ? 'Submitting' : confirm,
     disabled: !isApproved || !amountOut || isBusySubmit,
     loading: isBusySubmit,
   }

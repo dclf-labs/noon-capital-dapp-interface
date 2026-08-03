@@ -13,7 +13,7 @@ import {
 import { MobileNavDrawer } from '@/components/shell/MobileNavDrawer'
 import useSidebarProtocolMetrics from '@/features/shell/hooks/useSidebarProtocolMetrics'
 import { useWalletSession } from '@/hooks/connection'
-import { openEvmAppKit } from '@/wallet/evm/open-appkit'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 function shortenAddress(address?: string) {
   if (!address) return undefined
@@ -27,6 +27,7 @@ function shortenAddress(address?: string) {
 export function AppShell() {
   const location = useLocation()
   const session = useWalletSession()
+  const connectWalletFamily = useConnectWalletFamily()
   const [apyPeriod, setApyPeriod] = useState<SidebarApyPeriod>('7d')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { apy: sidebarApy, tvl: sidebarTvl } = useSidebarProtocolMetrics(apyPeriod)
@@ -38,8 +39,11 @@ export function AppShell() {
     shortenAddress(session.address) ||
     (session.isConnected ? 'Connected' : undefined)
 
+  // Open the connect UI for the *active product family* (EVM / Starknet / Sui),
+  // not always AppKit — so switching to Starknet/Sui while disconnected prompts
+  // the matching wallet flow from the navbar CTA.
   const openWallet = () => {
-    void openEvmAppKit()
+    void connectWalletFamily(session.chainFamily)
   }
 
   return (

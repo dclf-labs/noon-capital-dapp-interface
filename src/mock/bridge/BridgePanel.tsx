@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 
 import { NumericFormat } from 'react-number-format'
 
+import { WalletIcon } from '@/assets/icons'
 import {
   formatTradeReceiveDisplay,
   parseTradePayInput,
@@ -9,9 +10,10 @@ import {
   TRADE_PAY_DECIMALS,
 } from '@/features/_shared'
 import { formatUsd } from '@/features/_shared/trade-display'
-import { tokenIconSrc } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
 import { cn, truncateAddress } from '@/lib/utils'
 import { BridgeNetworkPicker } from '@/mock/bridge/BridgeNetworkPicker'
+import { BridgingFeesCollapsible } from '@/mock/bridge/BridgingFeesCollapsible'
 import { BRIDGE_ETA_LABEL, DEFAULT_BRIDGE_FEE_LABEL } from '@/mock/bridge/constants'
 import { resolveBridgeStatusNotice } from '@/mock/bridge/status-notice'
 import { StatusCallout } from '@/mock/bridge/StatusCallout'
@@ -26,7 +28,6 @@ export type { BridgeNetworkOption, BridgePanelProps } from '@/mock/bridge/types'
 /** Presentational bridge card — step 0 (Figma). Fully controlled by live adapters. */
 export function BridgePanel({
   isConnected,
-  unsupported,
   connectedAddress,
   sourceNetworks,
   destinationNetworks,
@@ -43,14 +44,15 @@ export function BridgePanel({
   balanceInLabel = 'Bal: —',
   balanceOutLabel = 'Bal: —',
   receiverValue,
-  receiverPlaceholder,
-  onReceiverChange,
+  onOpenReceiverModal,
   feeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  networkFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  gasFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  protocolFeeLabel = '$0',
   etaLabel = BRIDGE_ETA_LABEL,
   warning,
   isFetchingFee = false,
   isLoadingFee = false,
-  isInsufficientBalance = false,
   primaryLabel = 'Enter amount',
   primaryDisabled = true,
   primaryLoading = false,
@@ -62,12 +64,10 @@ export function BridgePanel({
 }: BridgePanelProps) {
   const amountId = useId()
   const receiveId = useId()
-  const receiverId = useId()
   const amountValue = toTradePayAmount(amount)
 
   const [payFocused, setPayFocused] = useState(false)
   const [payDraft, setPayDraft] = useState<string | undefined>(undefined)
-  const [editingReceiver, setEditingReceiver] = useState(false)
 
   const clearPayDraft = () => {
     setPayFocused(false)
@@ -91,19 +91,10 @@ export function BridgePanel({
   const hasAmount = amountValue != null && amountValue > 0
   const canFlip = Boolean(onFlipNetworks && sourceChainId && destinationChainId)
   const notice = resolveBridgeStatusNotice(warning)
+  const receiveChainSrc = tokenChainIconSrc(token)
 
   return (
     <>
-      {unsupported ? (
-        <div className="mb-3 w-full">
-          <StatusCallout
-            type="error"
-            title="Wallet network does not match the selected network."
-            description="Switch network in the header and approve the wallet prompt."
-          />
-        </div>
-      ) : null}
-
       <div className="w-full overflow-hidden rounded-xl border border-stone-300 bg-white shadow-[0px_4px_4px_0px_rgba(111,125,185,0.05)]">
         {/* Sending / Receiving networks */}
         <div className="flex w-full items-stretch border-b border-stone-200">
@@ -182,6 +173,7 @@ export function BridgePanel({
                   onTokenChange(next)
                 }}
                 size="sm"
+                variant="outlined"
                 label={`Select bridge token${token ? `, currently ${token.symbol}` : ''}`}
               />
             </div>
@@ -224,7 +216,10 @@ export function BridgePanel({
           </div>
 
           {/* Flip — Figma uses horizontal swap icon rotated -90° so arrows read up/down. */}
-          <div className="absolute top-1/2 left-1/2 z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <div
+            id="bridge-flip-button"
+            className="absolute top-1/2 left-1/2 z-10 flex size-9 -translate-x-[32.5%] -translate-y-[32.5%] items-center justify-center md:size-11"
+          >
             <button
               type="button"
               disabled={!canFlip}
@@ -232,9 +227,9 @@ export function BridgePanel({
               onMouseDown={(event) => event.preventDefault()}
               onClick={onFlipNetworks}
               className={cn(
-                'flex items-center justify-center rounded-md border border-stone-200 bg-white p-2',
+                'flex cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white p-1.5 md:p-2',
                 focusReset,
-                canFlip ? 'hover:bg-stone-50' : 'cursor-not-allowed opacity-40',
+                canFlip ? 'hover:bg-stone-50' : 'cursor-not-allowed',
               )}
             >
               <img
@@ -242,7 +237,7 @@ export function BridgePanel({
                 alt=""
                 width={28}
                 height={28}
-                className="size-7 -rotate-90"
+                className="size-5 -rotate-90 md:size-7"
               />
             </button>
           </div>
@@ -253,38 +248,38 @@ export function BridgePanel({
               <p className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500 uppercase">
                 You&apos;re receiving
               </p>
-              {editingReceiver ? (
-                <input
-                  id={receiverId}
-                  value={receiverValue}
-                  placeholder={receiverPlaceholder}
-                  onChange={(event) => onReceiverChange(event.target.value)}
-                  onBlur={() => setEditingReceiver(false)}
-                  autoFocus
-                  className={cn(
-                    'max-w-[180px] rounded-md border border-sky-200 bg-sky-50 px-2 py-1',
-                    'text-sm leading-5 font-medium text-sky-800',
-                    focusReset,
-                  )}
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={onOpenReceiverModal}
+                aria-label={receiverValue ? 'Change receiving address' : 'Set receiving address'}
+                className={cn(
+                  'relative flex items-center gap-1 overflow-visible rounded-md bg-[#E0EAFF] px-1.5 py-1',
+                  'text-sm leading-5 font-medium text-[#A4BCFD]',
+                  focusReset,
+                )}
+              >
+                <WalletIcon
+                  width={16}
+                  height={14}
+                  className="size-4 shrink-0 text-[#A4BCFD]"
+                  aria-hidden
                 />
-              ) : (
-                <button
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => setEditingReceiver(true)}
-                  className={cn(
-                    'flex items-center gap-1 rounded-md bg-sky-50 px-1.5 py-1',
-                    'text-sm leading-5 font-medium text-sky-700',
-                    focusReset,
-                    'hover:bg-sky-100',
-                  )}
-                >
-                  <span>CHANGE</span>
-                  <span className="tabular-nums">
-                    {receiverValue ? truncateAddress(receiverValue) : 'Add'}
+                <span>{receiverValue ? 'CHANGE' : 'SET ADDRESS'}</span>
+                {receiverValue ? (
+                  <span className="text-[#6C77E9] tabular-nums">
+                    {truncateAddress(receiverValue, 2)}
                   </span>
-                </button>
-              )}
+                ) : null}
+                {/* Attention ping — old-dapp BridgeInput Ping, rounded-square indigo. */}
+                <span
+                  className="pointer-events-none absolute -top-0.5 -right-0.5 flex size-2"
+                  aria-hidden
+                >
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-[2px] bg-[#6c77e9] opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-[2px] bg-[#6c77e9]" />
+                </span>
+              </button>
             </div>
 
             <div className="flex w-full items-center gap-2">
@@ -303,15 +298,29 @@ export function BridgePanel({
                 />
               </div>
               <div className="flex items-center gap-1.5 rounded-md border border-stone-200 bg-white py-1.5 pr-2 pl-1.5 shadow-[0px_4px_2px_rgba(111,125,185,0.05)]">
-                <span className="relative size-[22px] shrink-0 overflow-hidden rounded-md bg-stone-200">
-                  {token ? (
-                    <img
-                      src={tokenIconSrc(token)}
-                      alt=""
-                      width={22}
-                      height={22}
-                      className="size-full object-cover"
-                    />
+                <span className="relative size-6 shrink-0">
+                  <span className="block size-6 overflow-hidden rounded-[4px] bg-stone-200">
+                    {token ? (
+                      <img
+                        src={tokenIconSrc(token)}
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="size-full object-cover"
+                      />
+                    ) : null}
+                  </span>
+                  {receiveChainSrc ? (
+                    <span className="absolute right-[-3px] bottom-[-2px] size-3 overflow-hidden rounded-[2px] border border-white bg-white">
+                      <img
+                        src={receiveChainSrc}
+                        alt=""
+                        width={12}
+                        height={12}
+                        className="size-full rounded-[2px] object-cover"
+                        draggable={false}
+                      />
+                    </span>
                   ) : null}
                 </span>
                 <span className="text-base leading-6 font-medium text-stone-600">
@@ -327,55 +336,27 @@ export function BridgePanel({
         </div>
 
         {/* Old-dapp Info sits between inputs and fee/CTA — not between fee and button. */}
-        {notice || isInsufficientBalance ? (
+        {notice ? (
           <div className="flex w-full flex-col gap-2 px-4 pt-2">
-            {notice ? (
-              <StatusCallout
-                type={notice.type}
-                title={notice.title}
-                description={notice.description}
-              />
-            ) : null}
-            {isInsufficientBalance ? (
-              <StatusCallout
-                type="error"
-                title="Insufficient wallet balance."
-                description={
-                  token?.symbol
-                    ? `Add ${token.symbol} to your wallet or lower the send amount.`
-                    : 'Add tokens to your wallet or lower the send amount.'
-                }
-              />
-            ) : null}
+            <StatusCallout
+              type={notice.type}
+              title={notice.title}
+              description={notice.description}
+            />
           </div>
         ) : null}
 
         <div className="flex w-full flex-col gap-4 px-4 pt-2 pb-6">
           <div className="flex w-full flex-col gap-2">
-            <div className="flex w-full items-center gap-1">
-              <img
-                src="/assets/buy/gas-pump.svg"
-                alt=""
-                width={20}
-                height={20}
-                className="size-5 shrink-0"
-              />
-              <span className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500">
-                Bridging fees
-              </span>
-              {(isLoadingFee || isFetchingFee) && feeLabel === DEFAULT_BRIDGE_FEE_LABEL ? (
-                <span
-                  aria-label="Estimating bridge fee"
-                  className="inline-block h-6 w-14 animate-pulse rounded-md bg-stone-200"
-                />
-              ) : (
-                <p className="text-base leading-6 font-semibold text-stone-600 tabular-nums">
-                  {feeLabel}
-                </p>
-              )}
-            </div>
+            <BridgingFeesCollapsible
+              totalLabel={feeLabel}
+              protocolFeeLabel={protocolFeeLabel}
+              networkFeeLabel={networkFeeLabel}
+              gasFeeLabel={gasFeeLabel}
+              isLoading={isLoadingFee || isFetchingFee}
+            />
 
-            <div className="hidden w-full items-center gap-1 md:flex">
+            <div className="flex w-full items-center gap-1">
               <img
                 src="/assets/bridge/clock.svg"
                 alt=""

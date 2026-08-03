@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 
+import { formatPercent } from '@/features/_shared/trade-display'
 import useYieldAppCitreaVault from '@/features/api/hooks/useYieldAppCitreaVault'
 import useYieldAppEthTbtcTvl from '@/features/api/hooks/useYieldAppEthTbtcTvl'
 import useYieldAppTvl from '@/features/api/hooks/useYieldAppTvl'
 import { PRODUCT_VAULT_DEFINITIONS, type ProductVaultId } from '@/features/vault/catalog'
-import { toIntlCompactStr, toIntlStr } from '@/lib/format'
+import { toIntlCompactStr } from '@/lib/format'
 import type { VaultListItem } from '@/mock/vaults'
 
 type VaultMetrics = {
@@ -14,12 +15,12 @@ type VaultMetrics = {
 
 function formatApy(apy: number | undefined): string {
   if (apy == null || !Number.isFinite(apy)) return '—'
-  return `${toIntlStr(apy, 2, 2)}%`
+  return formatPercent(apy)
 }
 
 function formatTvl(tvlUsd: number | undefined): string {
   if (tvlUsd == null || !Number.isFinite(tvlUsd)) return '—'
-  return toIntlCompactStr(tvlUsd, 2, true, 1, '$')
+  return toIntlCompactStr(tvlUsd, 1, true, 0, '$', '', 1)
 }
 
 /**

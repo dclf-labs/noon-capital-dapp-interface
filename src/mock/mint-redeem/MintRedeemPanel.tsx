@@ -67,8 +67,8 @@ export function MintRedeemPanel({
   unitRateLabel,
   feeLabel,
   isFetchingQuote,
-  isInsufficientBalance,
-  isApproved,
+  isInsufficientBalance: _isInsufficientBalance,
+  isApproved: _isApproved,
   isWhitelisted,
   primaryLabel,
   primaryDisabled,
@@ -146,6 +146,7 @@ export function MintRedeemPanel({
           ) : null}
           <button
             type="button"
+            className={primaryLoading ? 'animate-pulse' : undefined}
             style={primaryDisabled || primaryLoading ? styles.buttonDisabled : styles.button}
             disabled={primaryDisabled || primaryLoading}
             onClick={onPrimary}
@@ -159,7 +160,7 @@ export function MintRedeemPanel({
 
   const receiveDisplay =
     amountOutValue != null ? down(amountOutValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
-  const receivePlaceholder = isFetchingQuote && amountOutValue == null ? '…' : '0.00'
+  const isReceiveLoading = isFetchingQuote && amountOutValue == null
   const variableToken = mode === 'mint' ? tokenIn : tokenOut
   const fixedToken = mode === 'mint' ? tokenOut : tokenIn
 
@@ -260,8 +261,9 @@ export function MintRedeemPanel({
         <div style={styles.row}>
           <NumericFormat
             style={{ ...styles.input, opacity: 0.85 }}
+            className={isReceiveLoading ? 'animate-pulse' : undefined}
             readOnly
-            placeholder={receivePlaceholder}
+            placeholder="0.00"
             decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
@@ -291,14 +293,11 @@ export function MintRedeemPanel({
         <p style={styles.muted}>Slippage 0%</p>
       </div>
 
-      {isInsufficientBalance ? <p style={styles.errorText}>Insufficient balance</p> : null}
-      {!isApproved && amountIn && isWhitelisted ? (
-        <p style={styles.muted}>Approval required before {title.toLowerCase()}.</p>
-      ) : null}
       {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
 
       <button
         type="button"
+        className={primaryLoading ? 'animate-pulse' : undefined}
         style={primaryDisabled || primaryLoading ? styles.buttonDisabled : styles.button}
         disabled={primaryDisabled || primaryLoading}
         onClick={onPrimary}

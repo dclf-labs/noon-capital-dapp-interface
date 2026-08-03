@@ -54,6 +54,7 @@ function RequestRow({
       </p>
       <button
         type="button"
+        className={isBusy ? 'animate-pulse' : undefined}
         style={disabled ? styles.buttonDisabled : styles.button}
         disabled={disabled}
         onClick={onClaim}

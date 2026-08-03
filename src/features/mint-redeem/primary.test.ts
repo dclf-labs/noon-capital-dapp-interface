@@ -27,7 +27,7 @@ describe('getMintRedeemPrimaryAction', () => {
   })
 
   it('shows Loading when balance, allowance, or whitelist is loading', () => {
-    expect(getMintRedeemPrimaryAction({ ...base, isBalanceLoading: true }).label).toBe('Loading…')
+    expect(getMintRedeemPrimaryAction({ ...base, isBalanceLoading: true }).label).toBe('Loading')
     expect(getMintRedeemPrimaryAction({ ...base, isAllowanceLoading: true }).loading).toBe(true)
     expect(getMintRedeemPrimaryAction({ ...base, isWhitelistLoading: true }).disabled).toBe(true)
   })
@@ -57,7 +57,7 @@ describe('getMintRedeemPrimaryAction', () => {
 
   it('shows Fetching quote / Quote unavailable / Insufficient balance', () => {
     expect(getMintRedeemPrimaryAction({ ...base, isFetchingQuote: true }).label).toBe(
-      'Fetching quote…',
+      'Fetching quote',
     )
     expect(getMintRedeemPrimaryAction({ ...base, isQuoteError: true }).label).toBe(
       'Quote unavailable',
@@ -82,7 +82,7 @@ describe('getMintRedeemPrimaryAction', () => {
       isBusyApprove: true,
       tokenInSymbol: 'USDC',
     })
-    expect(action.label).toBe('Approving…')
+    expect(action.label).toBe('Approving')
     expect(action.disabled).toBe(true)
     expect(action.loading).toBe(true)
   })
@@ -165,6 +165,6 @@ describe('getMintRedeemPrimaryAction', () => {
         step: 1,
         isBusySubmit: true,
       }),
-    ).toMatchObject({ label: 'Submitting…', disabled: true, loading: true })
+    ).toMatchObject({ label: 'Submitting', disabled: true, loading: true })
   })
 })

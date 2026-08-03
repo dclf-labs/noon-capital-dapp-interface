@@ -62,8 +62,6 @@ function payInput() {
 }
 
 function receiveInput() {
-  const ellipsis = screen.queryByPlaceholderText('…')
-  if (ellipsis) return ellipsis as HTMLInputElement
   const inputs = screen.getAllByPlaceholderText('0.00')
   return inputs[inputs.length - 1] as HTMLInputElement
 }
@@ -111,9 +109,10 @@ describe('MintRedeemPanel behaviour', () => {
     expect(receiveInput()).toHaveAttribute('title', String(toTradeReceiveStoredAmount(amountOut)))
   })
 
-  it('shows loading placeholder only when fetching and no receive amount yet', () => {
+  it('pulses the receive field when fetching and no receive amount yet', () => {
     renderPanel({ isFetchingQuote: true, amountOut: undefined })
-    expect(receiveInput()).toHaveAttribute('placeholder', '…')
+    expect(receiveInput()).toHaveAttribute('placeholder', '0.00')
+    expect(receiveInput()).toHaveClass('animate-pulse')
   })
 
   it('wires Half / Max and disables them when presetsDisabled', async () => {
@@ -222,7 +221,7 @@ describe('MintRedeemPanel behaviour', () => {
   it('renders USD notional under the pay field', () => {
     renderPanel({ amountIn: 50, amountInUsd: 49.999 })
     expect(screen.getByText(formatUsd(49.999))).toBeInTheDocument()
-    expect(screen.getByText('~$49.99')).toBeInTheDocument()
+    expect(screen.getByText('~$49.9')).toBeInTheDocument()
   })
 
   it('shows success state with explorer link and reset', async () => {

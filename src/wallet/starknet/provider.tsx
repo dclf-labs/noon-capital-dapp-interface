@@ -3,11 +3,12 @@ import { type ReactNode, useMemo } from 'react'
 import { mainnet } from '@starknet-react/chains'
 import {
   alchemyProvider,
-  argent,
   braavos,
-  type Connector,
   publicProvider,
+  ready,
   StarknetConfig,
+  useInjectedConnectors,
+  voyager,
 } from '@starknet-react/core'
 
 import { appEnv } from '@/lib/env'
@@ -26,8 +27,16 @@ function createStarknetProvider() {
   return publicProvider()
 }
 
-export function StarknetWalletProvider({ children }: StarknetWalletProviderProps) {
-  const connectors = useMemo<Connector[]>(() => [argent(), braavos()], [])
+/**
+ * Discovers injected Starknet wallets and always surfaces Ready (Argent) + Braavos,
+ * matching old-dapp `useInjectedConnectors` behavior.
+ */
+function StarknetConfigWithConnectors({ children }: { children: ReactNode }) {
+  const { connectors } = useInjectedConnectors({
+    recommended: [ready(), braavos()],
+    includeRecommended: 'always',
+    order: 'alphabetical',
+  })
   const provider = useMemo(() => createStarknetProvider(), [])
 
   return (
@@ -35,10 +44,15 @@ export function StarknetWalletProvider({ children }: StarknetWalletProviderProps
       chains={[mainnet]}
       provider={provider}
       connectors={connectors}
+      explorer={voyager}
       queryClient={queryClient}
       autoConnect
     >
       {children}
     </StarknetConfig>
   )
+}
+
+export function StarknetWalletProvider({ children }: StarknetWalletProviderProps) {
+  return <StarknetConfigWithConnectors>{children}</StarknetConfigWithConnectors>
 }

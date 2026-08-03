@@ -22,7 +22,7 @@ describe('getTradePrimaryAction', () => {
     expect(getTradePrimaryAction({ ...base, isConnected: false }).label).toBe('Connect wallet')
     expect(getTradePrimaryAction({ ...base, isBalanceLoading: true }).loading).toBe(true)
     expect(getTradePrimaryAction({ ...base, amountIn: undefined }).label).toBe('Enter amount')
-    expect(getTradePrimaryAction({ ...base, isFetchingQuote: true }).label).toBe('Fetching quote…')
+    expect(getTradePrimaryAction({ ...base, isFetchingQuote: true }).label).toBe('Fetching quote')
     expect(getTradePrimaryAction({ ...base, isQuoteError: true }).disabled).toBe(true)
     expect(getTradePrimaryAction({ ...base, isInsufficientBalance: true }).disabled).toBe(true)
   })

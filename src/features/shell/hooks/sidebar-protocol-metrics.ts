@@ -31,8 +31,8 @@ export function formatSidebarProtocolMetrics(
   const tvlReady = !input.tvlLoading && !input.tvlError && input.tvl != null
 
   return {
-    apy: apyReady ? toIntlCompactStr(apyRaw, 2, true, 1, '', '%') : '—',
-    tvl: tvlReady ? toIntlCompactStr(input.tvl, 2, true, 1, '', '') : '—',
+    apy: apyReady ? toIntlCompactStr(apyRaw, 2, true, 0, '', '%', 2) : '—',
+    tvl: tvlReady ? toIntlCompactStr(input.tvl, 1, true, 0, '', '', 1) : '—',
     isLoading: input.statsLoading || input.tvlLoading,
     isError: input.statsError || input.tvlError,
   }

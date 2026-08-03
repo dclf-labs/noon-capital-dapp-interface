@@ -1,54 +1,70 @@
-import starknetConfig from '@/config/chains/starknet'
-import suiConfig from '@/config/chains/sui'
+import { activeProtocolConfigs } from '@/config/chains'
 import { isBridgePairAllowed } from '@/features/bridge/route'
-import {
-  type ChainId,
-  getActiveEvmChainIds,
-  getChainConfig,
-  getStarknetChainId,
-  getSuiChainId,
-} from '@/lib/chain'
+import type { ChainId } from '@/lib/chain'
 import type { BridgeNetworkOption } from '@/mock/bridge/types'
 
-/** All bridgeable networks (EVM + Starknet + Sui) — matches old-dapp `activeConfig` lists. */
+/**
+ * Stable product order for bridge network pickers (header-adjacent first, then the rest).
+ * Every active protocol chain with bridge support should appear here.
+ */
+const BRIDGE_NETWORK_ORDER = [
+  'ethereum',
+  'zksync',
+  'sophon',
+  'tac',
+  'starknet',
+  'sui',
+  'base',
+  'hyperevm',
+  'citrea',
+  'berachain',
+] as const
+
+function orderIndex(iconSlug: string | undefined): number {
+  const idx = BRIDGE_NETWORK_ORDER.indexOf(
+    (iconSlug ?? '') as (typeof BRIDGE_NETWORK_ORDER)[number],
+  )
+  return idx === -1 ? BRIDGE_NETWORK_ORDER.length : idx
+}
+
+/**
+ * All active bridgeable networks (EVM + Starknet + Sui) from `activeProtocolConfigs`.
+ * Never filters by route — callers mark unavailable options with `disabled`.
+ */
 export function getAllBridgeNetworks(): BridgeNetworkOption[] {
-  const networks: BridgeNetworkOption[] = getActiveEvmChainIds().map((id) => {
-    const config = getChainConfig(id)
-    return { id: Number(id), name: config.name }
-  })
-
-  const starknetId = getStarknetChainId()
-  const suiId = getSuiChainId()
-  if (starknetId != null) {
-    networks.push({ id: Number(starknetId), name: starknetConfig.name })
-  }
-  if (suiId != null) {
-    networks.push({ id: Number(suiId), name: suiConfig.name })
-  }
-
-  return networks
+  return Object.values(activeProtocolConfigs)
+    .filter((config): config is NonNullable<typeof config> => Boolean(config?.bridgeTokens?.length))
+    .map((config) => ({
+      id: Number(config.id),
+      name: config.name,
+      disabled: false,
+    }))
+    .sort((a, b) => {
+      const configA = activeProtocolConfigs[a.id as ChainId]
+      const configB = activeProtocolConfigs[b.id as ChainId]
+      return orderIndex(configA?.iconSlug) - orderIndex(configB?.iconSlug)
+    })
 }
 
 /**
- * Source networks for the bridge card.
- * Always includes every bridgeable family so picking Starknet/Sui switches the active chain
- * (same as old-dapp BridgeSourceNetworkSelector).
+ * Source networks — always the full list.
+ * When a destination is selected, incompatible sources are marked `disabled`.
  */
-export function getBridgeSourceNetworks(
-  _family?: 'evm' | 'starknet' | 'sui',
-): BridgeNetworkOption[] {
-  return getAllBridgeNetworks()
+export function getBridgeSourceNetworks(destinationChainId?: ChainId): BridgeNetworkOption[] {
+  return getAllBridgeNetworks().map((network) => ({
+    ...network,
+    disabled:
+      destinationChainId != null ? !isBridgePairAllowed(network.id, destinationChainId) : false,
+  }))
 }
 
 /**
- * Destination candidates, filtered by {@link isBridgePairAllowed} once a source is selected.
- * Includes EVM + Starknet + Sui (old-dapp destination selector).
+ * Destination networks — always the full list.
+ * When a source is selected, incompatible destinations are marked `disabled`.
  */
-export function getBridgeDestinationNetworks(
-  sourceChainId: ChainId | undefined,
-  _family?: 'evm' | 'starknet' | 'sui',
-): BridgeNetworkOption[] {
-  const candidates = getAllBridgeNetworks()
-  if (sourceChainId == null) return candidates
-  return candidates.filter((network) => isBridgePairAllowed(sourceChainId, network.id))
+export function getBridgeDestinationNetworks(sourceChainId?: ChainId): BridgeNetworkOption[] {
+  return getAllBridgeNetworks().map((network) => ({
+    ...network,
+    disabled: sourceChainId != null ? !isBridgePairAllowed(sourceChainId, network.id) : false,
+  }))
 }

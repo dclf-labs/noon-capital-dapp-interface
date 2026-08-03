@@ -53,7 +53,7 @@ export function BridgePage() {
           ]}
         />
         {activeId === 'none' ? (
-          <p className="w-full max-w-[70%] min-w-[45%] text-center text-sm text-stone-500">
+          <p className="w-full min-w-0 text-center text-sm text-stone-500 lg:max-w-[70%] lg:min-w-[45%]">
             Bridge is available on EVM, Starknet, and Sui. Switch the active network above.
           </p>
         ) : null}

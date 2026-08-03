@@ -51,13 +51,13 @@ export function getStakeUnstakePrimaryAction({
     return { label: 'Connect wallet', disabled: true, loading: false }
   }
   if (isBalanceLoading || (requiresApproval && isAllowanceLoading)) {
-    return { label: 'Loading…', disabled: true, loading: true }
+    return { label: 'Loading', disabled: true, loading: true }
   }
   if (!amountIn) {
     return { label: 'Enter amount', disabled: true, loading: false }
   }
   if (isFetchingQuote) {
-    return { label: 'Fetching quote…', disabled: true, loading: true }
+    return { label: 'Fetching quote', disabled: true, loading: true }
   }
   if (isQuoteError) {
     return { label: 'Quote unavailable', disabled: true, loading: false }
@@ -72,7 +72,7 @@ export function getStakeUnstakePrimaryAction({
         approveStatus === 'TXN_FAILURE'
           ? 'Retry approve'
           : isBusyApprove
-            ? 'Approving…'
+            ? 'Approving'
             : `Approve ${tokenInSymbol || ''}`.trim(),
       disabled: isBusyApprove,
       loading: isBusyApprove,
@@ -88,7 +88,7 @@ export function getStakeUnstakePrimaryAction({
   const approvedOk = !requiresApproval || isApproved
 
   return {
-    label: submitFailed ? retry : isBusySubmit ? 'Submitting…' : confirm,
+    label: submitFailed ? retry : isBusySubmit ? 'Submitting' : confirm,
     disabled: !approvedOk || !amountOut || isBusySubmit,
     loading: isBusySubmit,
   }

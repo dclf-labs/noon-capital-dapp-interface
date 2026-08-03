@@ -158,7 +158,6 @@ export function BuyFlowView({
             primaryDisabled={showConnect ? false : primaryDisabled}
             primaryLoading={showConnect ? false : primaryLoading}
             isConnected={isConnected}
-            unsupported={unsupported}
             presetsDisabled={presetsDisabled || unsupported}
             isFetchingQuote={isFetchingQuote}
             isLoadingFee={feeLoading}
@@ -180,12 +179,6 @@ export function BuyFlowView({
         </div>
 
         <div ref={measureRef} className="flex w-full flex-col gap-3">
-          {unsupported ? (
-            <p className="w-full text-center text-sm text-red-700">
-              Wallet network does not match the selected network. Switch network in the header and
-              approve the wallet prompt.
-            </p>
-          ) : null}
           <BuyConfirmPanel
             amountIn={amountIn}
             amountOut={amountOut}

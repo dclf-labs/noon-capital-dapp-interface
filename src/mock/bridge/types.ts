@@ -4,6 +4,8 @@ import type { StatusCalloutType } from '@/mock/bridge/StatusCallout'
 export type BridgeNetworkOption = {
   id: number
   name: string
+  /** When true, shown in the picker but not selectable for the current route. */
+  disabled?: boolean
 }
 
 /** Status / warning notice shown between inputs and fees (old-dapp Info). */
@@ -34,10 +36,16 @@ export type BridgePanelProps = {
   receiverLabel: string
   receiverValue: string
   receiverPlaceholder: string
-  onReceiverChange: (value: string) => void
+  /** Opens the Change Address modal (old-dapp CHANGE / SET ADDRESS). */
+  onOpenReceiverModal: () => void
   feeLabel?: string
+  /** Source-chain submit gas in USD (Network fee row). */
+  networkFeeLabel?: string
+  /** Destination / bridge quote in USD (Gas fee row). */
+  gasFeeLabel?: string
+  /** Always `$0` — Protocol fee row. */
+  protocolFeeLabel?: string
   feeNativeLabel?: string
-  gasLabel?: string
   etaLabel?: string
   protocolLabel?: string
   /** Receiver / maintenance notice — rendered above fees like old-dapp Info. */
@@ -60,6 +68,10 @@ export type BridgeConfirmPanelProps = {
   token?: Token
   sourceName?: string
   destinationName?: string
+  /** `/assets/chains/…` for the source network row. */
+  sourceChainIconSrc?: string
+  /** `/assets/chains/…` for the destination network row. */
+  destinationChainIconSrc?: string
   /** Connected wallet on the source chain (old-dapp SubmitTxnInfo `address`). */
   sourceAddress?: string
   receiverValue?: string
@@ -67,7 +79,9 @@ export type BridgeConfirmPanelProps = {
   sourceAddressExplorerUrl?: string
   destinationAddressExplorerUrl?: string
   networkFeeLabel?: string
-  networkFeeNativeLabel?: string
+  /** Destination / bridge quote in USD (Gas fee). */
+  gasFeeLabel?: string
+  protocolFeeLabel?: string
   bridgeFeeLabel?: string
   etaLabel?: string
   warning?: string | BridgeStatusNotice

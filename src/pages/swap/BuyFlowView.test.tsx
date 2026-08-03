@@ -87,8 +87,8 @@ describe('BuyFlowView', () => {
           step={1}
           amountIn={21}
           amountOut={0.001}
-          feeLabel="~$0.21"
-          feeNativeLabel="~0.00008 ETH"
+          feeLabel="$0.2"
+          feeNativeLabel="<0.1 ETH"
           primaryLabel="Confirm the transaction"
           primaryDisabled={false}
           onBack={onBack}
@@ -100,9 +100,9 @@ describe('BuyFlowView', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Swapping')).toBeInTheDocument()
     expect(screen.getByText('To Receive')).toBeInTheDocument()
-    expect(screen.getByText('21.00')).toBeInTheDocument()
-    expect(screen.getByText('<0.01')).toBeInTheDocument()
-    expect(screen.getByText('~$0.21')).toBeInTheDocument()
+    expect(screen.getByText('21')).toBeInTheDocument()
+    expect(screen.getByText('<0.1')).toBeInTheDocument()
+    expect(screen.getByText('$0.2')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /confirm the transaction/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument()
   })

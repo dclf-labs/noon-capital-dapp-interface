@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ChevronDownIcon } from '@/assets/icons'
 import { SHELL_SELECTION_CLOSE_MS, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
 import type { Token } from '@/config/token'
-import { tokenIconSrc, tokenOptionKey } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc, tokenOptionKey } from '@/lib/token-icon'
 import { cn } from '@/lib/utils'
 import {
   computeTokenDropdownCoords,
@@ -21,6 +21,12 @@ type TokenDropdownProps = {
   tokens?: Token[]
   onChange?: (token: Token) => void
   size?: 'lg' | 'sm'
+  /**
+   * Trigger chrome:
+   * - `soft` — filled stone pill (buy / trade mocks)
+   * - `outlined` — white bordered chip (bridge Figma send row)
+   */
+  variant?: 'soft' | 'outlined'
   label: string
 }
 
@@ -33,23 +39,47 @@ function TokenGlyph({
   size: 'lg' | 'sm'
   selected?: boolean
 }) {
-  const px = size === 'lg' ? 32 : 22
+  const px = size === 'lg' ? 32 : 24
+  // Figma input-row badge is 12px; keep the same on the larger buy-token trigger.
+  const overlayPx = 12
+  const chainSrc = tokenChainIconSrc(token)
+
   return (
-    <span
-      className={cn(
-        'relative z-10 shrink-0 overflow-hidden',
-        // Buy-token trigger (lg, under the amount) is circular; everywhere else stays rounded-square.
-        size === 'lg' ? 'size-8 rounded-full' : 'size-[22px] rounded-md',
-        selected ? 'bg-white/10' : 'bg-stone-200',
-      )}
-    >
-      <img
-        src={tokenIconSrc(token)}
-        alt=""
-        width={px}
-        height={px}
-        className="size-full object-cover"
-      />
+    <span className="relative z-10 shrink-0">
+      <span
+        className={cn(
+          'block overflow-hidden',
+          // Buy-token trigger (lg, under the amount) is circular; input-row / list stay rounded-square.
+          size === 'lg' ? 'size-8 rounded-full' : 'size-6 rounded-[4px]',
+          selected ? 'bg-white/10' : 'bg-stone-200',
+        )}
+      >
+        <img
+          src={tokenIconSrc(token)}
+          alt=""
+          width={px}
+          height={px}
+          className="size-full object-cover"
+        />
+      </span>
+      {chainSrc ? (
+        <span
+          className={cn(
+            // Figma: 12px chain badge, rounded square (clip circular chain assets).
+            'absolute size-3 overflow-hidden rounded-[2px] border border-white bg-white',
+            size === 'lg' ? '-right-0.5 -bottom-0.5' : 'right-[-3px] bottom-[-2px]',
+          )}
+        >
+          <img
+            src={chainSrc}
+            alt=""
+            width={overlayPx}
+            height={overlayPx}
+            className="size-full rounded-[2px] object-cover"
+            draggable={false}
+          />
+        </span>
+      ) : null}
     </span>
   )
 }
@@ -60,6 +90,7 @@ export function TokenDropdown({
   tokens = [],
   onChange,
   size = 'lg',
+  variant = 'soft',
   label,
 }: TokenDropdownProps) {
   const menuId = useId()
@@ -234,21 +265,34 @@ export function TokenDropdown({
           setOpen((value) => !value)
         }}
         className={cn(
-          'flex items-center text-stone-500 transition-colors hover:text-primary',
+          'flex items-center',
           'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
-          open && 'text-primary',
-          size === 'lg'
-            ? 'gap-2 rounded-full bg-stone-100 py-1.5 pr-2.5 pl-2 text-sm leading-5 font-book'
-            : 'gap-1 rounded-lg bg-stone-100 px-2 py-1 text-base leading-6 font-medium text-stone-600',
+          variant === 'outlined'
+            ? cn(
+                // Bridge Figma — matches the static receive-row token chip + chevron.
+                'gap-1.5 rounded-md border border-stone-200 bg-white py-1.5 pr-2 pl-1.5',
+                'text-base leading-6 font-medium text-stone-600',
+                'shadow-[0px_4px_2px_rgba(111,125,185,0.05)]',
+                'transition-colors hover:bg-stone-50',
+                open && 'bg-stone-50',
+              )
+            : cn(
+                'text-stone-500 transition-colors hover:text-primary',
+                open && 'text-primary',
+                size === 'lg'
+                  ? 'gap-2 rounded-full bg-stone-100 py-1.5 pr-2.5 pl-2 text-sm leading-5 font-book'
+                  : 'gap-1 rounded-lg bg-stone-100 px-2 py-1 text-base leading-6 font-medium text-stone-600',
+              ),
         )}
       >
-        <TokenGlyph token={token} size={size} />
+        <TokenGlyph token={token} size={size === 'lg' && variant === 'soft' ? 'lg' : 'sm'} />
         <span>{token?.symbol || 'Select'}</span>
         <ChevronDownIcon
           width={20}
           height={20}
           className={cn(
             'size-5 shrink-0 transition-transform duration-200 ease-out',
+            variant === 'outlined' && 'text-stone-500',
             open && 'rotate-180',
           )}
           aria-hidden

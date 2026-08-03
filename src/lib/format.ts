@@ -149,98 +149,107 @@ export const toTruncatedTokenUnits = (
   return strToBn(negative ? `-${clipped}` : clipped, decimals)
 }
 
-/** Fixed 2-fraction-digit Intl string after `down(amount, precision)`. */
-export const toIntlStr = (
-  amount: number | string | bigint | undefined,
-  precision: number = 2,
-  minimumPrecision: number = 2,
-  prefix: string = '',
-  suffix: string = '',
-) => {
-  const _amount = down(toNum(amount), precision)
-  return _amount < 0.01 && _amount > 0
-    ? `<${prefix}0.01${suffix}`.replace('<~', '<')
-    : `${prefix}${new Intl.NumberFormat('en-US', {
-        minimumIntegerDigits: 1,
-        minimumFractionDigits: minimumPrecision || 2,
-        maximumFractionDigits: 2,
-      }).format(_amount)}${suffix}`
+/**
+ * Positive amounts that would display as zero at `maximumFractionDigits`
+ * (e.g. `<0.1` at 1dp, `<0.01` at 2dp).
+ */
+const isDisplayDust = (amount: number, maximumFractionDigits: number) => {
+  if (!Number.isFinite(amount) || amount <= 0) return false
+  return amount < 10 ** -maximumFractionDigits
 }
 
-export const toIntlStrWithMaxFractionDigits4 = (
+const formatDisplayDust = (prefix: string, suffix: string, maximumFractionDigits: number) => {
+  const floorLabel = (10 ** -maximumFractionDigits).toFixed(maximumFractionDigits)
+  return `<${prefix}${floorLabel}${suffix}`.replace('<~', '<')
+}
+
+/** Intl string after `down(amount, precision)` — decimals only when needed. */
+export const toIntlStr = (
   amount: number | string | bigint | undefined,
-  precision: number = 2,
-  minimumPrecision: number = 2,
+  precision: number = 1,
+  minimumFractionDigits: number = 0,
   prefix: string = '',
   suffix: string = '',
+  maximumFractionDigits: number = 1,
 ) => {
-  const _amount = down(toNum(amount), precision)
-  return _amount < 0.01 && _amount > 0
-    ? `<${prefix}0.01${suffix}`.replace('<~', '<')
-    : `${prefix}${new Intl.NumberFormat('en-US', {
-        minimumIntegerDigits: 1,
-        minimumFractionDigits: minimumPrecision || 2,
-        maximumFractionDigits: 4,
-      }).format(_amount)}${suffix}`
+  const raw = toNum(amount)
+  if (isDisplayDust(raw, maximumFractionDigits)) {
+    return formatDisplayDust(prefix, suffix, maximumFractionDigits)
+  }
+  // Truncate to the display cap (never round up via Intl after a deeper `down`).
+  const _amount = down(raw, Math.min(precision, maximumFractionDigits))
+  return `${prefix}${new Intl.NumberFormat('en-US', {
+    minimumIntegerDigits: 1,
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(_amount)}${suffix}`
 }
+
+/** @deprecated Prefer `toIntlStr` with `maximumFractionDigits`; kept for callers. */
+export const toIntlStrWithMaxFractionDigits4 = (
+  amount: number | string | bigint | undefined,
+  precision: number = 1,
+  minimumFractionDigits: number = 0,
+  prefix: string = '',
+  suffix: string = '',
+) => toIntlStr(amount, precision, minimumFractionDigits, prefix, suffix, 1)
 
 export const toIntlCompactStr = (
   amount: number | string | bigint | undefined,
-  precision: number = 2,
+  precision: number = 1,
   useConditionalCompact: boolean = true,
   minimumFractionDigits: number = 0,
   prefix: string = '',
   suffix: string = '',
+  maximumFractionDigits: number = 1,
 ) => {
-  const _amount = down(toNum(amount), precision)
-  return _amount < 0.01 && _amount > 0
-    ? `<${prefix}0.01${suffix}`.replace('<~', '<')
-    : useConditionalCompact && _amount < 100_000
-      ? toIntlStr(amount, precision, minimumFractionDigits, prefix, suffix)
-      : `${prefix}${new Intl.NumberFormat('en-US', {
-          notation: 'compact',
-          compactDisplay: 'short',
-          minimumIntegerDigits: 1,
-          maximumFractionDigits: 2,
-          minimumFractionDigits: minimumFractionDigits || 0,
-        }).format(_amount)}${suffix}`
+  const raw = toNum(amount)
+  if (isDisplayDust(raw, maximumFractionDigits)) {
+    return formatDisplayDust(prefix, suffix, maximumFractionDigits)
+  }
+  const _amount = down(raw, Math.min(precision, maximumFractionDigits))
+  return useConditionalCompact && _amount < 100_000
+    ? toIntlStr(amount, precision, minimumFractionDigits, prefix, suffix, maximumFractionDigits)
+    : `${prefix}${new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        compactDisplay: 'short',
+        minimumIntegerDigits: 1,
+        maximumFractionDigits,
+        minimumFractionDigits,
+      }).format(_amount)}${suffix}`
 }
 
 export const toIntlCompactStrWithMaxFractionDigits4 = (
   amount: number | string | bigint | undefined,
-  precision: number = 2,
+  precision: number = 1,
   useConditionalCompact: boolean = true,
   minimumFractionDigits: number = 0,
   prefix: string = '',
   suffix: string = '',
-) => {
-  const _amount = down(toNum(amount), precision)
-  return _amount < 0.01 && _amount > 0
-    ? `<${prefix}0.01${suffix}`.replace('<~', '<')
-    : useConditionalCompact && _amount < 100_000
-      ? toIntlStrWithMaxFractionDigits4(amount, precision, minimumFractionDigits, prefix, suffix)
-      : `${prefix}${new Intl.NumberFormat('en-US', {
-          notation: 'compact',
-          compactDisplay: 'short',
-          minimumIntegerDigits: 1,
-          maximumFractionDigits: 4,
-          minimumFractionDigits: minimumFractionDigits || 0,
-        }).format(_amount)}${suffix}`
-}
+) =>
+  toIntlCompactStr(
+    amount,
+    precision,
+    useConditionalCompact,
+    minimumFractionDigits,
+    prefix,
+    suffix,
+    1,
+  )
 
 export const toIntlInt = (
   amount: number | string | bigint | undefined,
   prefix: string = '',
   suffix: string = '',
 ) => {
-  const _amount = round(toNum(amount))
-  return _amount < 0.01 && _amount > 0
-    ? `<${prefix}0.01${suffix}`.replace('<~', '<')
-    : `${prefix}${new Intl.NumberFormat('en-US', {
-        minimumIntegerDigits: 1,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(_amount)}${suffix}`
+  const raw = toNum(amount)
+  if (isDisplayDust(raw, 1)) return formatDisplayDust(prefix, suffix, 1)
+  const _amount = round(raw)
+  return `${prefix}${new Intl.NumberFormat('en-US', {
+    minimumIntegerDigits: 1,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(_amount)}${suffix}`
 }
 
 export const toIntlCompactInt = (
@@ -248,14 +257,14 @@ export const toIntlCompactInt = (
   prefix: string = '',
   suffix: string = '',
 ) => {
-  const _amount = round(toNum(amount))
-  return _amount < 0.01 && _amount > 0
-    ? `<${prefix}0.01${suffix}`.replace('<~', '<')
-    : `${prefix}${new Intl.NumberFormat('en-US', {
-        notation: 'compact',
-        compactDisplay: 'short',
-        minimumIntegerDigits: 1,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }).format(_amount)}${suffix}`
+  const raw = toNum(amount)
+  if (isDisplayDust(raw, 1)) return formatDisplayDust(prefix, suffix, 1)
+  const _amount = round(raw)
+  return `${prefix}${new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    minimumIntegerDigits: 1,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  }).format(_amount)}${suffix}`
 }

@@ -11,6 +11,7 @@ export {
   BUY_USD_PRESETS,
   DEFAULT_BALANCE_USD,
   DEFAULT_NETWORK_FEE_LABEL,
+  NETWORK_FEE_TIP,
 } from '@/mock/buy/constants'
 export { formatBuyBalanceLabel, formatBuyUsdAmount } from '@/mock/buy/format'
 export { NetworkFeeHover } from '@/mock/buy/NetworkFeeHover'

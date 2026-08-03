@@ -86,13 +86,13 @@ export function getBridgePrimaryAction({
     return { label: 'Select token', disabled: true, loading: false }
   }
   if (isBalanceLoading || (requiresApproval && isAllowanceLoading)) {
-    return { label: 'Loading…', disabled: true, loading: true }
+    return { label: 'Loading', disabled: true, loading: true }
   }
   if (!amount) {
     return { label: 'Enter amount', disabled: true, loading: false }
   }
   if (isFeeLoading) {
-    return { label: 'Fetching fee…', disabled: true, loading: true }
+    return { label: 'Fetching fee', disabled: true, loading: true }
   }
   if (isFeeError) {
     return { label: 'Fee unavailable', disabled: true, loading: false }
@@ -121,7 +121,7 @@ export function getBridgePrimaryAction({
         approveStatus === 'TXN_FAILURE'
           ? 'Retry approve'
           : isBusyApprove
-            ? 'Approving…'
+            ? 'Approving'
             : `Approve ${tokenSymbol || ''}`.trim(),
       disabled: isBusyApprove,
       loading: isBusyApprove,
@@ -133,7 +133,7 @@ export function getBridgePrimaryAction({
   }
 
   return {
-    label: submitFailed ? 'Retry bridge' : isBusySubmit ? 'Bridging…' : 'Confirm bridge',
+    label: submitFailed ? 'Retry bridge' : isBusySubmit ? 'Bridging' : 'Confirm bridge',
     disabled: (requiresApproval && !isApproved) || isBusySubmit,
     loading: isBusySubmit,
   }

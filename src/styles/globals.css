@@ -116,59 +116,137 @@
   }
 
   /*
-   * No focus ring / outline flash on click or keyboard focus for chrome controls.
-   * Selection state is conveyed by fill / text color, not a ring.
+   * Zero outline / ring on every field and clickable control.
+   * Selection / hover state is conveyed by fill / text color, never a ring.
    */
   :where(
     a[href],
     button,
     summary,
+    label,
     input,
     textarea,
     select,
+    option,
     [role='button'],
     [role='option'],
     [role='menuitem'],
     [role='menuitemradio'],
+    [role='menuitemcheckbox'],
     [role='tab'],
-    [role='switch']
+    [role='switch'],
+    [role='checkbox'],
+    [role='radio'],
+    [role='combobox'],
+    [role='listbox'],
+    [role='slider'],
+    [tabindex]:not([tabindex='-1']),
+    [contenteditable='true']
+  ) {
+    outline: none !important;
+    outline-offset: 0 !important;
+    -webkit-tap-highlight-color: transparent;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: transparent;
+    --tw-ring-color: transparent;
+    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-shadow: 0 0 #0000;
+  }
+
+  :where(
+    a[href],
+    button,
+    summary,
+    label,
+    input,
+    textarea,
+    select,
+    option,
+    [role='button'],
+    [role='option'],
+    [role='menuitem'],
+    [role='menuitemradio'],
+    [role='menuitemcheckbox'],
+    [role='tab'],
+    [role='switch'],
+    [role='checkbox'],
+    [role='radio'],
+    [role='combobox'],
+    [role='listbox'],
+    [role='slider'],
+    [tabindex]:not([tabindex='-1']),
+    [contenteditable='true']
   ):focus,
   :where(
     a[href],
     button,
     summary,
+    label,
     input,
     textarea,
     select,
+    option,
     [role='button'],
     [role='option'],
     [role='menuitem'],
     [role='menuitemradio'],
+    [role='menuitemcheckbox'],
     [role='tab'],
-    [role='switch']
-  ):focus-visible {
-    outline: none;
-    box-shadow: none;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
+    [role='switch'],
+    [role='checkbox'],
+    [role='radio'],
+    [role='combobox'],
+    [role='listbox'],
+    [role='slider'],
+    [tabindex]:not([tabindex='-1']),
+    [contenteditable='true']
+  ):focus-visible,
+  :where(
+    a[href],
+    button,
+    summary,
+    label,
+    input,
+    textarea,
+    select,
+    option,
+    [role='button'],
+    [role='option'],
+    [role='menuitem'],
+    [role='menuitemradio'],
+    [role='menuitemcheckbox'],
+    [role='tab'],
+    [role='switch'],
+    [role='checkbox'],
+    [role='radio'],
+    [role='combobox'],
+    [role='listbox'],
+    [role='slider'],
+    [tabindex]:not([tabindex='-1']),
+    [contenteditable='true']
+  ):active {
+    outline: none !important;
+    outline-offset: 0 !important;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: transparent;
+    --tw-ring-color: transparent;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
   }
 
-  /* All fields: no outline / ring — including Tailwind ring utilities on focus. */
+  /* Fields: no box-shadow rings, and no hover/focus border glow. */
   :where(input, textarea, select) {
-    outline: none;
-    box-shadow: none;
-    -webkit-tap-highlight-color: transparent;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
+    box-shadow: none !important;
   }
 
+  :where(input, textarea, select):hover,
   :where(input, textarea, select):focus,
   :where(input, textarea, select):focus-visible,
   :where(input, textarea, select):active {
     outline: none !important;
     box-shadow: none !important;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
   }
 
   /* Suppress browser autofill chrome / suggestion styling. */
@@ -176,13 +254,9 @@
   :where(input, textarea, select):-webkit-autofill:hover,
   :where(input, textarea, select):-webkit-autofill:focus,
   :where(input, textarea, select):-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px transparent inset;
-    box-shadow: 0 0 0 1000px transparent inset;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    box-shadow: 0 0 0 1000px transparent inset !important;
     transition: background-color 99999s ease-in-out 0s;
-  }
-
-  :where(button, [role='button'], a[href]) {
-    -webkit-tap-highlight-color: transparent;
   }
 
   /* Large buy amount field — keep a thin caret despite 56px type. */

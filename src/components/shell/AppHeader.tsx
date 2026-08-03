@@ -1,7 +1,9 @@
-import { InfoIcon, MenuIcon } from '@/assets/icons'
+import { MenuIcon } from '@/assets/icons'
 import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
+import { APY_TIP } from '@/components/shell/constants'
 import { NetworkSelector } from '@/components/shell/NetworkSelector'
 import { WalletAvatarButton } from '@/components/shell/WalletAvatarButton'
+import { InfoTipIcon } from '@/components/ui/info-tip-icon'
 import { cn } from '@/lib/utils'
 
 type AppHeaderProps = {
@@ -16,8 +18,8 @@ type AppHeaderProps = {
 
 /**
  * Desktop (lg+): network selector + connect CTA or connected wallet chip.
- * Mobile / tablet: hamburger · mark · APY/TVL · network selector
- * (connect / connected wallet live at the bottom of the nav drawer).
+ * Mobile / tablet: hamburger · mark · APY/TVL · network · wallet CTA
+ * (drawer still repeats connect / account at the bottom).
  */
 export function AppHeader({
   walletLabel,
@@ -27,13 +29,19 @@ export function AppHeader({
   apy = '—',
   tvl = '—',
 }: AppHeaderProps) {
+  const walletControl = isConnected ? (
+    <WalletAvatarButton onClick={onConnectClick} label={walletLabel} showLabel />
+  ) : (
+    <ConnectWalletButton onClick={onConnectClick} />
+  )
+
   return (
     <>
       {/* Mobile + tablet top bar */}
       <header className="px-3 pt-2.5 pb-1 lg:hidden">
         <div
           className={cn(
-            'flex w-full items-center gap-3 rounded-lg border border-[#d4d1cf] bg-[#e9e9e9]/90 p-3',
+            'flex w-full items-center gap-2 rounded-lg border border-[#d4d1cf] bg-[#e9e9e9]/90 p-3 sm:gap-3',
             'backdrop-blur-[11.7px]',
           )}
         >
@@ -60,11 +68,11 @@ export function AppHeader({
             />
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1.5">
+          <div className="hidden shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1.5 min-[480px]:flex">
             <div className="flex flex-col items-start justify-center">
               <div className="mb-[-2px] flex items-center gap-0.5">
                 <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
-                <InfoIcon width={16} height={16} className="size-4 text-stone-500" aria-hidden />
+                <InfoTipIcon content={APY_TIP} label="About APY" size={16} />
               </div>
               <p className="font-denton text-base leading-5 text-black">{apy}</p>
             </div>
@@ -74,20 +82,28 @@ export function AppHeader({
             </div>
           </div>
 
-          <div className="mx-0.5 h-10 w-px shrink-0 bg-[#d4d1cf]" aria-hidden />
+          <div
+            className="mx-0.5 hidden h-10 w-px shrink-0 bg-[#d4d1cf] min-[480px]:block"
+            aria-hidden
+          />
 
           <NetworkSelector />
+
+          {/* Active-family connect / account — updates when switching to Starknet/Sui/etc. */}
+          <div className="shrink-0">
+            {isConnected ? (
+              <WalletAvatarButton onClick={onConnectClick} label={walletLabel} />
+            ) : (
+              <ConnectWalletButton compact onClick={onConnectClick} />
+            )}
+          </div>
         </div>
       </header>
 
       {/* Desktop top bar */}
       <header className="hidden w-full items-center justify-end gap-2 px-4 py-3 lg:flex lg:gap-[14px] lg:px-6 lg:py-4">
         <NetworkSelector />
-        {isConnected ? (
-          <WalletAvatarButton onClick={onConnectClick} label={walletLabel} showLabel />
-        ) : (
-          <ConnectWalletButton onClick={onConnectClick} />
-        )}
+        {walletControl}
       </header>
     </>
   )

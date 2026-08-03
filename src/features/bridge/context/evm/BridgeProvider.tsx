@@ -503,6 +503,19 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const prevSourceChainId = prevSourceChainIdRef.current
     const hasSourceChanged = prevSourceChainId !== effectiveSourceChainId
 
+    // Mid-flip: inputs already swapped (source=new, dest=old/connected) while the
+    // wallet is still on the previous chain. Keep the swapped pair until the wallet
+    // catches up — forcing source back would collide with dest and drop the route.
+    const pendingFlipPair =
+      currentSourceChainId != null &&
+      currentSourceChainId !== effectiveSourceChainId &&
+      destinationChainId != null &&
+      Number(destinationChainId) === Number(effectiveSourceChainId)
+
+    if (pendingFlipPair) {
+      return
+    }
+
     if (shouldUpdateSource || hasSourceChanged) {
       setInputs((prev) => {
         // When source chain changes:
@@ -527,14 +540,15 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [
     connection.connectedChainId,
     connection.config?.id,
+    destinationChainId,
     resolvedChainId,
     resolvedChainFamily,
     sourceChainId,
     setInputs,
   ])
 
-  // Effect to handle destination chain changes (from user selection)
-  // When destination chain changes, keep source chain the same UNLESS they are the same
+  // Destination is user-selected; source is wallet-owned. On collision, drop destination
+  // (never clear source — that races with flip / wallet sync and leaves dest empty).
   useEffect(() => {
     const prevDestinationChainId = prevDestinationChainIdRef.current
     const hasDestinationChanged = prevDestinationChainId !== destinationChainId
@@ -542,21 +556,20 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (hasDestinationChanged && destinationChainId !== undefined) {
       const newDestinationChainId = destinationChainId
       setInputs((prev) => {
-        // When destination chain changes:
-        // - Keep source chain the same UNLESS they are the same
-        // - If destination chain is the same as source chain, set source chain to undefined
-        const newSourceChainId =
-          prev.sourceChainId === newDestinationChainId ? undefined : prev.sourceChainId
-
-        return {
-          ...prev,
-          sourceChainId: newSourceChainId,
+        if (
+          prev.sourceChainId != null &&
+          Number(prev.sourceChainId) === Number(newDestinationChainId)
+        ) {
+          prevDestinationChainIdRef.current = undefined
+          return {
+            ...prev,
+            destinationChainId: undefined,
+          }
         }
+        prevDestinationChainIdRef.current = newDestinationChainId
+        return prev
       })
-      // Update ref immediately to prevent source effect from clearing destination
-      prevDestinationChainIdRef.current = newDestinationChainId
     } else if (destinationChainId === undefined) {
-      // Update ref when destination is cleared
       prevDestinationChainIdRef.current = undefined
     }
   }, [destinationChainId, inputs.destinationChainId, setInputs])

@@ -175,8 +175,11 @@ export function MockGalleryPage() {
           receiverLabel="EVM receiver"
           receiverValue="0x1111111111111111111111111111111111111111"
           receiverPlaceholder="0x…"
-          onReceiverChange={noop}
-          feeLabel="~$0.21"
+          onOpenReceiverModal={noop}
+          feeLabel="$0.2"
+          networkFeeLabel="$0.1"
+          gasFeeLabel="$0.1"
+          protocolFeeLabel="$0"
           protocolLabel="Hyperlane"
           isFetchingFee={false}
           isInsufficientBalance={false}

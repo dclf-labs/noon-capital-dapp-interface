@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { tokenIconSrc, tokenOptionKey } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc, tokenOptionKey } from '@/lib/token-icon'
 
 describe('tokenIconSrc', () => {
   it('maps iconSlug to the public tokens path', () => {
@@ -11,6 +11,18 @@ describe('tokenIconSrc', () => {
   it('falls back when slug is missing', () => {
     expect(tokenIconSrc(undefined)).toBe('/assets/buy/usn.png')
     expect(tokenIconSrc({ iconSlug: '  ' })).toBe('/assets/buy/usn.png')
+  })
+})
+
+describe('tokenChainIconSrc', () => {
+  it('maps chainIconSlug to the public chains path', () => {
+    expect(tokenChainIconSrc({ chainIconSlug: 'ethereum' })).toBe('/assets/chains/ethereum.svg')
+    expect(tokenChainIconSrc({ chainIconSlug: 'starknet' })).toBe('/assets/chains/starknet.svg')
+  })
+
+  it('returns undefined when slug is missing', () => {
+    expect(tokenChainIconSrc(undefined)).toBeUndefined()
+    expect(tokenChainIconSrc({ chainIconSlug: '  ' })).toBeUndefined()
   })
 })
 

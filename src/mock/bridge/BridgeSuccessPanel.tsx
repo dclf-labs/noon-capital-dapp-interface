@@ -1,6 +1,6 @@
 import { formatConfirmAmount } from '@/features/_shared/trade-display'
 import { safeExternalHref } from '@/lib/safe-external-href'
-import { tokenIconSrc } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
 import { cn } from '@/lib/utils'
 import { BRIDGE_SUCCESS_NOTE } from '@/mock/bridge/constants'
 import { StatusCallout } from '@/mock/bridge/StatusCallout'
@@ -41,6 +41,7 @@ export function BridgeSuccessPanel({
           <TokenSymbolMark
             symbol={token?.symbol}
             iconSrc={tokenIconSrc(token)}
+            chainIconSrc={tokenChainIconSrc(token)}
             size="lg"
             middle={displayAmount}
           />

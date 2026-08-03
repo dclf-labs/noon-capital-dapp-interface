@@ -2,8 +2,9 @@ import { useId, useMemo, useState } from 'react'
 
 import { motion } from 'motion/react'
 
-import { DividerIcon, InfoIcon as InfoGlyph } from '@/assets/icons'
+import { DividerIcon } from '@/assets/icons'
 import {
+  APY_TIP,
   SHELL_SELECTION_SPRING,
   SIDEBAR_CONTENT_TRANSITION,
   SIDEBAR_INSET_LEFT_PX,
@@ -11,6 +12,7 @@ import {
   SIDEBAR_RAIL_PX,
 } from '@/components/shell/constants'
 import type { ShellNavItem, SidebarApyPeriod } from '@/components/shell/types'
+import { InfoTipIcon } from '@/components/ui/info-tip-icon'
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
 import { useSidebar } from '@/components/ui/sidebar-context'
 import { cn } from '@/lib/utils'
@@ -53,17 +55,6 @@ function SidebarLogo() {
   )
 }
 
-function InfoIcon({ size }: { size: 12 | 16 }) {
-  return (
-    <InfoGlyph
-      width={size}
-      height={size}
-      className={cn('shrink-0 text-stone-500', size === 12 ? 'size-3' : 'size-4')}
-      aria-hidden
-    />
-  )
-}
-
 function Divider() {
   return <DividerIcon width={24} height={1} className="h-px w-6 text-black/10" aria-hidden />
 }
@@ -96,7 +87,7 @@ function SidebarStats({
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-0.5">
             <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
-            <InfoIcon size={12} />
+            <InfoTipIcon content={APY_TIP} label="About APY" size={12} />
           </div>
           <span className="text-base leading-6 font-book text-stone-900">{apy}</span>
         </div>
@@ -119,7 +110,7 @@ function SidebarStats({
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-0.5">
               <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
-              <InfoIcon size={16} />
+              <InfoTipIcon content={APY_TIP} label="About APY" size={16} />
             </div>
             <div
               className="flex rounded-lg border border-[rgba(17,17,17,0.1)] bg-[#f8f8f8] p-px"

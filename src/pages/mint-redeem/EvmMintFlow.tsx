@@ -180,13 +180,7 @@ export function EvmMintFlow() {
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
-      statusMessage={
-        approveStatus === 'TXN_FAILURE'
-          ? 'Approval failed'
-          : submitStatus === SubmitTxnStatus.TXN_FAILURE
-            ? 'Mint failed'
-            : undefined
-      }
+      statusMessage={submitStatus === SubmitTxnStatus.TXN_FAILURE ? 'Mint failed' : undefined}
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountInChange={onAmountInChange}

@@ -1,26 +1,23 @@
-import { useAccount, useConnect, useDisconnect } from '@starknet-react/core'
-import type { StarknetkitConnector } from 'starknetkit'
-import { useStarknetkitConnectModal } from 'starknetkit'
+import { useAccount, useDisconnect } from '@starknet-react/core'
 
+import useStarknetWalletSelector from '@/features/shell/hooks/useStarknetWalletSelector'
+
+/**
+ * Starknet account helpers. `connect` opens the branded wallet selector
+ * (same pattern as Sui → Mysten modal / EVM → AppKit).
+ */
 export function useStarknetWallet() {
   const { address, status } = useAccount()
-  const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
-  const { starknetkitConnectModal } = useStarknetkitConnectModal({
-    connectors: connectors as StarknetkitConnector[],
-  })
-
-  async function connectWallet() {
-    const { connector } = await starknetkitConnectModal()
-    if (!connector) return
-    await connect({ connector })
-  }
+  const selector = useStarknetWalletSelector()
 
   return {
     address,
     status,
     isConnected: status === 'connected' && Boolean(address),
-    connect: connectWallet,
+    connect: async () => {
+      selector.onOpen()
+    },
     disconnect,
   }
 }

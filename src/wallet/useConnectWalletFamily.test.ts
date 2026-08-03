@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const openEvmAppKit = vi.fn()
-const starknetConnect = vi.fn()
+const starknetOnOpen = vi.fn()
 const suiOnOpen = vi.fn()
 
 vi.mock('@/wallet/evm/open-appkit', () => ({
   openEvmAppKit: (...args: unknown[]) => openEvmAppKit(...args),
 }))
 
-vi.mock('@/wallet/starknet/useStarknetWallet', () => ({
-  useStarknetWallet: () => ({
-    connect: (...args: unknown[]) => starknetConnect(...args),
+vi.mock('@/features/shell/hooks/useStarknetWalletSelector', () => ({
+  default: () => ({
+    onOpen: (...args: unknown[]) => starknetOnOpen(...args),
   }),
 }))
 
-vi.mock('@/features/shell', () => ({
-  useSuiWalletSelector: () => ({
+vi.mock('@/features/shell/hooks/useSuiWalletSelector', () => ({
+  default: () => ({
     onOpen: (...args: unknown[]) => suiOnOpen(...args),
   }),
 }))
@@ -27,7 +27,7 @@ import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 describe('useConnectWalletFamily', () => {
   beforeEach(() => {
     openEvmAppKit.mockReset().mockResolvedValue(undefined)
-    starknetConnect.mockReset().mockResolvedValue(undefined)
+    starknetOnOpen.mockReset()
     suiOnOpen.mockReset()
   })
 
@@ -35,14 +35,14 @@ describe('useConnectWalletFamily', () => {
     const { result } = renderHook(() => useConnectWalletFamily())
     await result.current('evm')
     expect(openEvmAppKit).toHaveBeenCalledOnce()
-    expect(starknetConnect).not.toHaveBeenCalled()
+    expect(starknetOnOpen).not.toHaveBeenCalled()
     expect(suiOnOpen).not.toHaveBeenCalled()
   })
 
-  it('opens starknetkit for Starknet', async () => {
+  it('opens the Starknet selector for Starknet', async () => {
     const { result } = renderHook(() => useConnectWalletFamily())
     await result.current('starknet')
-    expect(starknetConnect).toHaveBeenCalledOnce()
+    expect(starknetOnOpen).toHaveBeenCalledOnce()
     expect(openEvmAppKit).not.toHaveBeenCalled()
   })
 

@@ -1,14 +1,14 @@
 import type { ChainFamily } from '@/chains'
-import { useSuiWalletSelector } from '@/features/shell'
+import useStarknetWalletSelector from '@/features/shell/hooks/useStarknetWalletSelector'
+import useSuiWalletSelector from '@/features/shell/hooks/useSuiWalletSelector'
 import { openEvmAppKit } from '@/wallet/evm/open-appkit'
-import { useStarknetWallet } from '@/wallet/starknet/useStarknetWallet'
 
 /**
  * Opens the wallet connection UI for a given chain family.
- * EVM → AppKit, Starknet → starknetkit, Sui → Mysten connect modal.
+ * EVM → AppKit, Starknet → branded selector, Sui → Mysten connect modal.
  */
 export function useConnectWalletFamily() {
-  const starknet = useStarknetWallet()
+  const starknetSelector = useStarknetWalletSelector()
   const suiSelector = useSuiWalletSelector()
 
   return async function connectWalletFamily(family: ChainFamily) {
@@ -17,7 +17,7 @@ export function useConnectWalletFamily() {
         await openEvmAppKit()
         return
       case 'starknet':
-        await starknet.connect()
+        starknetSelector.onOpen()
         return
       case 'sui':
         suiSelector.onOpen()

@@ -46,6 +46,10 @@ export const SHELL_SELECTION_SPRING = {
   damping: 30,
 }
 
+/** Sidebar / header APY info tip. */
+export const APY_TIP =
+  'Estimated annual percentage yield for Noon protocols over the selected period.'
+
 /**
  * Wait for the selection pill spring to settle before closing a dropdown /
  * mobile menu after a choice (matches `NetworkSelector`).

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 
 import type { ChainFamily } from '@/chains'
+import { chainIconSrc } from '@/components/shell/network'
 import { TransitionPanel } from '@/components/ui/transition-panel'
+import { useElementSize } from '@/hooks/ui/useElementSize'
 import { getChainConfig } from '@/lib/chain'
 import { BridgeConfirmPanel } from '@/mock/bridge/BridgeConfirmPanel'
 import { BridgePanel } from '@/mock/bridge/BridgePanel'
@@ -14,15 +16,19 @@ export type BridgeFlowViewProps = BridgePanelProps & {
   step: number
   /** Wallet family used when the card CTA is “Connect wallet”. */
   chainFamily: ChainFamily
+  /** When false, page chrome (hero) is owned by the parent (avoids remount flicker). */
   showHero?: boolean
   sourceName?: string
   destinationName?: string
-  bridgeFeeLabel?: string
-  networkFeeLabel?: string
-  networkFeeNativeLabel?: string
   txnUrl?: string
   onBack?: () => void
   onReset?: () => void
+}
+
+/** Same spring as BuyFlowView / noon/dapp `TransactionFlow` — no height tween. */
+const PANEL_TRANSITION = {
+  x: { type: 'spring' as const, stiffness: 300, damping: 30 },
+  opacity: { duration: 0.2 },
 }
 
 /**
@@ -30,6 +36,9 @@ export type BridgeFlowViewProps = BridgePanelProps & {
  * - step 0 → Figma bridge card (networks / amount / receiver)
  * - step 1 → confirm (on-chain submit)
  * - step ≥ 2 → success
+ *
+ * Step motion matches BuyFlowView: enter bridges the previous panel height,
+ * center settles to `auto` (avoids layout flash between steps).
  */
 export function BridgeFlowView({
   step,
@@ -37,9 +46,6 @@ export function BridgeFlowView({
   showHero = true,
   sourceName,
   destinationName,
-  bridgeFeeLabel,
-  networkFeeLabel,
-  networkFeeNativeLabel,
   txnUrl,
   onBack,
   onReset,
@@ -48,15 +54,20 @@ export function BridgeFlowView({
   const connectWalletFamily = useConnectWalletFamily()
   const activeIndex = Math.min(Math.max(step, 0), 2)
 
+  const [measureRef, bounds] = useElementSize()
+
+  // Snapshot outgoing height + direction on the same render as the step change,
+  // before the measure ref attaches to the incoming panel (avoids height flash).
   const [panelNav, setPanelNav] = useState({
     index: activeIndex,
     direction: 1,
-    // Snapshot height only when the step index changes (same as BuyFlowView).
+    enterHeight: 'auto' as number | 'auto',
   })
   if (activeIndex !== panelNav.index) {
     setPanelNav({
       index: activeIndex,
       direction: activeIndex > panelNav.index ? 1 : -1,
+      enterHeight: bounds.height > 0 ? bounds.height : 'auto',
     })
   }
 
@@ -76,44 +87,71 @@ export function BridgeFlowView({
         panelClassName="w-full"
         activeIndex={activeIndex}
         custom={panelNav.direction}
+        variants={{
+          enter: (dir: number) => ({
+            x: dir > 0 ? 364 : -364,
+            opacity: 0,
+            height: panelNav.enterHeight,
+            position: 'initial' as const,
+          }),
+          center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            height: 'auto',
+          },
+          exit: (dir: number) => ({
+            zIndex: 0,
+            x: dir < 0 ? 364 : -364,
+            opacity: 0,
+            position: 'absolute' as const,
+            top: 0,
+            width: '100%',
+          }),
+        }}
+        transition={PANEL_TRANSITION}
       >
-        <BridgePanel
-          {...panelProps}
-          primaryLabel={showConnect ? 'Connect wallet' : panelProps.primaryLabel}
-          primaryDisabled={showConnect ? false : panelProps.primaryDisabled}
-          primaryLoading={showConnect ? false : panelProps.primaryLoading}
-          onPrimary={() => {
-            if (showConnect) {
-              void connectWalletFamily(chainFamily)
-              return
-            }
-            panelProps.onPrimary()
-          }}
-        />
+        <div ref={measureRef} className="w-full">
+          <BridgePanel
+            {...panelProps}
+            primaryLabel={showConnect ? 'Connect wallet' : panelProps.primaryLabel}
+            primaryDisabled={showConnect ? false : panelProps.primaryDisabled}
+            primaryLoading={showConnect ? false : panelProps.primaryLoading}
+            presetsDisabled={Boolean(panelProps.presetsDisabled || panelProps.unsupported)}
+            onPrimary={() => {
+              if (showConnect) {
+                void connectWalletFamily(chainFamily)
+                return
+              }
+              panelProps.onPrimary()
+            }}
+          />
+        </div>
 
-        <div className="flex w-full flex-col gap-3">
+        <div ref={measureRef} className="flex w-full flex-col gap-3">
           <BridgeConfirmPanel
             amount={panelProps.amount}
             token={panelProps.token}
             sourceName={sourceName}
             destinationName={destinationName}
+            sourceChainIconSrc={
+              panelProps.sourceChainId ? chainIconSrc(panelProps.sourceChainId) : undefined
+            }
+            destinationChainIconSrc={
+              panelProps.destinationChainId
+                ? chainIconSrc(panelProps.destinationChainId)
+                : undefined
+            }
             sourceAddress={panelProps.connectedAddress}
             receiverValue={panelProps.receiverValue}
             sourceAddressExplorerUrl={sourceAddressExplorerUrl}
             destinationAddressExplorerUrl={destinationAddressExplorerUrl}
-            bridgeFeeLabel={bridgeFeeLabel ?? panelProps.feeLabel}
+            bridgeFeeLabel={panelProps.feeLabel}
             etaLabel={panelProps.etaLabel}
-            networkFeeLabel={networkFeeLabel ?? '—'}
-            networkFeeNativeLabel={networkFeeNativeLabel}
-            warning={
-              panelProps.unsupported
-                ? {
-                    type: 'error',
-                    title: 'Wallet network does not match the selected network.',
-                    description: 'Switch network in the header and approve the wallet prompt.',
-                  }
-                : panelProps.warning
-            }
+            networkFeeLabel={panelProps.networkFeeLabel ?? '—'}
+            gasFeeLabel={panelProps.gasFeeLabel ?? '—'}
+            protocolFeeLabel={panelProps.protocolFeeLabel}
+            warning={panelProps.warning}
             primaryLabel={panelProps.primaryLabel}
             primaryDisabled={panelProps.primaryDisabled || panelProps.unsupported}
             primaryLoading={panelProps.primaryLoading}
@@ -123,12 +161,14 @@ export function BridgeFlowView({
           />
         </div>
 
-        <BridgeSuccessPanel
-          amount={panelProps.amount}
-          token={panelProps.token}
-          txnUrl={txnUrl}
-          onBridgeMore={() => onReset?.()}
-        />
+        <div ref={measureRef} className="w-full">
+          <BridgeSuccessPanel
+            amount={panelProps.amount}
+            token={panelProps.token}
+            txnUrl={txnUrl}
+            onBridgeMore={() => onReset?.()}
+          />
+        </div>
       </TransitionPanel>
     </BridgeStepShell>
   )

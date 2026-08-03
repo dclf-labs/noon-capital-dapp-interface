@@ -64,9 +64,7 @@ function payInput() {
 }
 
 function receiveInput() {
-  // Receive uses "…" while quoting, otherwise "0.00" (same as pay when idle — pick last).
-  const ellipsis = screen.queryByPlaceholderText('…')
-  if (ellipsis) return ellipsis as HTMLInputElement
+  // Receive and pay both use "0.00" as placeholder — pick the last.
   const inputs = screen.getAllByPlaceholderText('0.00')
   return inputs[inputs.length - 1] as HTMLInputElement
 }
@@ -134,9 +132,10 @@ describe('TradePanelView input formatting', () => {
     expect(receiveInput()).toHaveAttribute('title', '12.345678')
   })
 
-  it('shows loading placeholder only when fetching and no receive amount yet', () => {
+  it('pulses the receive field when fetching and no receive amount yet', () => {
     const { rerender } = renderTrade({ isFetchingQuote: true, amountOut: undefined })
-    expect(receiveInput()).toHaveAttribute('placeholder', '…')
+    expect(receiveInput()).toHaveAttribute('placeholder', '0.00')
+    expect(receiveInput()).toHaveClass('animate-pulse')
     expect(receiveInput().value).toBe('')
 
     rerender(
@@ -166,7 +165,7 @@ describe('TradePanelView input formatting', () => {
       />,
     )
     expect(receiveInput().value).toBe('1.23')
-    expect(receiveInput()).toHaveAttribute('placeholder', '0.00')
+    expect(receiveInput()).not.toHaveClass('animate-pulse')
   })
 
   it('wires Half / Max buttons and disables them when presetsDisabled', async () => {
@@ -229,8 +228,8 @@ describe('TradePanelView input formatting', () => {
     const section = screen.getByText(/Confirm buy/i).closest('section') as HTMLElement
     const confirmRow = `${formatTokenAmount(amountIn, 'USDC', TRADE_PAY_DECIMALS)} → ${formatTokenAmount(amountOut, 'USN', TRADE_RECEIVE_DISPLAY_DECIMALS)}`
     const minRow = `Min received (1% slippage) ${formatTokenAmount(minReceived, 'USN', TRADE_RECEIVE_DISPLAY_DECIMALS)}`
-    expect(confirmRow).toBe('1,000.12 USDC → 999.65 USN')
-    expect(minRow).toBe('Min received (1% slippage) 989.65 USN')
+    expect(confirmRow).toBe('1,000.1 USDC → 999.6 USN')
+    expect(minRow).toBe('Min received (1% slippage) 989.6 USN')
     expect(within(section).getByText(confirmRow)).toBeInTheDocument()
     expect(within(section).getByText(minRow)).toBeInTheDocument()
   })
@@ -238,6 +237,6 @@ describe('TradePanelView input formatting', () => {
   it('renders USD notional under the pay field', () => {
     renderTrade({ amountIn: 10, amountInUsd: 10.125 })
     expect(screen.getByText(formatUsd(10.125))).toBeInTheDocument()
-    expect(screen.getByText('~$10.12')).toBeInTheDocument()
+    expect(screen.getByText('~$10.1')).toBeInTheDocument()
   })
 })

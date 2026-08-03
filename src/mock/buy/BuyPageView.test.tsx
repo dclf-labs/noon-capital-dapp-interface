@@ -42,7 +42,7 @@ function renderBuy(props: Partial<ComponentProps<typeof BuyPageView>> = {}, path
         tokensIn={[usdt]}
         tokensOut={[usn]}
         balanceInLabel="Bal: 1,000 USDT"
-        networkFeeLabel="~$0.21"
+        networkFeeLabel="$0.2"
         primaryLabel="Enter amount"
         primaryDisabled
         buyTokenUsdPrice={1}
@@ -134,27 +134,42 @@ describe('BuyPageView', () => {
     expect(screen.getByText('Syncswap')).toBeInTheDocument()
   })
 
-  it('reveals the native gas fee in a hover card on desktop', async () => {
+  it('reveals the native gas fee when hovering the fee value on desktop', async () => {
     useIsMobileMock.mockReturnValue(false)
     const user = userEvent.setup()
     renderBuy({
-      networkFeeLabel: '~$0.21',
-      networkFeeNativeLabel: '~0.00008 ETH',
+      networkFeeLabel: '$0.2',
+      networkFeeNativeLabel: '<0.1 ETH',
     })
 
-    await user.hover(screen.getByText('Network fee (gas)'))
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('~0.00008 ETH')
+    await user.hover(screen.getByRole('button', { name: 'Network fee details' }))
+    expect(await screen.findByText('<0.1 ETH')).toBeInTheDocument()
+  })
+
+  it('shows network fee explainer from the info icon', async () => {
+    useIsMobileMock.mockReturnValue(false)
+    const user = userEvent.setup()
+    renderBuy({
+      networkFeeLabel: '$0.2',
+      networkFeeNativeLabel: '<0.1 ETH',
+    })
+
+    await user.hover(screen.getByRole('button', { name: 'About network fee' }))
+    expect(
+      await screen.findByText(/paid to the network to process your transaction/i),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/estimate and can vary by chain/i)).toBeInTheDocument()
   })
 
   it('opens the native gas fee in a shadcn popover on mobile', async () => {
     useIsMobileMock.mockReturnValue(true)
     const user = userEvent.setup()
     renderBuy({
-      networkFeeLabel: '~$0.21',
-      networkFeeNativeLabel: '~0.00008 ETH',
+      networkFeeLabel: '$0.2',
+      networkFeeNativeLabel: '<0.1 ETH',
     })
 
     await user.click(screen.getByRole('button', { name: /network fee details/i }))
-    expect(await screen.findByText('~0.00008 ETH')).toBeInTheDocument()
+    expect(await screen.findByText('<0.1 ETH')).toBeInTheDocument()
   })
 })

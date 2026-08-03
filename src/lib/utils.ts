@@ -24,7 +24,8 @@ export function formatNumber(
   const num = typeof value === 'string' ? Number(value) : value
   if (!Number.isFinite(num)) return '—'
   return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 4,
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0,
     ...options,
   }).format(num)
 }

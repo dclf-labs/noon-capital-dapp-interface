@@ -60,8 +60,6 @@ function payInput() {
 }
 
 function receiveInput() {
-  const ellipsis = screen.queryByPlaceholderText('…')
-  if (ellipsis) return ellipsis as HTMLInputElement
   const inputs = screen.getAllByPlaceholderText('0.00')
   return inputs[inputs.length - 1] as HTMLInputElement
 }
@@ -92,7 +90,7 @@ describe('StakeUnstakePanel behaviour', () => {
   it('renders USD notional and exact confirm amounts', () => {
     renderPanel({ amountIn: 10, amountInUsd: 10.129, amountOut: 9.876543 })
     expect(screen.getByText(formatUsd(10.129))).toBeInTheDocument()
-    expect(screen.getByText('~$10.12')).toBeInTheDocument()
+    expect(screen.getByText('~$10.1')).toBeInTheDocument()
 
     renderPanel({
       step: 1,

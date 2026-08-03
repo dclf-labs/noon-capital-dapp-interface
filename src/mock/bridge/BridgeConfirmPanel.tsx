@@ -1,13 +1,13 @@
 import { ArrowUpRightIcon } from '@/assets/icons'
 import { formatConfirmAmount } from '@/features/_shared/trade-display'
 import { safeExternalHref } from '@/lib/safe-external-href'
-import { tokenIconSrc } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
 import { cn, truncateAddress } from '@/lib/utils'
-import { BRIDGE_ETA_LABEL } from '@/mock/bridge/constants'
+import { BridgingFeesCollapsible } from '@/mock/bridge/BridgingFeesCollapsible'
+import { BRIDGE_ETA_LABEL, DEFAULT_BRIDGE_FEE_LABEL } from '@/mock/bridge/constants'
 import { resolveBridgeStatusNotice } from '@/mock/bridge/status-notice'
 import { StatusCallout } from '@/mock/bridge/StatusCallout'
 import type { BridgeConfirmPanelProps } from '@/mock/bridge/types'
-import { NetworkFeeHover } from '@/mock/buy/NetworkFeeHover'
 import { TokenSymbolMark } from '@/mock/buy/TokenSymbolMark'
 
 const focusReset =
@@ -55,12 +55,34 @@ function ExplorerAddressLink({ address, explorerUrl }: { address?: string; explo
   )
 }
 
+function ChainNameMark({ name, iconSrc }: { name: string; iconSrc?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm leading-5 font-book text-stone-500">
+      {iconSrc ? (
+        <span className="size-4 shrink-0 overflow-hidden rounded-[3px] bg-stone-200">
+          <img
+            src={iconSrc}
+            alt=""
+            width={16}
+            height={16}
+            className="size-full object-cover"
+            draggable={false}
+          />
+        </span>
+      ) : null}
+      <span>{name}</span>
+    </span>
+  )
+}
+
 function BridgeAmountColumn({
   label,
   amount,
   tokenSymbol,
   tokenIcon,
+  chainIcon,
   networkName,
+  networkIconSrc,
   address,
   addressExplorerUrl,
 }: {
@@ -68,7 +90,9 @@ function BridgeAmountColumn({
   amount: string
   tokenSymbol?: string
   tokenIcon: string
+  chainIcon?: string
   networkName?: string
+  networkIconSrc?: string
   address?: string
   addressExplorerUrl?: string
 }) {
@@ -79,10 +103,13 @@ function BridgeAmountColumn({
         <p className="max-w-full truncate font-denton text-[40px] leading-none text-stone-900 tabular-nums md:text-[56px]">
           {amount}
         </p>
-        <TokenSymbolMark symbol={tokenSymbol} iconSrc={tokenIcon} size="sm" />
-        {networkName ? (
-          <p className="text-sm leading-5 font-book text-stone-500">{networkName}</p>
-        ) : null}
+        <TokenSymbolMark
+          symbol={tokenSymbol}
+          iconSrc={tokenIcon}
+          chainIconSrc={chainIcon}
+          size="sm"
+        />
+        {networkName ? <ChainNameMark name={networkName} iconSrc={networkIconSrc} /> : null}
         <ExplorerAddressLink address={address} explorerUrl={addressExplorerUrl} />
       </div>
     </div>
@@ -95,12 +122,15 @@ export function BridgeConfirmPanel({
   token,
   sourceName,
   destinationName,
+  sourceChainIconSrc,
+  destinationChainIconSrc,
   sourceAddress,
   receiverValue,
   sourceAddressExplorerUrl,
   destinationAddressExplorerUrl,
-  networkFeeLabel = '—',
-  networkFeeNativeLabel,
+  networkFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  gasFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  protocolFeeLabel = '$0',
   bridgeFeeLabel,
   etaLabel = BRIDGE_ETA_LABEL,
   warning,
@@ -115,6 +145,8 @@ export function BridgeConfirmPanel({
   const displayAmount = formatConfirmAmount(amount, 6)
   const notice = resolveBridgeStatusNotice(warning)
   const tokenIcon = tokenIconSrc(token)
+  const tokenChainIcon = tokenChainIconSrc(token)
+  const totalFeeLabel = bridgeFeeLabel ?? DEFAULT_BRIDGE_FEE_LABEL
 
   return (
     <div className="w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-50 shadow-[0px_4px_4px_0px_rgba(111,125,185,0.05)]">
@@ -153,7 +185,9 @@ export function BridgeConfirmPanel({
               amount={displayAmount}
               tokenSymbol={token?.symbol}
               tokenIcon={tokenIcon}
+              chainIcon={tokenChainIcon ?? sourceChainIconSrc}
               networkName={sourceName}
+              networkIconSrc={sourceChainIconSrc}
               address={sourceAddress}
               addressExplorerUrl={sourceAddressExplorerUrl}
             />
@@ -173,7 +207,9 @@ export function BridgeConfirmPanel({
               amount={displayAmount}
               tokenSymbol={token?.symbol}
               tokenIcon={tokenIcon}
+              chainIcon={destinationChainIconSrc ?? tokenChainIcon}
               networkName={destinationName}
+              networkIconSrc={destinationChainIconSrc}
               address={receiverValue}
               addressExplorerUrl={destinationAddressExplorerUrl}
             />
@@ -192,29 +228,13 @@ export function BridgeConfirmPanel({
 
         <div className="flex w-full flex-col gap-4 px-3">
           <div className="flex w-full flex-col gap-2">
-            <NetworkFeeHover
-              usdLabel={networkFeeLabel}
-              nativeLabel={networkFeeNativeLabel}
+            <BridgingFeesCollapsible
+              totalLabel={totalFeeLabel}
+              protocolFeeLabel={protocolFeeLabel}
+              networkFeeLabel={networkFeeLabel}
+              gasFeeLabel={gasFeeLabel}
               isLoading={isLoadingFee}
             />
-
-            {bridgeFeeLabel ? (
-              <div className="flex w-full items-center gap-1">
-                <img
-                  src="/assets/buy/gas-pump.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="size-5 shrink-0"
-                />
-                <span className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500">
-                  Bridging fees
-                </span>
-                <p className="text-base leading-6 font-semibold text-stone-600 tabular-nums">
-                  {bridgeFeeLabel}
-                </p>
-              </div>
-            ) : null}
 
             <div className="flex w-full items-center gap-1">
               <img

@@ -13,8 +13,10 @@ export {
 export {
   formatBalanceLabel,
   formatConfirmAmount,
+  formatFeeUsd,
   formatNativeFee,
   formatNativeFeeDetail,
+  formatPercent,
   formatTokenAmount,
   formatUnitRate,
   formatUsd,

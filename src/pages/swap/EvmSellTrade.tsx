@@ -179,13 +179,7 @@ export function EvmSellTrade() {
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
-      statusMessage={
-        approveStatus === 'TXN_FAILURE'
-          ? 'Approval failed'
-          : submitStatus === SubmitTxnStatus.TXN_FAILURE
-            ? 'Swap failed'
-            : undefined
-      }
+      statusMessage={submitStatus === SubmitTxnStatus.TXN_FAILURE ? 'Swap failed' : undefined}
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountInChange={onAmountInChange}

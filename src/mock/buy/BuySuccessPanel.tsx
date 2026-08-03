@@ -1,6 +1,6 @@
 import { formatConfirmAmount } from '@/features/_shared/trade-display'
 import { safeExternalHref } from '@/lib/safe-external-href'
-import { tokenIconSrc } from '@/lib/token-icon'
+import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
 import { cn } from '@/lib/utils'
 import { TokenSymbolMark } from '@/mock/buy/TokenSymbolMark'
 import type { BuySuccessPanelProps } from '@/mock/buy/types'
@@ -34,6 +34,7 @@ export function BuySuccessPanel({ amountOut, tokenOut, txnUrl, onBuyMore }: BuyS
           <TokenSymbolMark
             symbol={tokenOut?.symbol}
             iconSrc={tokenIconSrc(tokenOut)}
+            chainIconSrc={tokenChainIconSrc(tokenOut)}
             size="lg"
             middle={receiveAmount}
           />

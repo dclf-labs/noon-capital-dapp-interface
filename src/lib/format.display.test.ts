@@ -26,11 +26,15 @@ describe('format display helpers', () => {
   })
 
   it('formats intl strings with dust and compact thresholds', () => {
-    // Dust branch needs precision high enough that down() keeps a positive remainder.
-    expect(toIntlStr(0.001, 4)).toBe('<0.01')
-    // toIntlStr uses down()/floor semantics, not round.
-    expect(toIntlStr(12.3456, 2)).toContain('12.34')
-    expect(toIntlStrWithMaxFractionDigits4(1.23456, 4)).toContain('1.2345')
+    // Dust floor follows maximumFractionDigits (1 → <0.1, 2 → <0.01).
+    expect(toIntlStr(0.05, 1)).toBe('<0.1')
+    expect(toIntlStr(0.001, 2, 0, '', '', 2)).toBe('<0.01')
+    expect(toIntlStr(0.05, 1, 0, '$', '')).toBe('<$0.1')
+    expect(toIntlStr(0.05, 1, 0, '~$', '')).toBe('<$0.1')
+    // toIntlStr uses down()/floor semantics, not round; omits trailing zeros.
+    expect(toIntlStr(12.3456, 1)).toBe('12.3')
+    expect(toIntlStr(12, 1)).toBe('12')
+    expect(toIntlStrWithMaxFractionDigits4(1.23456, 1)).toBe('1.2')
     expect(toIntlCompactStr(50_000)).toContain('50')
     expect(toIntlCompactStr(1_500_000)).toMatch(/M|1\.5/)
     expect(toIntlCompactStrWithMaxFractionDigits4(2_000_000)).toMatch(/M|2/)

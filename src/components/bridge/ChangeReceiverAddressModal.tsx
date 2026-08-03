@@ -1,0 +1,250 @@
+import { useCallback, useEffect, useId, useState } from 'react'
+import { createPortal } from 'react-dom'
+
+import { AnimatePresence, motion } from 'motion/react'
+
+import { CloseIcon } from '@/assets/icons'
+import useDebounce from '@/hooks/ui/useDebounce'
+import {
+  filterReceiverAddressInput,
+  getReceiverAddressError,
+  type ReceiverAddressFamily,
+  type SanitizedReceiverAddress,
+  sanitizeReceiverAddress,
+} from '@/lib/receiver-address'
+import { cn } from '@/lib/utils'
+import { StatusCallout } from '@/mock/bridge/StatusCallout'
+
+const PANEL_EASE = [0.22, 1, 0.36, 1] as const
+const focusReset =
+  'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
+
+export type { ReceiverAddressFamily }
+
+type FamilyCopy = {
+  label: string
+  placeholder: string
+  submitLabel: string
+  noticeTitle: string
+  noticeDescription: string
+}
+
+const FAMILY_COPY: Record<ReceiverAddressFamily, FamilyCopy> = {
+  evm: {
+    label: 'Enter the EVM address:',
+    placeholder: '0x…',
+    submitLabel: 'Change address',
+    noticeTitle:
+      'Before proceeding, please ensure that you can access the wallet address on the receiving chain.',
+    noticeDescription:
+      'This is especially important if you use wallets like Gnosis Safe. If you cannot access this address, please change the receiving wallet address to avoid any issues.',
+  },
+  starknet: {
+    label: 'Enter the Starknet address:',
+    placeholder: '0x…',
+    submitLabel: 'Set Starknet address',
+    noticeTitle: 'Starknet address required',
+    noticeDescription:
+      'When bridging to Starknet, you need to provide a valid Starknet wallet address. Please ensure you have access to this address on Starknet.',
+  },
+  sui: {
+    label: 'Enter the Sui address:',
+    placeholder: '0x…',
+    submitLabel: 'Set Sui address',
+    noticeTitle: 'Sui address required',
+    noticeDescription:
+      'When bridging to Sui, you need to provide a valid Sui wallet address. Please ensure you have access to this address on Sui.',
+  },
+}
+
+export type ChangeReceiverAddressModalProps = {
+  family: ReceiverAddressFamily
+  isOpen?: boolean
+  currentAddress?: string
+  onOpenChange?: (open: boolean) => void
+  onSubmitAddress: (address: SanitizedReceiverAddress) => void
+}
+
+/**
+ * Bridge destination “Change Address” modal — old-dapp receiving-address dialogs,
+ * restyled for the Noon Capital shell. Validates strictly by destination family
+ * (EVM / Starknet / Sui).
+ */
+export function ChangeReceiverAddressModal({
+  family,
+  isOpen = false,
+  currentAddress,
+  onOpenChange,
+  onSubmitAddress,
+}: ChangeReceiverAddressModalProps) {
+  const titleId = useId()
+  const inputId = useId()
+  const copy = FAMILY_COPY[family]
+  const [draft, setDraft] = useState(currentAddress || '')
+  // Reset draft when the modal opens (React “adjust state when prop changes” pattern).
+  const [openSnapshot, setOpenSnapshot] = useState(isOpen)
+  if (isOpen !== openSnapshot) {
+    setOpenSnapshot(isOpen)
+    if (isOpen) setDraft(currentAddress || '')
+  }
+
+  const debounced = useDebounce(draft, 350)
+  const isDebouncing = debounced !== draft
+  // Family-strict Starknet / Sui / EVM validation (EVM paste rejected on Starknet & Sui).
+  const validationError = getReceiverAddressError(family, debounced)
+  const isValid = Boolean(debounced.trim()) && validationError == null
+  const submitDisabled = !isValid || isDebouncing
+
+  const close = useCallback(() => onOpenChange?.(false), [onOpenChange])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [close, isOpen])
+
+  const onSubmit = useCallback(() => {
+    if (submitDisabled) return
+    // Re-validate + sanitize on submit — Starknet / Sui never accept EVM addresses.
+    if (getReceiverAddressError(family, debounced)) return
+    const sanitized = sanitizeReceiverAddress(family, debounced)
+    if (!sanitized) return
+    onSubmitAddress(sanitized)
+    onOpenChange?.(false)
+  }, [debounced, family, onOpenChange, onSubmitAddress, submitDisabled])
+
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen ? (
+        <motion.div
+          key={`change-receiver-${family}`}
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          <button
+            type="button"
+            aria-label="Close"
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
+            onClick={close}
+          />
+
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.98 }}
+            transition={{ duration: 0.22, ease: PANEL_EASE }}
+            className={cn(
+              'relative z-10 flex w-full max-w-lg flex-col gap-5 overflow-hidden',
+              'rounded-xl border border-stone-200 bg-white p-6',
+              'shadow-[0_12px_40px_rgba(17,17,17,0.08)]',
+            )}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <h2
+                  id={titleId}
+                  className="font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900 md:text-[32px] md:leading-10 md:tracking-[-1.6px]"
+                >
+                  Change Address
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Close"
+                className={cn(
+                  'flex shrink-0 items-center rounded-md border border-stone-200 bg-white p-2 text-primary',
+                  'shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-opacity hover:opacity-80',
+                  focusReset,
+                )}
+              >
+                <CloseIcon width={16} height={16} className="size-4" aria-hidden />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label htmlFor={inputId} className="text-sm leading-5 font-book text-stone-500">
+                {copy.label}
+              </label>
+              <input
+                id={inputId}
+                type="text"
+                autoFocus
+                autoComplete="off"
+                spellCheck={false}
+                value={draft}
+                placeholder={currentAddress || copy.placeholder}
+                onChange={(event) =>
+                  setDraft(filterReceiverAddressInput(family, event.target.value || ''))
+                }
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    onSubmit()
+                  }
+                }}
+                className={cn(
+                  'w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3',
+                  'text-base leading-6 font-book text-stone-900 tabular-nums placeholder:text-stone-400',
+                  'hover:border-stone-200 hover:bg-stone-50 focus:border-stone-200 focus:bg-stone-50',
+                  'focus-visible:border-stone-200 active:border-stone-200',
+                  focusReset,
+                )}
+              />
+            </div>
+
+            <StatusCallout
+              type="neutral"
+              title={copy.noticeTitle}
+              description={copy.noticeDescription}
+            />
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={close}
+                className={cn(
+                  'flex flex-1 items-center justify-center rounded-lg border border-stone-200 bg-white px-4 py-3',
+                  'text-base leading-6 font-medium text-stone-700 transition-opacity hover:opacity-90',
+                  focusReset,
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={submitDisabled}
+                onClick={onSubmit}
+                className={cn(
+                  'flex flex-1 items-center justify-center rounded-lg px-4 py-3',
+                  'text-base leading-6 font-medium',
+                  focusReset,
+                  submitDisabled
+                    ? 'cursor-not-allowed bg-[#e9e9e9] text-[#7b7b7b]'
+                    : 'bg-[#6c77e9] text-stone-50 transition-opacity hover:opacity-90',
+                )}
+              >
+                {isDebouncing ? 'Processing address' : copy.submitLabel}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>,
+    document.body,
+  )
+}
+
+export default ChangeReceiverAddressModal

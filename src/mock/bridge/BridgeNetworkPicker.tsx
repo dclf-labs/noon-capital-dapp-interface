@@ -1,14 +1,20 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { AnimatePresence, motion } from 'motion/react'
 
 import { SHELL_SELECTION_CLOSE_MS, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
 import { chainIconSrc } from '@/components/shell/network'
+import { getChainConfig } from '@/lib/chain'
 import { cn } from '@/lib/utils'
 import type { BridgeNetworkOption } from '@/mock/bridge/types'
+import {
+  computeTokenDropdownCoords,
+  type TokenDropdownCoords,
+} from '@/mock/buy/token-dropdown-panel'
 
 const PANEL_EASE = [0.22, 1, 0.36, 1] as const
+const MENU_Z = 400
 
 type BridgeNetworkPickerProps = {
   label: string
@@ -33,11 +39,15 @@ export function BridgeNetworkPicker({
   const panelRef = useRef<HTMLDivElement>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [open, setOpen] = useState(false)
-  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [coords, setCoords] = useState<(TokenDropdownCoords & { width: number }) | null>(null)
   /** Optimistic selection so the pill can animate before the parent re-renders. */
   const [pendingId, setPendingId] = useState<number | null>(null)
 
-  const selected = networks.find((n) => n.id === value)
+  // Keep showing the selected chain even if it's briefly absent from `networks`
+  // (e.g. mid-flip while source/dest filters catch up).
+  const selected =
+    networks.find((n) => n.id === value) ??
+    (value != null ? { id: value, name: getChainConfig(value).name } : undefined)
   const activeId = pendingId ?? value
 
   const clearCloseTimer = () => {
@@ -60,11 +70,35 @@ export function BridgeNetworkPicker({
     return () => clearCloseTimer()
   }, [])
 
-  useEffect(() => {
-    if (!open || !rootRef.current) return
-    const rect = rootRef.current.getBoundingClientRect()
-    setCoords({ top: rect.bottom + 6, left: rect.left, width: Math.max(rect.width, 200) })
-  }, [open])
+  useLayoutEffect(() => {
+    if (!open) return
+
+    const update = () => {
+      const trigger = rootRef.current
+      if (!trigger) return
+      const triggerRect = trigger.getBoundingClientRect()
+      const width = Math.max(triggerRect.width, 200)
+      const panelRect = panelRef.current?.getBoundingClientRect()
+      const next = computeTokenDropdownCoords(
+        triggerRect,
+        { width: window.innerWidth, height: window.innerHeight },
+        panelRect
+          ? { width, height: panelRect.height }
+          : { width, height: Math.min(networks.length * 40 + 8, 360) },
+      )
+      setCoords({ ...next, width })
+    }
+
+    update()
+    const raf = window.requestAnimationFrame(update)
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
+  }, [open, networks.length])
 
   useEffect(() => {
     if (!open) return
@@ -106,12 +140,12 @@ export function BridgeNetworkPicker({
           setOpen((prev) => !prev)
         }}
         className={cn(
-          'flex min-w-0 flex-1 items-center gap-2 p-4',
+          'flex w-full min-w-0 items-center justify-between gap-2 p-4',
           'ring-0 outline-none focus:outline-none focus-visible:ring-0',
           (disabled || networks.length === 0) && 'cursor-not-allowed opacity-50',
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        <div className="flex min-w-0 items-center gap-1.5">
           <span className="relative size-8 shrink-0 overflow-hidden rounded-md bg-stone-200">
             {selected ? (
               <img
@@ -141,7 +175,7 @@ export function BridgeNetworkPicker({
 
       {typeof document !== 'undefined'
         ? createPortal(
-            <AnimatePresence>
+            <AnimatePresence onExitComplete={() => setCoords(null)}>
               {open && coords ? (
                 <motion.div
                   ref={panelRef}
@@ -151,40 +185,57 @@ export function BridgeNetworkPicker({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.16, ease: PANEL_EASE }}
-                  style={{ top: coords.top, left: coords.left, width: coords.width }}
-                  className="fixed z-[400] max-h-64 overflow-auto rounded-xl border border-stone-200 bg-white p-1 shadow-lg"
+                  style={{
+                    top: coords.top,
+                    left: coords.left,
+                    width: coords.width,
+                    maxHeight: coords.maxHeight,
+                    zIndex: MENU_Z,
+                  }}
+                  className="fixed overflow-y-auto overscroll-contain rounded-xl border border-stone-200 bg-white p-1 shadow-lg"
                 >
                   {networks.map((network) => {
                     const active = network.id === activeId
+                    const unavailable = Boolean(network.disabled)
                     return (
                       <button
-                        key={network.id}
+                        key={`${network.id}:${network.name}`}
                         type="button"
                         role="option"
                         aria-selected={active}
+                        aria-disabled={unavailable}
+                        disabled={unavailable}
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => {
+                          if (unavailable) return
                           setPendingId(network.id)
                           onChange(network.id)
                           scheduleClose()
                         }}
                         className={cn(
-                          'relative flex h-10 w-full items-center gap-2 rounded-lg px-2 text-left',
+                          'relative flex h-10 w-full shrink-0 items-center gap-2 rounded-lg px-2 text-left',
                           'text-sm leading-5 font-book',
                           'ring-0 outline-none focus:outline-none focus-visible:ring-0',
-                          active
-                            ? 'text-white'
-                            : 'text-stone-700 hover:text-primary focus-visible:text-primary',
+                          unavailable
+                            ? 'cursor-not-allowed text-stone-400'
+                            : active
+                              ? 'text-white'
+                              : 'text-stone-700 hover:text-primary focus-visible:text-primary',
                         )}
                       >
-                        {active ? (
+                        {active && !unavailable ? (
                           <motion.div
                             layoutId={`bridge-network-picker-bg-${menuId}`}
                             className="absolute inset-0 rounded-lg bg-primary"
                             transition={SHELL_SELECTION_SPRING}
                           />
                         ) : null}
-                        <span className="relative z-10 size-5 shrink-0 overflow-hidden rounded-md bg-stone-100">
+                        <span
+                          className={cn(
+                            'relative z-10 size-5 shrink-0 overflow-hidden rounded-md bg-stone-100',
+                            unavailable && 'opacity-50',
+                          )}
+                        >
                           <img
                             src={chainIconSrc(network.id)}
                             alt=""

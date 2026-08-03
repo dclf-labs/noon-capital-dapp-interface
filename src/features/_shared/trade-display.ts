@@ -1,13 +1,19 @@
-import { toIntlCompactStr, toIntlCompactStrWithMaxFractionDigits4, toIntlStr } from '@/lib/format'
+import { toIntlCompactStr, toIntlStr } from '@/lib/format'
 
 /**
  * Display-only formatters for trade UI (confirm rows, USD, fees, balances).
- * Prefer these over ad-hoc `toIntlStr` args in screens — pay/receive field
- * precision still goes through `trade-input-format`.
+ * Non-input labels: decimals only when needed, max 1dp for numbers.
+ * Pay/receive field precision still goes through `trade-input-format`.
  */
 
+/** Amount / USD / fee numbers — max 1 fraction digit, omit trailing zeros. */
 export function formatUsd(amount: number | string | bigint | undefined): string {
-  return toIntlStr(amount, 2, 2, '~$', '')
+  return toIntlStr(amount, 1, 0, '~$', '', 1)
+}
+
+/** Network / gas fee USD label (no approximate `~` prefix). */
+export function formatFeeUsd(amount: number | string | bigint | undefined): string {
+  return toIntlStr(amount, 1, 0, '$', '', 1)
 }
 
 export function formatTokenAmount(
@@ -16,19 +22,19 @@ export function formatTokenAmount(
   decimals: number = 18,
 ): string {
   const suffix = symbol ? ` ${symbol}` : ''
-  return toIntlCompactStr(amount, decimals, true, 2, '', suffix)
+  return toIntlCompactStr(amount, decimals, true, 0, '', suffix, 1)
 }
 
 /**
- * Confirm / success amount label (no symbol) — matches old-dapp `toIntlCompactStr(..., 6)`.
- * Dust → `<0.01`; values ≥ 100k → compact (`150K`).
+ * Confirm / success amount label (no symbol).
+ * Dust → `<0.1`; values ≥ 100k → compact (`150K`).
  */
 export function formatConfirmAmount(
   amount: number | string | bigint | undefined,
   decimals: number = 6,
 ): string {
   if (amount === undefined || amount === '') return '0'
-  return toIntlCompactStr(amount, decimals, true, 2, '', '')
+  return toIntlCompactStr(amount, decimals, true, 0, '', '', 1)
 }
 
 export function formatNativeFee(
@@ -36,28 +42,28 @@ export function formatNativeFee(
   symbol: string = 'ETH',
   decimals: number = 18,
 ): string {
-  return toIntlStr(amount, decimals, 2, '~', ` ${symbol}`)
+  return toIntlStr(amount, decimals, 0, '', ` ${symbol}`, 1)
 }
 
 /**
- * Precise native fee for tooltips / hover cards (gas dust stays readable).
- * Unlike `formatNativeFee`, does not collapse amounts below 0.01 to `<0.01`.
+ * Native fee for tooltips / hover cards.
+ * Dust below the 1dp floor uses the same `<0.1` label as other non-input displays.
  */
 export function formatNativeFeeDetail(
   amount: number | string | bigint | undefined,
   symbol: string = 'ETH',
 ): string {
-  const value = Number(amount ?? 0)
-  if (!Number.isFinite(value) || value <= 0) return `~0 ${symbol}`
-  return `~${new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 6,
-  }).format(value)} ${symbol}`
+  return formatNativeFee(amount, symbol)
 }
 
-/** Unit rate / mid price (up to 4 fraction digits). */
+/** Unit rate / mid price (max 1 fraction digit). */
 export function formatUnitRate(amount: number | string | bigint | undefined): string {
-  return toIntlCompactStrWithMaxFractionDigits4(amount, 4, true, 2, '', '')
+  return toIntlCompactStr(amount, 1, true, 0, '', '', 1)
+}
+
+/** Percentages — max 2 fraction digits, omit trailing zeros. */
+export function formatPercent(amount: number | string | bigint | undefined): string {
+  return toIntlStr(amount, 2, 0, '', '%', 2)
 }
 
 /** Balance label as shown next to trade inputs. */

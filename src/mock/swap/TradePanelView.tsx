@@ -68,8 +68,8 @@ export function TradePanelView({
   unitRateLabel,
   feeLabel,
   isFetchingQuote,
-  isInsufficientBalance,
-  isApproved,
+  isInsufficientBalance: _isInsufficientBalance,
+  isApproved: _isApproved,
   primaryLabel,
   primaryDisabled,
   primaryLoading,
@@ -157,6 +157,7 @@ export function TradePanelView({
           ) : null}
           <button
             type="button"
+            className={primaryLoading ? 'animate-pulse' : undefined}
             style={primaryDisabled || primaryLoading ? styles.buttonDisabled : styles.button}
             disabled={primaryDisabled || primaryLoading}
             onClick={onPrimary}
@@ -170,7 +171,7 @@ export function TradePanelView({
 
   const receiveDisplayValue =
     amountOutValue != null ? down(amountOutValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
-  const receivePlaceholder = isFetchingQuote && amountOutValue == null ? '…' : '0.00'
+  const isReceiveLoading = isFetchingQuote && amountOutValue == null
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>
@@ -255,8 +256,9 @@ export function TradePanelView({
         <div style={styles.row}>
           <NumericFormat
             style={{ ...styles.input, opacity: 0.85 }}
+            className={isReceiveLoading ? 'animate-pulse' : undefined}
             readOnly
-            placeholder={receivePlaceholder}
+            placeholder="0.00"
             decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
@@ -276,12 +278,11 @@ export function TradePanelView({
         {feeLabel ? <p style={styles.muted}>Est. fee {feeLabel}</p> : null}
       </div>
 
-      {isInsufficientBalance ? <p style={styles.errorText}>Insufficient balance</p> : null}
-      {!isApproved && amountIn ? <p style={styles.muted}>Approval required before swap.</p> : null}
       {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
 
       <button
         type="button"
+        className={primaryLoading ? 'animate-pulse' : undefined}
         style={primaryDisabled || primaryLoading ? styles.buttonDisabled : styles.button}
         disabled={primaryDisabled || primaryLoading}
         onClick={onPrimary}

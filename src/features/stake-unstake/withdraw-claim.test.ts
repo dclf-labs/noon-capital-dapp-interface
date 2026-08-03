@@ -46,7 +46,7 @@ describe('withdraw claim helpers', () => {
     ).toBe('Cooling down')
     expect(
       getWithdrawClaimLabel({ claimed: false, claimable: true, isBusy: true, failed: false }),
-    ).toBe('Claiming…')
+    ).toBe('Claiming')
     expect(
       getWithdrawClaimLabel({ claimed: false, claimable: true, isBusy: false, failed: true }),
     ).toBe('Retry claim')

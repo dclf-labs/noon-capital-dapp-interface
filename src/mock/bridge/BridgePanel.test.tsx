@@ -34,7 +34,7 @@ function renderPanel(overrides: Partial<BridgePanelProps> = {}) {
     receiverLabel: 'EVM receiver',
     receiverValue: '0x1111111111111111111111111111111111111111',
     receiverPlaceholder: '0x…',
-    onReceiverChange: vi.fn(),
+    onOpenReceiverModal: vi.fn(),
     isFetchingFee: false,
     isInsufficientBalance: false,
     primaryLabel: 'Next',
@@ -79,11 +79,33 @@ describe('BridgePanel behaviour', () => {
     expect(onPrimary).toHaveBeenCalledTimes(1)
   })
 
-  it('exposes half/max and bridging fees row', () => {
-    renderPanel({ feeLabel: '~$0.21' })
+  it('opens the change-address modal from the CHANGE chip', async () => {
+    const user = userEvent.setup()
+    const onOpenReceiverModal = vi.fn()
+    renderPanel({ onOpenReceiverModal })
+    await user.click(screen.getByRole('button', { name: /change receiving address/i }))
+    expect(onOpenReceiverModal).toHaveBeenCalledTimes(1)
+  })
+
+  it('exposes half/max and collapsible bridging fees', async () => {
+    const user = userEvent.setup()
+    renderPanel({
+      feeLabel: '$0.3',
+      networkFeeLabel: '$0.1',
+      gasFeeLabel: '$0.2',
+      protocolFeeLabel: '$0',
+    })
     expect(screen.getByRole('button', { name: 'HALF' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'MAX' })).toBeInTheDocument()
     expect(screen.getByText('Bridging fees')).toBeInTheDocument()
-    expect(screen.getByText('~$0.21')).toBeInTheDocument()
+    expect(screen.getByText('$0.3')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /bridging fees details/i }))
+    expect(screen.getByText('Protocol fee')).toBeInTheDocument()
+    expect(screen.getByText('Network fee')).toBeInTheDocument()
+    expect(screen.getByText('Gas fee')).toBeInTheDocument()
+    expect(screen.getByText('$0')).toBeInTheDocument()
+    expect(screen.getByText('$0.1')).toBeInTheDocument()
+    expect(screen.getByText('$0.2')).toBeInTheDocument()
   })
 })

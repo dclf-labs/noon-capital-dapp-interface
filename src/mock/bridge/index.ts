@@ -4,6 +4,7 @@ export { BridgeNetworkSwitcher } from '@/mock/bridge/BridgeNetworkSwitcher'
 export { BridgePanel } from '@/mock/bridge/BridgePanel'
 export { BridgeStepShell } from '@/mock/bridge/BridgeStepShell'
 export { BridgeSuccessPanel } from '@/mock/bridge/BridgeSuccessPanel'
+export { BridgingFeesCollapsible } from '@/mock/bridge/BridgingFeesCollapsible'
 export {
   BRIDGE_ETA_LABEL,
   BRIDGE_HERO_SUBTITLE,

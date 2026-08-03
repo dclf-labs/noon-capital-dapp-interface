@@ -43,7 +43,7 @@ export function getWithdrawClaimLabel(params: {
   failed: boolean
 }): string {
   if (params.claimed) return 'Claimed'
-  if (params.isBusy) return 'Claiming…'
+  if (params.isBusy) return 'Claiming'
   if (params.failed) return 'Retry claim'
   if (!params.claimable) return 'Cooling down'
   return 'Claim'

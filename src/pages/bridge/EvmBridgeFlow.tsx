@@ -6,6 +6,7 @@ import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
 import { formatBalanceLabel, formatFeeUsd } from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
+import { canFlipBridgeNetworks, requestBridgeNetworkFlip } from '@/features/bridge/flip'
 import {
   useBridgeBalance,
   useBridgeForm,
@@ -27,7 +28,7 @@ import { useSelectActiveChain } from '@/hooks/connection'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { useStickyValue } from '@/hooks/ui/useStickyValue'
 import { type Address, type StarknetAddress, type SuiAddress } from '@/lib/address'
-import { getChainConfig, isEvmChainId } from '@/lib/chain'
+import { type ChainId, getChainConfig } from '@/lib/chain'
 import type { EVMConnection } from '@/lib/connection'
 import { isStoredReceiverAddressValid } from '@/lib/receiver-address'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
@@ -269,19 +270,17 @@ export function EvmBridgeFlow() {
   )
 
   const onFlipNetworks = useCallback(() => {
-    const source = inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined
-    const destination = inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined
-    if (source == null || destination == null || !isEvmChainId(destination)) return
-    if (!isBridgePairAllowed(destination, source)) return
-    // Swap both chains in one update so BridgeProvider sync effects don't see a
-    // half-applied flip and clear the new destination while the wallet switches.
-    setInputs((prev) => ({
-      ...prev,
-      sourceChainId: destination,
-      destinationChainId: source,
-      amount: undefined,
-    }))
-    void selectActiveChain(destination)
+    requestBridgeNetworkFlip(inputs.sourceChainId, inputs.destinationChainId, {
+      selectActiveChain,
+      applySameFamilyFlip: (nextSource, nextDestination) => {
+        setInputs((prev) => ({
+          ...prev,
+          sourceChainId: nextSource as typeof prev.sourceChainId,
+          destinationChainId: nextDestination as typeof prev.destinationChainId,
+          amount: undefined,
+        }))
+      },
+    })
   }, [inputs.destinationChainId, inputs.sourceChainId, selectActiveChain, setInputs])
 
   const onBack = useCallback(() => setStep(0), [setStep])
@@ -336,7 +335,10 @@ export function EvmBridgeFlow() {
         onSourceChange={onSourceChange}
         onDestinationChange={onDestinationChange}
         onFlipNetworks={
-          inputs.destinationChainId && isEvmChainId(Number(inputs.destinationChainId))
+          canFlipBridgeNetworks(
+            inputs.sourceChainId as ChainId | undefined,
+            inputs.destinationChainId as ChainId | undefined,
+          )
             ? onFlipNetworks
             : undefined
         }

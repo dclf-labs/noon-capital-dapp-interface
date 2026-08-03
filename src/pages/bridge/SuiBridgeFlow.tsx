@@ -5,6 +5,7 @@ import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
 import { formatBalanceLabel, formatFeeUsd } from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
+import { canFlipBridgeNetworks, requestBridgeNetworkFlip } from '@/features/bridge/flip'
 import {
   useBridgeBalance,
   useBridgeForm,
@@ -164,6 +165,12 @@ export function SuiBridgeFlow() {
     [setDestinationChainId, setInputs],
   )
 
+  const onFlipNetworks = useCallback(() => {
+    requestBridgeNetworkFlip(inputs.sourceChainId, inputs.destinationChainId, {
+      selectActiveChain,
+    })
+  }, [inputs.destinationChainId, inputs.sourceChainId, selectActiveChain])
+
   const onReset = useCallback(() => {
     if (submit.txnHash) dismissedHashRef.current = submit.txnHash
     setStep(0)
@@ -211,6 +218,11 @@ export function SuiBridgeFlow() {
           void selectActiveChain(chainId)
         }}
         onDestinationChange={onDestinationChange}
+        onFlipNetworks={
+          canFlipBridgeNetworks(inputs.sourceChainId, inputs.destinationChainId)
+            ? onFlipNetworks
+            : undefined
+        }
         tokens={inputs.tokens}
         token={inputs.token}
         onTokenChange={setToken}

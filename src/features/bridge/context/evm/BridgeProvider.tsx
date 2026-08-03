@@ -34,7 +34,9 @@ import type { SuiAddress } from '@/lib/address'
 import { getActiveEvmChainIds, isEvmChainId } from '@/lib/chain'
 import { type EVMConnection } from '@/lib/connection'
 import { toNum } from '@/lib/format'
+import { getChainFamily } from '@/lib/wallet-session'
 import { useActiveChainStore } from '@/state/active-chain'
+import { useBridgeFlipStore } from '@/state/bridge-flip'
 
 /** Cover the gap after `isPending` clears before wagmi reports the new chain. */
 const EVM_SWITCH_UNSUPPORTED_GRACE_MS = 2000
@@ -464,16 +466,33 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Detect chain family changes and reset destination
+  // Detect chain family changes — apply pending cross-family flip, else reset destination
   useEffect(() => {
     const hasChainFamilyChanged =
       prevChainFamilyRef.current !== undefined && prevChainFamilyRef.current !== resolvedChainFamily
 
     if (hasChainFamilyChanged) {
-      setInputs((prev) => ({
-        ...prev,
-        destinationChainId: undefined,
-      }))
+      if (resolvedChainFamily === 'evm') {
+        const pending = useBridgeFlipStore.getState().consumePending()
+        if (pending && getChainFamily(pending.sourceChainId) === 'evm') {
+          setInputs((prev) => ({
+            ...prev,
+            sourceChainId: pending.sourceChainId as ProtocolChainId,
+            destinationChainId: pending.destinationChainId as ProtocolChainId,
+            amount: undefined,
+          }))
+        } else {
+          setInputs((prev) => ({
+            ...prev,
+            destinationChainId: undefined,
+          }))
+        }
+      } else {
+        setInputs((prev) => ({
+          ...prev,
+          destinationChainId: undefined,
+        }))
+      }
     }
 
     prevChainFamilyRef.current = resolvedChainFamily
@@ -503,14 +522,20 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const prevSourceChainId = prevSourceChainIdRef.current
     const hasSourceChanged = prevSourceChainId !== effectiveSourceChainId
 
-    // Mid-flip: inputs already swapped (source=new, dest=old/connected) while the
-    // wallet is still on the previous chain. Keep the swapped pair until the wallet
-    // catches up — forcing source back would collide with dest and drop the route.
+    // Mid-flip: inputs already swapped to the new source while the wallet (and/or
+    // connection-derived effective source) still lags. Keep the flipped pair until
+    // the wallet catches up — forcing source back would drop the destination route.
+    const classicEvmFlip =
+      destinationChainId != null && Number(destinationChainId) === Number(effectiveSourceChainId)
+    const dappAlreadyOnFlippedSource =
+      resolvedEvmChainId != null &&
+      currentSourceChainId != null &&
+      Number(currentSourceChainId) === Number(resolvedEvmChainId)
     const pendingFlipPair =
       currentSourceChainId != null &&
       currentSourceChainId !== effectiveSourceChainId &&
       destinationChainId != null &&
-      Number(destinationChainId) === Number(effectiveSourceChainId)
+      (classicEvmFlip || dappAlreadyOnFlippedSource)
 
     if (pendingFlipPair) {
       return

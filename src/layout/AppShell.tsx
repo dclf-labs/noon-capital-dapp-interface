@@ -13,12 +13,8 @@ import {
 import { MobileNavDrawer } from '@/components/shell/MobileNavDrawer'
 import useSidebarProtocolMetrics from '@/features/shell/hooks/useSidebarProtocolMetrics'
 import { useWalletSession } from '@/hooks/connection'
+import { getShellWalletChrome } from '@/layout/shell-wallet-chrome'
 import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
-
-function shortenAddress(address?: string) {
-  if (!address) return undefined
-  return `${address.slice(0, 6)}…${address.slice(-4)}`
-}
 
 /**
  * Shared app chrome: background, max-width column, header (network + wallet),
@@ -26,7 +22,9 @@ function shortenAddress(address?: string) {
  */
 export function AppShell() {
   const location = useLocation()
+  // Active product network only — EVM connected + Starknet selected ⇒ Connect.
   const session = useWalletSession()
+  const { isConnected, walletLabel, chainFamily } = getShellWalletChrome(session)
   const connectWalletFamily = useConnectWalletFamily()
   const [apyPeriod, setApyPeriod] = useState<SidebarApyPeriod>('7d')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -34,16 +32,9 @@ export function AppShell() {
 
   const navItems = useMemo(() => shellNavForPath(location.pathname), [location.pathname])
 
-  const walletLabel =
-    session.name ||
-    shortenAddress(session.address) ||
-    (session.isConnected ? 'Connected' : undefined)
-
-  // Open the connect UI for the *active product family* (EVM / Starknet / Sui),
-  // not always AppKit — so switching to Starknet/Sui while disconnected prompts
-  // the matching wallet flow from the navbar CTA.
+  // Open the connect UI for the *selected* family (EVM / Starknet / Sui).
   const openWallet = () => {
-    void connectWalletFamily(session.chainFamily)
+    void connectWalletFamily(chainFamily)
   }
 
   return (
@@ -66,7 +57,7 @@ export function AppShell() {
       <div className="relative z-10 flex min-h-dvh w-full min-w-0 flex-1 flex-col">
         <AppHeader
           walletLabel={walletLabel}
-          isConnected={session.isConnected}
+          isConnected={isConnected}
           apy={sidebarApy}
           tvl={sidebarTvl}
           onMenuClick={() => setMobileMenuOpen(true)}
@@ -101,7 +92,7 @@ export function AppShell() {
         navItems={navItems}
         apy={sidebarApy}
         tvl={sidebarTvl}
-        isConnected={session.isConnected}
+        isConnected={isConnected}
         walletLabel={walletLabel}
         onConnectClick={openWallet}
       />

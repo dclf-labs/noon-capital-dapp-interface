@@ -25,6 +25,8 @@ import { useReadOnlySession } from '@/hooks/connection/useReadOnlySession'
 import { useSuiFamilySession } from '@/hooks/connection/useWalletSession'
 import useEvmDestinationTokenBalance from '@/hooks/on-chain/evm/useDestinationTokenBalance'
 import useTokenBalance from '@/hooks/on-chain/sui/useTokenBalance'
+import { getChainFamily } from '@/lib/wallet-session'
+import { useBridgeFlipStore } from '@/state/bridge-flip'
 
 const INITIAL_BRIDGE_INPUTS: FormInputs = {
   token: undefined,
@@ -208,15 +210,26 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Detect chain family changes — apply pending cross-family flip, else reset destination
   useEffect(() => {
     const hasChainFamilyChanged =
       prevChainFamilyRef.current !== undefined && prevChainFamilyRef.current !== resolvedChainFamily
 
     if (hasChainFamilyChanged && resolvedChainFamily === 'sui') {
-      setInputs((prev) => ({
-        ...prev,
-        destinationChainId: undefined,
-      }))
+      const pending = useBridgeFlipStore.getState().consumePending()
+      if (pending && getChainFamily(pending.sourceChainId) === 'sui') {
+        setInputs((prev) => ({
+          ...prev,
+          sourceChainId: pending.sourceChainId as ProtocolChainId,
+          destinationChainId: pending.destinationChainId as ProtocolChainId,
+          amount: undefined,
+        }))
+      } else {
+        setInputs((prev) => ({
+          ...prev,
+          destinationChainId: undefined,
+        }))
+      }
     }
 
     prevChainFamilyRef.current = resolvedChainFamily

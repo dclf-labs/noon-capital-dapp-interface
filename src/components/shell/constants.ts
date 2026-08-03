@@ -57,6 +57,17 @@ export const APY_TIP =
 export const SHELL_SELECTION_CLOSE_MS = 260
 
 /**
+ * Idle list / dropdown / modal option hover.
+ * Soft `stone-100` reads cleaner on white panels than old-dapp `stone-200`.
+ * Do not apply when the option is selected (selected uses the black pill).
+ */
+export const LIST_OPTION_IDLE =
+  'text-stone-700 transition-colors hover:bg-stone-100 hover:text-stone-900 focus-visible:bg-stone-100 focus-visible:text-stone-900'
+
+/** Vertical rhythm between stacked options inside dropdown / menu panels. */
+export const LIST_OPTION_STACK = 'flex flex-col gap-1.5 p-1.5'
+
+/**
  * Network dropdown panel — above shell chrome (sidebar 30, mobile drawer 100),
  * below modals / AppKit (1000).
  */

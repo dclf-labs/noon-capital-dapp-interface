@@ -171,7 +171,7 @@ export function SidebarLink({
     link.active
       ? 'text-white'
       : enabled
-        ? 'text-stone-500 hover:text-primary focus-visible:text-primary'
+        ? 'text-stone-500 hover:bg-stone-100 hover:text-stone-900 focus-visible:bg-stone-100 focus-visible:text-stone-900'
         : 'cursor-not-allowed text-stone-400 opacity-40',
     className,
   )

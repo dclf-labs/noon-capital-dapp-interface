@@ -173,7 +173,7 @@ export function MobileNavDrawer({
                   active
                     ? 'text-white'
                     : enabled
-                      ? 'text-[#111] hover:text-primary'
+                      ? 'text-[#111] hover:bg-stone-100 hover:text-stone-900'
                       : 'cursor-not-allowed text-[#111] opacity-50',
                 )
 

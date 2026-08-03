@@ -174,6 +174,7 @@ export function StarknetBuyTrade() {
   return (
     <BuyFlowView
       mode="buy"
+      chainFamily="starknet"
       step={step}
       showHero={false}
       isConnected={connection.isConnected}

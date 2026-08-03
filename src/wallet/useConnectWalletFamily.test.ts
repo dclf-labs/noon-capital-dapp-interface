@@ -31,7 +31,7 @@ describe('useConnectWalletFamily', () => {
     suiOnOpen.mockReset()
   })
 
-  it('opens AppKit for EVM', async () => {
+  it('opens AppKit for EVM only', async () => {
     const { result } = renderHook(() => useConnectWalletFamily())
     await result.current('evm')
     expect(openEvmAppKit).toHaveBeenCalledOnce()
@@ -39,17 +39,19 @@ describe('useConnectWalletFamily', () => {
     expect(suiOnOpen).not.toHaveBeenCalled()
   })
 
-  it('opens the Starknet selector for Starknet', async () => {
+  it('opens the Starknet selector for Starknet only', async () => {
     const { result } = renderHook(() => useConnectWalletFamily())
     await result.current('starknet')
     expect(starknetOnOpen).toHaveBeenCalledOnce()
     expect(openEvmAppKit).not.toHaveBeenCalled()
+    expect(suiOnOpen).not.toHaveBeenCalled()
   })
 
-  it('opens the Sui selector for Sui', async () => {
+  it('opens the Sui selector for Sui only', async () => {
     const { result } = renderHook(() => useConnectWalletFamily())
     await result.current('sui')
     expect(suiOnOpen).toHaveBeenCalledOnce()
     expect(openEvmAppKit).not.toHaveBeenCalled()
+    expect(starknetOnOpen).not.toHaveBeenCalled()
   })
 })

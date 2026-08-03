@@ -5,6 +5,7 @@ import { type Connector, useAccount, useConnect } from '@starknet-react/core'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { CloseIcon } from '@/assets/icons'
+import { LIST_OPTION_IDLE } from '@/components/shell/constants'
 import { cn } from '@/lib/utils'
 
 const PANEL_EASE = [0.22, 1, 0.36, 1] as const
@@ -148,7 +149,7 @@ export function StarknetWalletSelector({
               </button>
             </div>
 
-            <div className="flex w-full flex-col gap-2">
+            <div className="flex w-full flex-col gap-3">
               {connectors.length ? (
                 connectors.map((connector) => {
                   const selected = Boolean(isConnected && connectedConnector?.id === connector.id)
@@ -166,12 +167,9 @@ export function StarknetWalletSelector({
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => connectWallet(connector)}
                       className={cn(
-                        'group flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left',
-                        'transition-colors',
+                        'group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left',
                         focusReset,
-                        selected
-                          ? 'border-[#c7d2fe] bg-[#e0eaff] text-[#6c77e9]'
-                          : 'border-stone-200 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900',
+                        selected ? 'bg-[#e0eaff] text-[#6c77e9]' : LIST_OPTION_IDLE,
                         pending && 'cursor-wait opacity-80',
                       )}
                     >

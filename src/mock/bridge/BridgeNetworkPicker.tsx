@@ -3,7 +3,12 @@ import { createPortal } from 'react-dom'
 
 import { AnimatePresence, motion } from 'motion/react'
 
-import { SHELL_SELECTION_CLOSE_MS, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
+import {
+  LIST_OPTION_IDLE,
+  LIST_OPTION_STACK,
+  SHELL_SELECTION_CLOSE_MS,
+  SHELL_SELECTION_SPRING,
+} from '@/components/shell/constants'
 import { chainIconSrc } from '@/components/shell/network'
 import { getChainConfig } from '@/lib/chain'
 import { cn } from '@/lib/utils'
@@ -192,7 +197,10 @@ export function BridgeNetworkPicker({
                     maxHeight: coords.maxHeight,
                     zIndex: MENU_Z,
                   }}
-                  className="fixed overflow-y-auto overscroll-contain rounded-xl border border-stone-200 bg-white p-1 shadow-lg"
+                  className={cn(
+                    'fixed overflow-y-auto overscroll-contain rounded-xl border border-stone-200 bg-white shadow-lg',
+                    LIST_OPTION_STACK,
+                  )}
                 >
                   {networks.map((network) => {
                     const active = network.id === activeId
@@ -220,7 +228,7 @@ export function BridgeNetworkPicker({
                             ? 'cursor-not-allowed text-stone-400'
                             : active
                               ? 'text-white'
-                              : 'text-stone-700 hover:text-primary focus-visible:text-primary',
+                              : LIST_OPTION_IDLE,
                         )}
                       >
                         {active && !unavailable ? (

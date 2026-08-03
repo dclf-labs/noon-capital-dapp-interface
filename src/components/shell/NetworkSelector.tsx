@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from 'motion/react'
 
 import { ChevronDownIcon } from '@/assets/icons'
 import {
+  LIST_OPTION_IDLE,
+  LIST_OPTION_STACK,
   NETWORK_SELECTOR_Z_INDEX,
   SHELL_SELECTION_CLOSE_MS,
   SHELL_SELECTION_SPRING,
@@ -113,8 +115,9 @@ export function NetworkSelector() {
               zIndex: NETWORK_SELECTOR_Z_INDEX,
             }}
             className={cn(
-              'flex max-h-[min(420px,70dvh)] w-[220px] flex-col overflow-y-auto',
-              'rounded-xl border border-stone-200 bg-white p-1 shadow-lg',
+              'max-h-[min(420px,70dvh)] w-[220px] overflow-y-auto',
+              LIST_OPTION_STACK,
+              'rounded-xl border border-stone-200 bg-white shadow-lg',
             )}
           >
             {NETWORK_OPTIONS.map((network) => {
@@ -127,11 +130,9 @@ export function NetworkSelector() {
                   aria-checked={selected}
                   onClick={() => selectNetwork(network.chainId)}
                   className={cn(
-                    'relative flex h-10 w-full items-center gap-2 rounded-lg px-2 transition-colors',
+                    'relative flex h-10 w-full items-center gap-2 rounded-lg px-2',
                     'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
-                    selected
-                      ? 'text-white'
-                      : 'text-stone-700 hover:text-primary focus-visible:text-primary',
+                    selected ? 'text-white' : LIST_OPTION_IDLE,
                   )}
                 >
                   {selected ? (

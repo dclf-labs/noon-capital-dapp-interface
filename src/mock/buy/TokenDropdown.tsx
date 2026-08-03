@@ -4,7 +4,12 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { ChevronDownIcon } from '@/assets/icons'
-import { SHELL_SELECTION_CLOSE_MS, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
+import {
+  LIST_OPTION_IDLE,
+  LIST_OPTION_STACK,
+  SHELL_SELECTION_CLOSE_MS,
+  SHELL_SELECTION_SPRING,
+} from '@/components/shell/constants'
 import type { Token } from '@/config/token'
 import { tokenChainIconSrc, tokenIconSrc, tokenOptionKey } from '@/lib/token-icon'
 import { cn } from '@/lib/utils'
@@ -192,7 +197,8 @@ export function TokenDropdown({
             exit={{ opacity: 0, y: -8, clipPath: 'inset(0 0 100% 0)' }}
             transition={{ duration: 0.24, ease: PANEL_EASE }}
             className={cn(
-              'fixed flex min-w-[180px] flex-col overflow-y-auto overscroll-contain p-1',
+              'fixed min-w-[180px] overflow-y-auto overscroll-contain',
+              LIST_OPTION_STACK,
               'rounded-xl border border-stone-200 bg-white shadow-lg',
             )}
             style={{
@@ -219,11 +225,9 @@ export function TokenDropdown({
                       scheduleClose()
                     }}
                     className={cn(
-                      'relative flex h-10 w-full shrink-0 items-center gap-2 rounded-lg px-2 text-left transition-colors',
+                      'relative flex h-10 w-full shrink-0 items-center gap-2 rounded-lg px-2 text-left',
                       'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
-                      selected
-                        ? 'text-white'
-                        : 'text-stone-700 hover:text-primary focus-visible:text-primary',
+                      selected ? 'text-white' : LIST_OPTION_IDLE,
                     )}
                   >
                     {selected ? (

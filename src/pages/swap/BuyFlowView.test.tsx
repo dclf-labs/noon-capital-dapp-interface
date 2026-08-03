@@ -1,13 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Token } from '@/config/token'
 import { BuyFlowView } from '@/pages/swap/BuyFlowView'
 
-vi.mock('@/wallet/evm/open-appkit', () => ({
-  openEvmAppKit: vi.fn(),
+const connectWalletFamily = vi.fn()
+
+vi.mock('@/wallet/useConnectWalletFamily', () => ({
+  useConnectWalletFamily: () => connectWalletFamily,
 }))
 
 vi.mock('@/hooks/ui/useIsMobile', () => ({
@@ -32,6 +34,7 @@ const usdt = {
 
 const baseProps = {
   mode: 'buy' as const,
+  chainFamily: 'evm' as const,
   step: 0,
   isConnected: true,
   tokenIn: usdt,
@@ -55,6 +58,10 @@ const baseProps = {
 }
 
 describe('BuyFlowView', () => {
+  beforeEach(() => {
+    connectWalletFamily.mockReset().mockResolvedValue(undefined)
+  })
+
   it('renders Figma buy step 0 with default 0', () => {
     render(
       <MemoryRouter initialEntries={['/swap/buy']}>
@@ -76,6 +83,53 @@ describe('BuyFlowView', () => {
 
     await user.click(screen.getByRole('button', { name: '$100' }))
     expect(onBuyAmountChange).toHaveBeenCalledWith(100)
+  })
+
+  it.each([
+    ['evm', 'evm'],
+    ['starknet', 'starknet'],
+    ['sui', 'sui'],
+  ] as const)(
+    'opens %s wallet UI from Connect wallet when chainFamily is %s',
+    async (_label, family) => {
+      const user = userEvent.setup()
+      const onPrimary = vi.fn()
+      render(
+        <MemoryRouter initialEntries={['/swap/buy']}>
+          <BuyFlowView
+            {...baseProps}
+            isConnected={false}
+            chainFamily={family}
+            onPrimary={onPrimary}
+          />
+        </MemoryRouter>,
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Connect wallet' }))
+      expect(connectWalletFamily).toHaveBeenCalledExactlyOnceWith(family)
+      expect(onPrimary).not.toHaveBeenCalled()
+    },
+  )
+
+  it('does not open wallet UI when already connected', async () => {
+    const user = userEvent.setup()
+    const onPrimary = vi.fn()
+    render(
+      <MemoryRouter initialEntries={['/swap/buy']}>
+        <BuyFlowView
+          {...baseProps}
+          isConnected
+          chainFamily="starknet"
+          primaryLabel="Next"
+          primaryDisabled={false}
+          onPrimary={onPrimary}
+        />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(connectWalletFamily).not.toHaveBeenCalled()
+    expect(onPrimary).toHaveBeenCalledTimes(1)
   })
 
   it('renders Figma confirm step with fee + compact amounts', () => {

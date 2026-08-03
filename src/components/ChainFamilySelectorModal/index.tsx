@@ -1,4 +1,6 @@
 import type { ChainFamily } from '@/chains'
+import { LIST_OPTION_IDLE } from '@/components/shell/constants'
+import { cn } from '@/lib/utils'
 import { openEvmAppKit } from '@/wallet/evm/open-appkit'
 
 const CHAIN_FAMILY_OPTIONS: ReadonlyArray<{
@@ -102,25 +104,16 @@ export default function ChainFamilySelectorModal({
           </p>
         </div>
 
-        <div style={{ display: 'grid', gap: 8 }}>
+        <div className="grid gap-3">
           {CHAIN_FAMILY_OPTIONS.map((option) => (
             <button
               key={option.family}
               type="button"
               onClick={() => void selectFamily(option.family)}
-              style={{
-                display: 'grid',
-                gap: 2,
-                textAlign: 'left',
-                padding: '12px 14px',
-                borderRadius: 8,
-                border: '1px solid #ddd',
-                background: '#fafafa',
-                cursor: 'pointer',
-              }}
+              className={cn('grid gap-0.5 rounded-lg px-3.5 py-3 text-left', LIST_OPTION_IDLE)}
             >
-              <span style={{ fontWeight: 600 }}>{option.title}</span>
-              <span style={{ fontSize: 13, opacity: 0.7 }}>{option.description}</span>
+              <span className="font-semibold text-stone-900">{option.title}</span>
+              <span className="text-[13px] text-stone-500">{option.description}</span>
             </button>
           ))}
         </div>
@@ -128,14 +121,7 @@ export default function ChainFamilySelectorModal({
         <button
           type="button"
           onClick={close}
-          style={{
-            justifySelf: 'end',
-            padding: '8px 12px',
-            borderRadius: 8,
-            border: '1px solid #ddd',
-            background: '#fff',
-            cursor: 'pointer',
-          }}
+          className={cn('justify-self-end rounded-lg px-3 py-2', LIST_OPTION_IDLE)}
         >
           Cancel
         </button>

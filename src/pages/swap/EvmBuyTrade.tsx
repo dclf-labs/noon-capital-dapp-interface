@@ -184,6 +184,7 @@ export function EvmBuyTrade() {
   return (
     <BuyFlowView
       mode="buy"
+      chainFamily="evm"
       step={step}
       showHero={false}
       isConnected={connection.isConnected}

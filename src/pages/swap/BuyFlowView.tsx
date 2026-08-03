@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import type { ChainFamily } from '@/chains'
 import { TransitionPanel } from '@/components/ui/transition-panel'
 import { useElementSize } from '@/hooks/ui/useElementSize'
 import { buyTokenAmountFromUsd, payAmountFromBuyAmount } from '@/mock/buy/buy-amount'
@@ -9,9 +10,11 @@ import { BuyStepShell } from '@/mock/buy/BuyStepShell'
 import { BuySuccessPanel } from '@/mock/buy/BuySuccessPanel'
 import type { BuyPoweredBy } from '@/mock/buy/powered-by'
 import type { TradePanelViewProps } from '@/mock/swap/TradePanelView'
-import { openEvmAppKit } from '@/wallet/evm/open-appkit'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 export type BuyFlowViewProps = TradePanelViewProps & {
+  /** Wallet family used when the card CTA is “Connect wallet”. */
+  chainFamily: ChainFamily
   /** USD price of tokenOut for $ presets. */
   buyTokenUsdPrice?: number
   /** tokenOut received per 1 tokenIn. */
@@ -44,6 +47,7 @@ const PANEL_TRANSITION = {
  * enter bridges the previous panel height, center settles to `auto`.
  */
 export function BuyFlowView({
+  chainFamily,
   buyTokenUsdPrice,
   unitOutPerIn,
   poweredBy,
@@ -53,6 +57,7 @@ export function BuyFlowView({
   onBuyAmountChange,
   ...props
 }: BuyFlowViewProps) {
+  const connectWalletFamily = useConnectWalletFamily()
   const {
     step,
     isConnected,
@@ -170,7 +175,7 @@ export function BuyFlowView({
             onTokenOutChange={onTokenOutChange}
             onPrimary={() => {
               if (showConnect) {
-                void openEvmAppKit()
+                void connectWalletFamily(chainFamily)
                 return
               }
               onPrimary()

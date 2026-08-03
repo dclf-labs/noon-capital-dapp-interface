@@ -2,8 +2,8 @@ import { type ReactNode, useMemo } from 'react'
 
 import { mainnet } from '@starknet-react/chains'
 import {
-  alchemyProvider,
   braavos,
+  infuraProvider,
   publicProvider,
   ready,
   StarknetConfig,
@@ -18,11 +18,11 @@ interface StarknetWalletProviderProps {
   children: ReactNode
 }
 
-/** Starknet-react provider: Alchemy when keyed, else public RPC. */
+/** Starknet-react provider: Infura when keyed, else public RPC. */
 function createStarknetProvider() {
-  const alchemyKey = appEnv.rpc.starknetAlchemyApiKey
-  if (alchemyKey) {
-    return alchemyProvider({ apiKey: alchemyKey })
+  const infuraKey = appEnv.rpc.starknetInfuraApiKey
+  if (infuraKey) {
+    return infuraProvider({ apiKey: infuraKey })
   }
   return publicProvider()
 }

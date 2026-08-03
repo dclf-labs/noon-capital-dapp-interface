@@ -99,7 +99,7 @@ Validated in `src/lib/env` as **`appEnv`**. Prefer canonical names; a few altern
 | ------------------------------------------------ | ------------------------------------------- |
 | `VITE_API_BASE_URL`                              | Noon backend API base                       |
 | `VITE_WALLETCONNECT_PROJECT_ID`                  | Required in production (AppKit fail-closed) |
-| `VITE_STARKNET_ALCHEMY_API_KEY`                  | Builds Alchemy RPC when URL unset           |
+| `VITE_STARKNET_INFURA_API_KEY`                   | Builds Infura RPC when URL unset            |
 | `VITE_STARKNET_RPC_URL`                          | Optional Starknet RPC override              |
 | `VITE_ETHEREUM_RPC_URL` / `BASE` / `SUI` / `TAC` | Optional protocol RPC overrides             |
 | `VITE_GA_MEASUREMENT_ID`                         | Optional; injected into `index.html` only   |

@@ -16,14 +16,14 @@ appEnv.analytics.gaMeasurementId // optional; also injected via index.html
 
 ## Variables we keep
 
-| Key                                    | Why                                                |
-| -------------------------------------- | -------------------------------------------------- |
-| `VITE_API_BASE_URL`                    | Every backend API call                             |
-| `VITE_WALLETCONNECT_PROJECT_ID`        | EVM AppKit (required in production)                |
-| `VITE_STARKNET_ALCHEMY_API_KEY`        | Starknet wallet + RPC                              |
-| `VITE_STARKNET_RPC_URL`                | Optional explicit Starknet RPC (wins over Alchemy) |
-| `VITE_*_RPC_URL` (all protocol chains) | Optional RPC overrides; blank → public defaults    |
-| `VITE_GA_MEASUREMENT_ID`               | Optional analytics (`index.html`)                  |
+| Key                                    | Why                                               |
+| -------------------------------------- | ------------------------------------------------- |
+| `VITE_API_BASE_URL`                    | Every backend API call                            |
+| `VITE_WALLETCONNECT_PROJECT_ID`        | EVM AppKit (required in production)               |
+| `VITE_STARKNET_INFURA_API_KEY`         | Starknet wallet + RPC (Infura)                    |
+| `VITE_STARKNET_RPC_URL`                | Optional explicit Starknet RPC (wins over Infura) |
+| `VITE_*_RPC_URL` (all protocol chains) | Optional RPC overrides; blank → public defaults   |
+| `VITE_GA_MEASUREMENT_ID`               | Optional analytics (`index.html`)                 |
 
 ## Adding a variable
 

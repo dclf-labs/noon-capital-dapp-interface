@@ -49,6 +49,7 @@ describe('parseEnv', () => {
     })
     expect(env.VITE_API_BASE_URL).toBe('https://legacy.api/')
     expect(env.VITE_WALLETCONNECT_PROJECT_ID).toBe('legacy-wc')
+    expect(env.VITE_STARKNET_INFURA_API_KEY).toBe('legacy-starknet')
     expect(env.VITE_STARKNET_ALCHEMY_API_KEY).toBe('legacy-starknet')
   })
 })
@@ -91,20 +92,32 @@ describe('createAppEnv', () => {
       parseEnv({
         ...validEnv,
         VITE_STARKNET_RPC_URL: 'https://custom.rpc/starknet',
-        VITE_STARKNET_ALCHEMY_API_KEY: 'alchemy-key',
+        VITE_STARKNET_INFURA_API_KEY: 'infura-key',
       }),
     )
     expect(app.rpc.starknet).toBe('https://custom.rpc/starknet')
   })
 
-  it('builds a Starknet Alchemy URL from the API key', () => {
+  it('builds a Starknet Infura URL from the API key', () => {
     const app = createAppEnv(
       parseEnv({
         ...validEnv,
-        VITE_APP_STARKNET_ALCHEMY_API_KEY: 'alchemy-key',
+        VITE_STARKNET_INFURA_API_KEY: 'infura-key',
       }),
     )
-    expect(app.rpc.starknet).toBe('https://starknet-mainnet.g.alchemy.com/v2/alchemy-key')
+    expect(app.rpc.starknet).toBe('https://starknet-mainnet.infura.io/v3/infura-key')
+    expect(app.rpc.starknetInfuraApiKey).toBe('infura-key')
+  })
+
+  it('accepts the legacy Alchemy-named Starknet key as Infura', () => {
+    const app = createAppEnv(
+      parseEnv({
+        ...validEnv,
+        VITE_APP_STARKNET_ALCHEMY_API_KEY: 'legacy-key',
+      }),
+    )
+    expect(app.rpc.starknet).toBe('https://starknet-mainnet.infura.io/v3/legacy-key')
+    expect(app.rpc.starknetInfuraApiKey).toBe('legacy-key')
   })
 
   it('falls back to the public Blast Starknet endpoint', () => {

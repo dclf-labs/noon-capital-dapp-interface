@@ -32,9 +32,14 @@ export const envSchema = z.object({
   /** Google Analytics measurement id (injected via `index.html`). */
   VITE_GA_MEASUREMENT_ID: optionalString,
 
-  /** Explicit Starknet JSON-RPC URL (wins over Alchemy). */
+  /** Explicit Starknet JSON-RPC URL (wins over Infura key). */
   VITE_STARKNET_RPC_URL: optionalString,
-  /** Alchemy API key → builds Starknet mainnet RPC when no explicit URL. */
+  /** Infura API key → builds Starknet mainnet RPC when no explicit URL. */
+  VITE_STARKNET_INFURA_API_KEY: optionalString,
+  /**
+   * Legacy alias for Infura key (old-dapp / Alchemy-named env).
+   * Prefer `VITE_STARKNET_INFURA_API_KEY`.
+   */
   VITE_STARKNET_ALCHEMY_API_KEY: optionalString,
 
   /** Optional protocol RPC overrides (else public defaults in chain config). */
@@ -73,6 +78,11 @@ export function normalizeRawEnv(raw: RawRecord): RawRecord {
       raw.VITE_WALLETCONNECT_PROJECT_ID,
       raw.VITE_APP_WALLET_CONNECT_PROJECT_ID,
     ),
+    VITE_STARKNET_INFURA_API_KEY: firstString(
+      raw.VITE_STARKNET_INFURA_API_KEY,
+      raw.VITE_STARKNET_ALCHEMY_API_KEY,
+      raw.VITE_APP_STARKNET_ALCHEMY_API_KEY,
+    ),
     VITE_STARKNET_ALCHEMY_API_KEY: firstString(
       raw.VITE_STARKNET_ALCHEMY_API_KEY,
       raw.VITE_APP_STARKNET_ALCHEMY_API_KEY,
@@ -97,8 +107,9 @@ export const DEFAULT_SUI_RPC_URL = 'https://fullnode.mainnet.sui.io:443'
 
 function buildStarknetRpcUrl(raw: AppEnvRaw): string {
   if (raw.VITE_STARKNET_RPC_URL) return raw.VITE_STARKNET_RPC_URL
-  if (raw.VITE_STARKNET_ALCHEMY_API_KEY) {
-    return `https://starknet-mainnet.g.alchemy.com/v2/${raw.VITE_STARKNET_ALCHEMY_API_KEY}`
+  const infuraKey = raw.VITE_STARKNET_INFURA_API_KEY || raw.VITE_STARKNET_ALCHEMY_API_KEY
+  if (infuraKey) {
+    return `https://starknet-mainnet.infura.io/v3/${infuraKey}`
   }
   return DEFAULT_STARKNET_RPC
 }
@@ -135,7 +146,8 @@ export function createAppEnv(raw: AppEnvRaw) {
 
     rpc: {
       starknet: buildStarknetRpcUrl(raw),
-      starknetAlchemyApiKey: raw.VITE_STARKNET_ALCHEMY_API_KEY,
+      /** Infura project id for Starknet-react `infuraProvider`. */
+      starknetInfuraApiKey: raw.VITE_STARKNET_INFURA_API_KEY || raw.VITE_STARKNET_ALCHEMY_API_KEY,
       ethereum: raw.VITE_ETHEREUM_RPC_URL,
       base: raw.VITE_BASE_RPC_URL,
       /** Empty when unset — callers fall back to Mysten / protocol config. */
@@ -168,6 +180,7 @@ function readImportMetaEnv(): RawRecord {
     VITE_APP_WALLET_CONNECT_PROJECT_ID: e.VITE_APP_WALLET_CONNECT_PROJECT_ID,
     VITE_GA_MEASUREMENT_ID: e.VITE_GA_MEASUREMENT_ID,
     VITE_STARKNET_RPC_URL: e.VITE_STARKNET_RPC_URL,
+    VITE_STARKNET_INFURA_API_KEY: e.VITE_STARKNET_INFURA_API_KEY,
     VITE_STARKNET_ALCHEMY_API_KEY: e.VITE_STARKNET_ALCHEMY_API_KEY,
     VITE_APP_STARKNET_ALCHEMY_API_KEY: e.VITE_APP_STARKNET_ALCHEMY_API_KEY,
     VITE_ETHEREUM_RPC_URL: e.VITE_ETHEREUM_RPC_URL,

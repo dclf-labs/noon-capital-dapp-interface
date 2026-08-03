@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly VITE_WALLETCONNECT_PROJECT_ID: string
   readonly VITE_GA_MEASUREMENT_ID: string
   readonly VITE_STARKNET_RPC_URL: string
+  readonly VITE_STARKNET_INFURA_API_KEY: string
+  /** @deprecated Prefer `VITE_STARKNET_INFURA_API_KEY`. */
   readonly VITE_STARKNET_ALCHEMY_API_KEY: string
   readonly VITE_ETHEREUM_RPC_URL: string
   readonly VITE_BASE_RPC_URL: string

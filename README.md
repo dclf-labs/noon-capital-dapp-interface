@@ -60,8 +60,8 @@ Copy `.env.example` → `.env`. App code should read **`appEnv`** (`src/lib/env`
 | ------------------------------------------------ | ------------------------------- | -------------------------------------------------------------------- |
 | `VITE_API_BASE_URL`                              | Recommended                     | Noon backend (`https://back.noon.capital`)                           |
 | `VITE_WALLETCONNECT_PROJECT_ID`                  | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
-| `VITE_STARKNET_ALCHEMY_API_KEY`                  | Recommended                     | Builds Starknet Alchemy RPC when `VITE_STARKNET_RPC_URL` is unset    |
-| `VITE_STARKNET_RPC_URL`                          | No                              | Explicit Starknet RPC (wins over Alchemy)                            |
+| `VITE_STARKNET_INFURA_API_KEY`                   | Recommended                     | Builds Starknet Infura RPC when `VITE_STARKNET_RPC_URL` is unset     |
+| `VITE_STARKNET_RPC_URL`                          | No                              | Explicit Starknet RPC (wins over Infura)                             |
 | `VITE_ETHEREUM_RPC_URL` / `BASE` / `SUI` / `TAC` | No                              | Optional protocol RPC overrides (else public defaults)               |
 | `VITE_GA_MEASUREMENT_ID`                         | No                              | Injected into `index.html` only; empty disables analytics            |
 

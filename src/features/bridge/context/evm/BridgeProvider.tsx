@@ -71,15 +71,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useState(false)
   const [isSuiReceiverAddressModalOpen, setIsSuiReceiverAddressModalOpen] = useState(false)
   const [isEvmReceiverAddressModalOpen, setIsEvmReceiverAddressModalOpen] = useState(false)
-  const [hasAutoOpenedStarknetModal, setHasAutoOpenedStarknetModal] = useState(false)
-  const [hasAutoOpenedSuiModal, setHasAutoOpenedSuiModal] = useState(false)
-  const [hasAutoOpenedEvmModal, setHasAutoOpenedEvmModal] = useState(false)
-  const [lastDestinationChainId, setLastDestinationChainId] = useState<number | undefined>(
-    undefined,
-  )
-  const [lastDestinationNetworkType, setLastDestinationNetworkType] = useState<
-    DestinationNetworkType | undefined
-  >(undefined)
   const [lastConnectedAddress, setLastConnectedAddress] = useState<string | undefined>(undefined)
   const prevSourceChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
   const prevDestinationChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
@@ -241,52 +232,20 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }))
     }
 
-    // If wallet address changed and destination is EVM, open modal to confirm address
-    if (hasWalletChanged) {
-      const networkType = getDestinationNetworkType(inputs.destinationChainId)
-
-      if (networkType === 'evm' && !isEvmReceiverAddressModalOpen) {
-        setIsEvmReceiverAddressModalOpen(true)
-      }
-    }
-
     // Update last connected address
     setLastConnectedAddress(connection.address)
   }, [
     connection.address,
     connection.isConnected,
-    inputs.destinationChainId,
-    isEvmReceiverAddressModalOpen,
     inputs.evmReceiverAddress,
     lastConnectedAddress,
     setInputs,
   ])
 
-  // Effect to handle destination network changes and modal management
+  // Sync active receiverAddress for the destination family; close unrelated modals.
+  // Modal open is user-driven via SET ADDRESS / CHANGE on the bridge panel.
   useEffect(() => {
-    // Use inputs.destinationChainId directly instead of destinationConnection.config?.id
-    // to avoid fallback config issues when destinationChainId is undefined
-    const currentDestinationChainId = destinationChainId
-    const currentNetworkType = getDestinationNetworkType(currentDestinationChainId)
-
-    // Detect network type change (EVM ↔ Starknet ↔ Sui)
-    const hasNetworkTypeChanged =
-      lastDestinationNetworkType &&
-      lastDestinationNetworkType !== currentNetworkType &&
-      connection.isConnected
-
-    // Reset auto-open flags when destination chain changes
-    if (lastDestinationChainId !== currentDestinationChainId) {
-      setHasAutoOpenedStarknetModal(false)
-      setHasAutoOpenedSuiModal(false)
-      setHasAutoOpenedEvmModal(false)
-      setLastDestinationChainId(currentDestinationChainId)
-    }
-
-    // Update last network type
-    if (lastDestinationNetworkType !== currentNetworkType) {
-      setLastDestinationNetworkType(currentNetworkType)
-    }
+    const currentNetworkType = getDestinationNetworkType(destinationChainId)
 
     if (!connection.isConnected) {
       return
@@ -300,16 +259,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ...prev,
         receiverAddress: prev.starknetReceiverAddress,
       }))
-
-      if (
-        (!inputs?.starknetReceiverAddress && !hasAutoOpenedStarknetModal) ||
-        (hasNetworkTypeChanged && lastDestinationNetworkType !== 'starknet')
-      ) {
-        if (!isStarknetReceiverAddressModalOpen) {
-          setIsStarknetReceiverAddressModalOpen(true)
-          setHasAutoOpenedStarknetModal(true)
-        }
-      }
     } else if (currentNetworkType === 'sui') {
       if (isEvmReceiverAddressModalOpen) setIsEvmReceiverAddressModalOpen(false)
       if (isStarknetReceiverAddressModalOpen) setIsStarknetReceiverAddressModalOpen(false)
@@ -318,16 +267,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ...prev,
         receiverAddress: prev.suiReceiverAddress,
       }))
-
-      if (
-        (!inputs?.suiReceiverAddress && !hasAutoOpenedSuiModal) ||
-        (hasNetworkTypeChanged && lastDestinationNetworkType !== 'sui')
-      ) {
-        if (!isSuiReceiverAddressModalOpen) {
-          setIsSuiReceiverAddressModalOpen(true)
-          setHasAutoOpenedSuiModal(true)
-        }
-      }
     } else {
       if (isStarknetReceiverAddressModalOpen) setIsStarknetReceiverAddressModalOpen(false)
       if (isSuiReceiverAddressModalOpen) setIsSuiReceiverAddressModalOpen(false)
@@ -336,29 +275,16 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ...prev,
         receiverAddress: prev.evmReceiverAddress,
       }))
-
-      if (hasNetworkTypeChanged && lastDestinationNetworkType !== 'evm') {
-        if (!isEvmReceiverAddressModalOpen) {
-          setIsEvmReceiverAddressModalOpen(true)
-          setHasAutoOpenedEvmModal(true)
-        }
-      }
     }
   }, [
     connection.isConnected,
-    inputs.destinationChainId,
+    destinationChainId,
     inputs.evmReceiverAddress,
     inputs?.starknetReceiverAddress,
     inputs?.suiReceiverAddress,
     isStarknetReceiverAddressModalOpen,
     isSuiReceiverAddressModalOpen,
     isEvmReceiverAddressModalOpen,
-    hasAutoOpenedStarknetModal,
-    hasAutoOpenedSuiModal,
-    hasAutoOpenedEvmModal,
-    lastDestinationChainId,
-    lastDestinationNetworkType,
-    destinationChainId,
     setInputs,
   ])
 

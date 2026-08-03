@@ -237,13 +237,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     prevChainFamilyRef.current = resolvedChainFamily
   }, [resolvedChainFamily, setInputs])
 
-  // Open receiver address modal on initial load when both chains are set
-  useEffect(() => {
-    if (inputs.sourceChainId && inputs.destinationChainId && !inputs.receiverAddress) {
-      setIsReceiverAddressModalOpen(true)
-    }
-  }, [inputs.sourceChainId, inputs.destinationChainId, inputs.receiverAddress])
-
   // Effect to handle source chain changes (from connection)
   // Source chain should always be undefined or connected Starknet chain
   useEffect(() => {
@@ -356,24 +349,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     connection.config?.id,
     setInputs,
   ])
-
-  // Open receiver address modal on initial load when both chains are set
-  useEffect(() => {
-    if (inputs.sourceChainId && inputs.destinationChainId && !inputs.receiverAddress) {
-      setIsReceiverAddressModalOpen(true)
-    }
-  }, [inputs.sourceChainId, inputs.destinationChainId, inputs.receiverAddress])
-
-  // Open receiver address modal when destination chain changes (but keep existing receiver address)
-  useEffect(() => {
-    if (
-      prevDestinationChainIdRef.current &&
-      inputs.destinationChainId &&
-      prevDestinationChainIdRef.current !== inputs.destinationChainId
-    ) {
-      setIsReceiverAddressModalOpen(true)
-    }
-  }, [inputs.destinationChainId])
 
   return (
     <BridgeFormContext.Provider value={formValue}>

@@ -236,12 +236,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [resolvedChainFamily, setInputs])
 
   useEffect(() => {
-    if (inputs.sourceChainId && inputs.destinationChainId && !inputs.receiverAddress) {
-      setIsReceiverAddressModalOpen(true)
-    }
-  }, [inputs.sourceChainId, inputs.destinationChainId, inputs.receiverAddress])
-
-  useEffect(() => {
     const effectiveSourceChainId = (inputs.sourceChainId ||
       connection.connectedChainId ||
       connection.config?.id) as ProtocolChainId | undefined
@@ -327,16 +321,6 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     connection.config?.id,
     setInputs,
   ])
-
-  useEffect(() => {
-    if (
-      prevDestinationChainIdRef.current &&
-      inputs.destinationChainId &&
-      prevDestinationChainIdRef.current !== inputs.destinationChainId
-    ) {
-      setIsReceiverAddressModalOpen(true)
-    }
-  }, [inputs.destinationChainId])
 
   return (
     <BridgeFormContext.Provider value={formValue}>

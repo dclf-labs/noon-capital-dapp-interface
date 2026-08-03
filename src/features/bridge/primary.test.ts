@@ -35,6 +35,7 @@ describe('getBridgePrimaryAction', () => {
       'Select destination network',
     )
     expect(getBridgePrimaryAction({ ...base, pairAllowed: false }).label).toBe('Unsupported route')
+    // Missing receiver gates the CTA; it does not auto-open the address modal.
     expect(getBridgePrimaryAction({ ...base, hasReceiver: false }).label).toBe(
       'Enter receiver address',
     )

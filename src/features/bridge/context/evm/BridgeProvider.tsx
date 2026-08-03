@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { getToken, getTokens } from '@/config'
-import type { ChainId, ProtocolChainId } from '@/config/chain-id'
+import type { ProtocolChainId } from '@/config/chain-id'
 import starknetConfig from '@/config/chains/starknet'
 import suiConfig from '@/config/chains/sui'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
@@ -23,6 +23,10 @@ import useBridgeAllowance from '@/features/bridge/hooks/evm/useBridgeAllowance'
 import useBridgeFeeQuote from '@/features/bridge/hooks/evm/useBridgeFeeQuote'
 import useBridgeSubmitFee from '@/features/bridge/hooks/evm/useBridgeSubmitFee'
 import { applyBridgeTokenSync } from '@/features/bridge/lib/sync-bridge-tokens'
+import {
+  getDestinationNetworkType,
+  syncReceiverForDestination,
+} from '@/features/bridge/receiver-modal'
 import { useResolvedChain, useSelectActiveChain } from '@/hooks/connection'
 import { useReadOnlySession } from '@/hooks/connection/useReadOnlySession'
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
@@ -41,8 +45,6 @@ import { useBridgeFlipStore } from '@/state/bridge-flip'
 /** Cover the gap after `isPending` clears before wagmi reports the new chain. */
 const EVM_SWITCH_UNSUPPORTED_GRACE_MS = 2000
 
-type DestinationNetworkType = 'starknet' | 'sui' | 'evm'
-
 const INITIAL_BRIDGE_INPUTS: FormInputs = {
   token: undefined,
   amount: undefined,
@@ -53,15 +55,6 @@ const INITIAL_BRIDGE_INPUTS: FormInputs = {
   suiReceiverAddress: undefined,
   destinationChainId: undefined,
   sourceChainId: undefined,
-}
-
-const getDestinationNetworkType = (
-  destinationChainId: ChainId | undefined,
-): DestinationNetworkType => {
-  if (destinationChainId == null) return 'evm'
-  if (Number(destinationChainId) === Number(STARKNET_BRIDGE_DESTINATION?.id)) return 'starknet'
-  if (Number(destinationChainId) === Number(SUI_BRIDGE_DESTINATION?.id)) return 'sui'
-  return 'evm'
 }
 
 export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -245,43 +238,35 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Sync active receiverAddress for the destination family; close unrelated modals.
   // Modal open is user-driven via SET ADDRESS / CHANGE on the bridge panel.
   useEffect(() => {
-    const currentNetworkType = getDestinationNetworkType(destinationChainId)
+    if (!connection.isConnected) return
 
-    if (!connection.isConnected) {
-      return
+    const destinationType = getDestinationNetworkType(destinationChainId)
+    const sync = syncReceiverForDestination(destinationType, {
+      evm: inputs.evmReceiverAddress,
+      starknet: inputs.starknetReceiverAddress,
+      sui: inputs.suiReceiverAddress,
+    })
+
+    if (sync.closeModals.includes('evm') && isEvmReceiverAddressModalOpen) {
+      setIsEvmReceiverAddressModalOpen(false)
+    }
+    if (sync.closeModals.includes('starknet') && isStarknetReceiverAddressModalOpen) {
+      setIsStarknetReceiverAddressModalOpen(false)
+    }
+    if (sync.closeModals.includes('sui') && isSuiReceiverAddressModalOpen) {
+      setIsSuiReceiverAddressModalOpen(false)
     }
 
-    if (currentNetworkType === 'starknet') {
-      if (isEvmReceiverAddressModalOpen) setIsEvmReceiverAddressModalOpen(false)
-      if (isSuiReceiverAddressModalOpen) setIsSuiReceiverAddressModalOpen(false)
-
-      setInputs((prev) => ({
-        ...prev,
-        receiverAddress: prev.starknetReceiverAddress,
-      }))
-    } else if (currentNetworkType === 'sui') {
-      if (isEvmReceiverAddressModalOpen) setIsEvmReceiverAddressModalOpen(false)
-      if (isStarknetReceiverAddressModalOpen) setIsStarknetReceiverAddressModalOpen(false)
-
-      setInputs((prev) => ({
-        ...prev,
-        receiverAddress: prev.suiReceiverAddress,
-      }))
-    } else {
-      if (isStarknetReceiverAddressModalOpen) setIsStarknetReceiverAddressModalOpen(false)
-      if (isSuiReceiverAddressModalOpen) setIsSuiReceiverAddressModalOpen(false)
-
-      setInputs((prev) => ({
-        ...prev,
-        receiverAddress: prev.evmReceiverAddress,
-      }))
-    }
+    setInputs((prev) => ({
+      ...prev,
+      receiverAddress: sync.receiverAddress,
+    }))
   }, [
     connection.isConnected,
     destinationChainId,
     inputs.evmReceiverAddress,
-    inputs?.starknetReceiverAddress,
-    inputs?.suiReceiverAddress,
+    inputs.starknetReceiverAddress,
+    inputs.suiReceiverAddress,
     isStarknetReceiverAddressModalOpen,
     isSuiReceiverAddressModalOpen,
     isEvmReceiverAddressModalOpen,

@@ -79,12 +79,42 @@ describe('BridgePanel behaviour', () => {
     expect(onPrimary).toHaveBeenCalledTimes(1)
   })
 
-  it('opens the change-address modal from the CHANGE chip', async () => {
+  it('does not open the receiver modal on mount or destination network change', () => {
+    const onOpenReceiverModal = vi.fn()
+    const { rerender, props } = renderPanel({ onOpenReceiverModal })
+    expect(onOpenReceiverModal).not.toHaveBeenCalled()
+
+    rerender(
+      <BridgePanel
+        {...props}
+        onOpenReceiverModal={onOpenReceiverModal}
+        destinationChainId={1}
+        sourceChainId={324}
+      />,
+    )
+    expect(onOpenReceiverModal).not.toHaveBeenCalled()
+  })
+
+  it('opens the receiver modal only from SET ADDRESS / CHANGE', async () => {
     const user = userEvent.setup()
     const onOpenReceiverModal = vi.fn()
-    renderPanel({ onOpenReceiverModal })
-    await user.click(screen.getByRole('button', { name: /change receiving address/i }))
+    const { rerender, props } = renderPanel({
+      onOpenReceiverModal,
+      receiverValue: undefined,
+    })
+
+    await user.click(screen.getByRole('button', { name: /set receiving address/i }))
     expect(onOpenReceiverModal).toHaveBeenCalledTimes(1)
+
+    rerender(
+      <BridgePanel
+        {...props}
+        onOpenReceiverModal={onOpenReceiverModal}
+        receiverValue="0x1111111111111111111111111111111111111111"
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: /change receiving address/i }))
+    expect(onOpenReceiverModal).toHaveBeenCalledTimes(2)
   })
 
   it('exposes half/max and collapsible bridging fees', async () => {

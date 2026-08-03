@@ -151,7 +151,7 @@ export function BuyPanel({
               isAllowed={isTradePayInputAllowed}
               style={{ fontSize: amountFontSize }}
               className={cn(
-                'buy-amount-input w-full max-w-none bg-transparent text-center leading-none font-book tabular-nums',
+                'buy-amount-input w-full max-w-none bg-transparent text-center font-suisse leading-none font-book tabular-nums',
                 FOCUS_RESET,
                 hasBuyAmount || amountDraft.hasActiveDraft ? 'text-stone-900' : 'text-stone-500',
               )}

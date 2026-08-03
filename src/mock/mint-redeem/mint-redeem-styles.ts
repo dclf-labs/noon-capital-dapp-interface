@@ -28,7 +28,10 @@ export const input: CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
   padding: '8px 10px',
+  fontFamily: 'var(--font-s)',
+  fontWeight: 450,
   fontSize: 16,
+  letterSpacing: '-0.5em',
   border: '1px solid #ccc',
   borderRadius: 6,
 }

@@ -134,12 +134,12 @@ export function BridgePanel({
                 onValueChange={payDraft.onValueChange}
                 isAllowed={isTradePayInputAllowed}
                 className={cn(
-                  'w-full bg-transparent text-left text-2xl leading-8 font-medium tabular-nums',
+                  'w-full bg-transparent text-left font-suisse text-2xl leading-8 font-medium tabular-nums',
                   FOCUS_RESET,
                   hasAmount || payDraft.hasActiveDraft ? 'text-stone-900' : 'text-stone-600',
                 )}
               />
-              <p className="text-sm leading-5 text-stone-500 tabular-nums">
+              <p className="text-sm leading-5 font-book text-stone-500 tabular-nums">
                 {formatUsd(amountUsd)}
               </p>
             </div>
@@ -239,7 +239,7 @@ export function BridgePanel({
                 readOnly
                 value={displayReceive}
                 className={cn(
-                  'w-full bg-transparent text-left text-2xl leading-8 font-medium text-stone-600 tabular-nums',
+                  'w-full bg-transparent text-left font-suisse text-2xl leading-8 font-medium text-stone-600 tabular-nums',
                   FOCUS_RESET,
                 )}
               />

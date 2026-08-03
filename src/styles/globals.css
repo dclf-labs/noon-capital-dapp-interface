@@ -82,13 +82,32 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-s);
+    font-weight: 450;
+    /* Figma Text/* Suisse styles use 0; Louize headings set negative tracking in components. */
+    letter-spacing: 0;
   }
 
   body {
     margin: 0;
     min-height: 100dvh;
+    font-family: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
+  /*
+   * Form controls use the UA font by default — force Suisse Int'l
+   * so inputs / buttons match the rest of the dapp.
+   */
+  :where(button, input, textarea, select, option) {
     font-family: var(--font-s);
-    font-weight: 450;
+  }
+
+  /* Tight tracking on typed fields (amounts, addresses) — not buttons/selects. */
+  :where(input, textarea) {
+    font-family: var(--font-s);
+    letter-spacing: -0.05em;
   }
 
   #root {

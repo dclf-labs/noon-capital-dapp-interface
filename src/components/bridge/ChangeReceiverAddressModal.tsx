@@ -197,7 +197,7 @@ export function ChangeReceiverAddressModal({
                 }}
                 className={cn(
                   'w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3',
-                  'text-base leading-6 font-book text-stone-900 tabular-nums placeholder:text-stone-400',
+                  'font-suisse text-base leading-6 font-book text-stone-900 tabular-nums placeholder:text-stone-400',
                   'hover:border-stone-200 hover:bg-stone-50 focus:border-stone-200 focus:bg-stone-50',
                   'focus-visible:border-stone-200 active:border-stone-200',
                   focusReset,

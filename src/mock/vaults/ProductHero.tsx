@@ -31,7 +31,7 @@ export function ProductHero({ subtitle }: ProductHeroProps) {
           ),
         )}
       </nav>
-      <p className="max-w-[330px] text-base tracking-[0.32px] text-[rgba(17,17,17,0.6)] md:max-w-[448px]">
+      <p className="max-w-[330px] text-base font-normal tracking-[0.32px] text-[rgba(17,17,17,0.6)] md:max-w-[448px] md:leading-6">
         {subtitle}
       </p>
     </header>

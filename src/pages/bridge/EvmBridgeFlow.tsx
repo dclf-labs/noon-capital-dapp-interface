@@ -3,7 +3,12 @@ import { useCallback, useMemo, useState } from 'react'
 import { STARKNET_BRIDGE_DESTINATION, SUI_BRIDGE_DESTINATION } from '@/constants/common'
 import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
-import { formatBalanceLabel, formatNativeFee } from '@/features/_shared/trade-display'
+import {
+  formatBalanceLabel,
+  formatNativeFee,
+  formatNativeFeeDetail,
+  formatUsd,
+} from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
 import {
   useBridgeBalance,
@@ -24,14 +29,24 @@ import {
 } from '@/features/bridge/route'
 import { useSelectActiveChain } from '@/hooks/connection'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
-import { type Address, sanitizeEVMAddress, sanitizeSuiAddress } from '@/lib/address'
+import { useStickyValue } from '@/hooks/ui/useStickyValue'
+import {
+  type Address,
+  isEVMAddressValid,
+  isStarknetAddressValid,
+  isSuiAddressValid,
+  sanitizeEVMAddress,
+  sanitizeSuiAddress,
+} from '@/lib/address'
+import { getChainConfig, isEvmChainId } from '@/lib/chain'
 import type { EVMConnection } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { BridgePanel } from '@/mock/bridge/BridgePanel'
+import { BRIDGE_RECEIVER_NOTICE } from '@/mock/bridge/constants'
 import {
   getBridgeDestinationNetworks,
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
+import { BridgeFlowView } from '@/pages/bridge/BridgeFlowView'
 
 export function EvmBridgeFlow() {
   const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =
@@ -75,6 +90,14 @@ export function EvmBridgeFlow() {
     return 'evm'
   }, [inputs.destinationChainId])
 
+  const hasValidReceiver = useMemo(() => {
+    const value = inputs.receiverAddress
+    if (!value) return false
+    if (destinationType === 'starknet') return isStarknetAddressValid(String(value))
+    if (destinationType === 'sui') return isSuiAddressValid(String(value))
+    return isEVMAddressValid(value as Address)
+  }, [destinationType, inputs.receiverAddress])
+
   const requiresApproval =
     !isHyperlaneRoute &&
     doesLayerzeroNeedApproval(inputs.token, connection.config?.layerzeroOftHelper)
@@ -94,7 +117,7 @@ export function EvmBridgeFlow() {
         hasSourceNetwork: !!inputs.sourceChainId,
         hasDestinationNetwork: !!inputs.destinationChainId,
         pairAllowed,
-        hasReceiver: !!inputs.receiverAddress,
+        hasReceiver: hasValidReceiver,
         hasToken: !!inputs.token,
         amount: inputs.amount,
         isBalanceLoading: tokenInBalance.isLoading,
@@ -118,9 +141,9 @@ export function EvmBridgeFlow() {
       connection.unsupported,
       feeQuote.isError,
       feeQuote.isLoading,
+      hasValidReceiver,
       inputs.amount,
       inputs.destinationChainId,
-      inputs.receiverAddress,
       inputs.sourceChainId,
       inputs.token,
       isApproved,
@@ -162,17 +185,17 @@ export function EvmBridgeFlow() {
     (value: string) => {
       setReceiverDraft(value)
       if (destinationType === 'sui') {
-        const sanitized = sanitizeSuiAddress(value)
-        setSuiReceiverAddress(sanitized)
+        setSuiReceiverAddress(sanitizeSuiAddress(value))
         return
       }
       if (destinationType === 'starknet') {
         const trimmed = value.trim()
-        setStarknetReceiverAddress(trimmed ? (trimmed as Address) : undefined)
+        setStarknetReceiverAddress(
+          isStarknetAddressValid(trimmed) ? (trimmed as Address) : undefined,
+        )
         return
       }
-      const sanitized = sanitizeEVMAddress(value) as Address | undefined
-      setEvmReceiverAddress(sanitized)
+      setEvmReceiverAddress(sanitizeEVMAddress(value) as Address | undefined)
     },
     [destinationType, setEvmReceiverAddress, setStarknetReceiverAddress, setSuiReceiverAddress],
   )
@@ -202,6 +225,7 @@ export function EvmBridgeFlow() {
       setStep(1)
       return
     }
+    if (!hasValidReceiver) return
     void submit(
       connection,
       inputs.token,
@@ -220,6 +244,7 @@ export function EvmBridgeFlow() {
     connection,
     destinationConnection,
     feeQuote.data,
+    hasValidReceiver,
     inputs.amount,
     inputs.receiverAddress,
     inputs.token,
@@ -245,9 +270,29 @@ export function EvmBridgeFlow() {
     (chainId: number | undefined) => {
       setDestinationChainId(chainId)
       setReceiverDraft('')
+      setInputs((prev) => ({ ...prev, amount: undefined }))
     },
-    [setDestinationChainId],
+    [setDestinationChainId, setInputs],
   )
+
+  const onFlipNetworks = useCallback(() => {
+    const source = inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined
+    const destination = inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined
+    if (source == null || destination == null || !isEvmChainId(destination)) return
+    if (!isBridgePairAllowed(destination, source)) return
+    setDestinationChainId(source)
+    setSourceChainId(destination)
+    void selectActiveChain(destination)
+    setReceiverDraft('')
+    setInputs((prev) => ({ ...prev, amount: undefined }))
+  }, [
+    inputs.destinationChainId,
+    inputs.sourceChainId,
+    selectActiveChain,
+    setDestinationChainId,
+    setInputs,
+    setSourceChainId,
+  ])
 
   const onBack = useCallback(() => setStep(0), [setStep])
   const onReset = useCallback(() => {
@@ -259,18 +304,43 @@ export function EvmBridgeFlow() {
   }, [setInputs, setStep, setTxnUrl])
 
   const gasSymbol = connection.config?.defaultGasToken?.symbol || 'ETH'
+  const feeRouteKey = `${inputs.sourceChainId ?? ''}:${inputs.destinationChainId ?? ''}:${inputs.token?.contractAddress ?? ''}`
+
+  const liveBridgeFee =
+    feeQuote.data !== undefined ? formatNativeFee(feeQuote.data, gasSymbol) : undefined
+  const liveGasUsd = submitFee.isReady ? formatUsd(submitFee.data) : undefined
+  const liveGasNative = submitFee.isReady
+    ? formatNativeFeeDetail(submitFee.native, gasSymbol)
+    : undefined
+
+  const feeLabel = useStickyValue(liveBridgeFee, feeRouteKey)
+  const gasLabel = useStickyValue(liveGasUsd, feeRouteKey)
+  const gasNativeLabel = useStickyValue(liveGasNative, feeRouteKey)
+
+  const sourceName = inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined
+  const destinationName = inputs.destinationChainId
+    ? getChainConfig(inputs.destinationChainId).name
+    : undefined
 
   return (
-    <BridgePanel
+    <BridgeFlowView
       step={step}
+      chainFamily="evm"
+      showHero={false}
       isConnected={connection.isConnected}
       unsupported={connection.unsupported}
+      connectedAddress={connection.address}
       sourceNetworks={getBridgeSourceNetworks('evm')}
       destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId, 'evm')}
       sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
       destinationChainId={inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined}
       onSourceChange={onSourceChange}
       onDestinationChange={onDestinationChange}
+      onFlipNetworks={
+        inputs.destinationChainId && isEvmChainId(Number(inputs.destinationChainId))
+          ? onFlipNetworks
+          : undefined
+      }
       tokens={inputs.tokens}
       token={inputs.token}
       onTokenChange={setToken}
@@ -298,10 +368,12 @@ export function EvmBridgeFlow() {
             : '0x…'
       }
       onReceiverChange={onReceiverChange}
-      feeLabel={feeQuote.data !== undefined ? formatNativeFee(feeQuote.data, gasSymbol) : undefined}
-      gasLabel={
-        submitFee.data !== undefined ? formatNativeFee(submitFee.data, gasSymbol) : undefined
-      }
+      feeLabel={feeLabel}
+      networkFeeLabel={gasLabel}
+      networkFeeNativeLabel={gasNativeLabel}
+      bridgeFeeLabel={feeLabel}
+      sourceName={sourceName}
+      destinationName={destinationName}
       protocolLabel={
         inputs.destinationChainId
           ? isHyperlaneBridgeRoute(connection.config?.useHyperlane, inputs.destinationChainId)
@@ -311,21 +383,20 @@ export function EvmBridgeFlow() {
       }
       warning={
         routeDisabled
-          ? 'LayerZero routes are temporarily disabled.'
-          : 'Make sure you control the receiver wallet on the destination network.'
+          ? {
+              type: 'warning',
+              title: 'Bridge under maintenance',
+              description:
+                'LayerZero bridge routes are temporarily unavailable. Please try again later.',
+            }
+          : BRIDGE_RECEIVER_NOTICE
       }
       isFetchingFee={feeQuote.isLoading}
+      isLoadingFee={!feeLabel && feeQuote.isLoading}
       isInsufficientBalance={isInsufficientBalance}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
-      statusMessage={
-        approveStatus === 'TXN_FAILURE'
-          ? 'Approval failed'
-          : submitStatus === 'TXN_FAILURE'
-            ? 'Bridge failed'
-            : undefined
-      }
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountChange={onAmountChange}

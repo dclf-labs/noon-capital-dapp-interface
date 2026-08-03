@@ -9,9 +9,11 @@ import {
 } from '@/features/_shared'
 import {
   formatBalanceLabel,
-  formatNativeFee,
+  formatNativeFeeDetail,
   formatUnitRate,
+  formatUsd,
 } from '@/features/_shared/trade-display'
+import useTokenPrice from '@/features/api/hooks/useTokenPrice'
 import {
   useBuyBalance,
   useBuyForm,
@@ -20,7 +22,10 @@ import {
 } from '@/features/buy/hooks/starknet/useBuy'
 import useBuySubmit from '@/features/buy/hooks/starknet/useBuySubmit'
 import useUpdateBuy from '@/features/buy/hooks/starknet/useUpdateBuy'
-import { TradePanelView } from '@/mock/swap/TradePanelView'
+import { useStickyValue } from '@/hooks/ui/useStickyValue'
+import { payAmountFromBuyAmount } from '@/mock/buy/buy-amount'
+import { resolveBuyPoweredBy } from '@/mock/buy/powered-by'
+import { BuyFlowView } from '@/pages/swap/BuyFlowView'
 
 export function StarknetBuyTrade() {
   const { inputs, connection, step, setStep, setInputs } = useBuyForm()
@@ -28,6 +33,7 @@ export function StarknetBuyTrade() {
   const { amountInUsd, isFetchingQuote, isQuoteError, price } = useBuyPrice()
   const { submitFee, txnUrl, setTxnUrl } = useBuyTxn()
   const { setAmountIn, setTokenIn, setTokenOut } = useUpdateBuy()
+  const buyTokenUsd = useTokenPrice(inputs.tokenOut)
 
   const submit = useBuySubmit(
     connection,
@@ -78,6 +84,30 @@ export function StarknetBuyTrade() {
       : typeof price.data === 'number'
         ? price.data
         : undefined
+
+  const unitOutPerIn = typeof unitRate === 'number' && unitRate > 0 ? unitRate : undefined
+
+  const onBuyAmountChange = useCallback(
+    (buyAmount: number | undefined) => {
+      if (buyAmount === undefined) {
+        setInputs((prev) => ({
+          ...prev,
+          amountIn: undefined,
+          amountOut: undefined,
+          route: [],
+        }))
+        return
+      }
+      const pay = payAmountFromBuyAmount(buyAmount, unitOutPerIn)
+      setInputs((prev) => ({
+        ...prev,
+        amountIn: pay,
+        amountOut: buyAmount,
+        route: [],
+      }))
+    },
+    [setInputs, unitOutPerIn],
+  )
 
   const primary = useMemo(
     () =>
@@ -134,10 +164,18 @@ export function StarknetBuyTrade() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl, submit.txnHash])
 
+  const liveFeeLabel = submitFee.isReady ? formatUsd(submitFee.data) : undefined
+  const liveFeeNativeLabel = submitFee.isReady
+    ? formatNativeFeeDetail(submitFee.native, connection.config?.defaultGasToken?.symbol || 'STRK')
+    : undefined
+  const feeLabel = useStickyValue(liveFeeLabel)
+  const feeNativeLabel = useStickyValue(liveFeeNativeLabel)
+
   return (
-    <TradePanelView
+    <BuyFlowView
       mode="buy"
       step={step}
+      showHero={false}
       isConnected={connection.isConnected}
       unsupported={connection.unsupported}
       tokenIn={inputs.tokenIn}
@@ -154,20 +192,21 @@ export function StarknetBuyTrade() {
         inputs.tokenOut?.decimals,
       )}
       unitRateLabel={unitRate !== undefined ? formatUnitRate(unitRate) : undefined}
-      feeLabel={
-        submitFee.data !== undefined
-          ? formatNativeFee(submitFee.data, connection.config?.defaultGasToken?.symbol || 'ETH')
-          : undefined
-      }
+      feeLabel={feeLabel}
+      feeNativeLabel={feeNativeLabel}
+      isLoadingFee={!feeLabel && (submitFee.isLoading || submitFee.isFetching)}
+      poweredBy={resolveBuyPoweredBy(connection.config)}
       isFetchingQuote={isFetchingQuote}
       isInsufficientBalance={isInsufficientBalance}
       isApproved={isApproved}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
-      statusMessage={receipt.isError || submit.mutationStatus.isError ? 'Swap failed' : undefined}
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+      buyTokenUsdPrice={buyTokenUsd.data}
+      unitOutPerIn={unitOutPerIn}
+      onBuyAmountChange={onBuyAmountChange}
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}

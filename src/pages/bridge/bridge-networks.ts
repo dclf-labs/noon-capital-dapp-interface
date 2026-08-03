@@ -8,46 +8,47 @@ import {
   getStarknetChainId,
   getSuiChainId,
 } from '@/lib/chain'
-import type { BridgeNetworkOption } from '@/mock/bridge/BridgePanel'
+import type { BridgeNetworkOption } from '@/mock/bridge/types'
 
-/** Source networks available for the connected wallet family. */
-export function getBridgeSourceNetworks(family: 'evm' | 'starknet' | 'sui'): BridgeNetworkOption[] {
-  if (family === 'starknet') {
-    return [{ id: Number(starknetConfig.id), name: starknetConfig.name }]
-  }
-  if (family === 'sui') {
-    return [{ id: Number(suiConfig.id), name: suiConfig.name }]
-  }
-  return getActiveEvmChainIds().map((id) => {
+/** All bridgeable networks (EVM + Starknet + Sui) — matches old-dapp `activeConfig` lists. */
+export function getAllBridgeNetworks(): BridgeNetworkOption[] {
+  const networks: BridgeNetworkOption[] = getActiveEvmChainIds().map((id) => {
     const config = getChainConfig(id)
     return { id: Number(id), name: config.name }
   })
-}
-
-/**
- * Destination candidates for the active family, filtered by {@link isBridgePairAllowed}
- * once a source is selected.
- */
-export function getBridgeDestinationNetworks(
-  sourceChainId: ChainId | undefined,
-  family: 'evm' | 'starknet' | 'sui',
-): BridgeNetworkOption[] {
-  const candidates: BridgeNetworkOption[] = [
-    ...getActiveEvmChainIds().map((id) => {
-      const config = getChainConfig(id)
-      return { id: Number(id), name: config.name }
-    }),
-  ]
 
   const starknetId = getStarknetChainId()
   const suiId = getSuiChainId()
-  if (starknetId != null && family !== 'starknet') {
-    candidates.push({ id: Number(starknetId), name: starknetConfig.name })
+  if (starknetId != null) {
+    networks.push({ id: Number(starknetId), name: starknetConfig.name })
   }
-  if (suiId != null && family !== 'sui') {
-    candidates.push({ id: Number(suiId), name: suiConfig.name })
+  if (suiId != null) {
+    networks.push({ id: Number(suiId), name: suiConfig.name })
   }
 
+  return networks
+}
+
+/**
+ * Source networks for the bridge card.
+ * Always includes every bridgeable family so picking Starknet/Sui switches the active chain
+ * (same as old-dapp BridgeSourceNetworkSelector).
+ */
+export function getBridgeSourceNetworks(
+  _family?: 'evm' | 'starknet' | 'sui',
+): BridgeNetworkOption[] {
+  return getAllBridgeNetworks()
+}
+
+/**
+ * Destination candidates, filtered by {@link isBridgePairAllowed} once a source is selected.
+ * Includes EVM + Starknet + Sui (old-dapp destination selector).
+ */
+export function getBridgeDestinationNetworks(
+  sourceChainId: ChainId | undefined,
+  _family?: 'evm' | 'starknet' | 'sui',
+): BridgeNetworkOption[] {
+  const candidates = getAllBridgeNetworks()
   if (sourceChainId == null) return candidates
   return candidates.filter((network) => isBridgePairAllowed(sourceChainId, network.id))
 }

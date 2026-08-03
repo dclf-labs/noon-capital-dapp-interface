@@ -92,6 +92,7 @@ const useTokenAllowance = (
     isError,
     data,
     isFetching,
+    isPlaceholderData,
     refetch: refetchAllowance,
   } = useQuery({
     queryFn: async () => await fetcher(connection, connection.address, spender, token),
@@ -102,17 +103,19 @@ const useTokenAllowance = (
     queryKey: queryKey,
     refetchInterval: connection.config?.dataRefreshInterval,
     enabled: isEnabled,
+    placeholderData: (previousData) => previousData,
   })
 
   return useMemo(
     () => ({
-      isLoading: isEnabled ? isLoading : false,
+      isLoading: isEnabled ? isLoading && data === undefined && !isPlaceholderData : false,
       isError: isError,
       refetch: refetchAllowance,
-      data: isEnabled ? data || 0 : 0,
+      // Keep cached allowance while briefly disabled during EVM chain catch-up.
+      data: data !== undefined ? data || 0 : 0,
       isFetching: isEnabled ? isFetching : false,
     }),
-    [isLoading, isError, refetchAllowance, data, isFetching, isEnabled],
+    [isLoading, isError, refetchAllowance, data, isFetching, isEnabled, isPlaceholderData],
   )
 }
 

@@ -74,7 +74,7 @@ const useTokenBalance = (connection: EVMConnection, token: Token | undefined) =>
     return rawUnitsToNumber(balance, token?.decimals)
   }
 
-  const { isLoading, isError, data, isFetching, refetch } = useQuery({
+  const { isLoading, isError, data, isFetching, refetch, isPlaceholderData } = useQuery({
     queryFn: async () => await fetcher(connection, token),
     refetchOnMount: true,
     refetchOnReconnect: true,
@@ -83,18 +83,23 @@ const useTokenBalance = (connection: EVMConnection, token: Token | undefined) =>
     queryKey: queryKey,
     refetchInterval: connection.config?.dataRefreshInterval,
     enabled: isEnabled,
+    // Keep the prior balance painted while the new chain/token query resolves.
+    placeholderData: (previousData) => previousData,
   })
 
   return useMemo(
     () => ({
-      isLoading: isEnabled ? isLoading : false,
+      // With placeholderData, `isLoading` is false during chain switches — avoid CTA flicker.
+      isLoading: isEnabled ? isLoading && data === undefined && !isPlaceholderData : false,
       isError: isError,
-      // Avoid returning stale balances after disconnect / chain mismatch.
-      data: isEnabled ? data || 0 : 0,
+      // Keep cached balance while briefly disabled (EVM switch mismatch); new query keys
+      // start with `data === undefined` so disconnect still paints 0.
+      data: data !== undefined ? data || 0 : 0,
       isFetching: isEnabled ? isFetching : false,
+      isPlaceholderData: Boolean(isPlaceholderData),
       refetch: refetch,
     }),
-    [isLoading, isError, data, isFetching, refetch, isEnabled],
+    [isLoading, isError, data, isFetching, refetch, isEnabled, isPlaceholderData],
   )
 }
 

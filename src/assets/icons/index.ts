@@ -11,6 +11,7 @@ export { default as ChevronDownIcon } from '@/assets/icons/chevron-down.svg?reac
 export { default as CloseIcon } from '@/assets/icons/close.svg?react'
 export { default as DividerIcon } from '@/assets/icons/divider.svg?react'
 export { default as FilterIcon } from '@/assets/icons/filter.svg?react'
+export { default as GasPumpIcon } from '@/assets/icons/gas-pump.svg?react'
 export { default as InfoIcon } from '@/assets/icons/info.svg?react'
 export { default as MenuIcon } from '@/assets/icons/menu.svg?react'
 export { default as NavBridgeIcon } from '@/assets/icons/nav-bridge.svg?react'

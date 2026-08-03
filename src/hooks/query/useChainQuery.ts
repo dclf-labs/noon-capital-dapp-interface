@@ -44,22 +44,24 @@ export function useChainQuery<TData, TQueryKey extends QueryKey = QueryKey>({
   fallback,
   select,
 }: UseChainQueryOptions<TData, TQueryKey>): ChainQueryResult<TData> {
-  const { data, isLoading, isError, isFetching } = useQuery({
+  const { data, isLoading, isError, isFetching, isPlaceholderData } = useQuery({
     queryKey,
     queryFn,
     enabled,
     refetchInterval,
     select,
+    // Smooth chain / amount switches — keep the last good value painted while refetching.
+    placeholderData: (previousData) => previousData,
     ...CHAIN_QUERY_DEFAULTS,
   })
 
   return useMemo(
     () => ({
       data: (data === undefined ? fallback : data) as TData,
-      isLoading,
+      isLoading: isLoading && data === undefined && !isPlaceholderData,
       isError,
       isFetching,
     }),
-    [data, fallback, isError, isFetching, isLoading],
+    [data, fallback, isError, isFetching, isLoading, isPlaceholderData],
   )
 }

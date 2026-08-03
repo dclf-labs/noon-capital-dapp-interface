@@ -53,6 +53,14 @@ describe('getTradePrimaryAction', () => {
       getTradePrimaryAction({
         ...base,
         step: 1,
+        mode: 'buy',
+        requiresApproval: false,
+      }).label,
+    ).toBe('Confirm the transaction')
+    expect(
+      getTradePrimaryAction({
+        ...base,
+        step: 1,
         mode: 'sell',
         requiresApproval: false,
       }).label,

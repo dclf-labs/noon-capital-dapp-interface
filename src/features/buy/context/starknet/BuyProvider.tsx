@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 
 import { getTokens } from '@/config'
 import { getAmountUsd } from '@/features/_shared/trade-amounts'
@@ -77,6 +77,11 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [inputs.amountIn, tokenPrice],
   )
 
+  const inputsRef = useRef(inputs)
+  useEffect(() => {
+    inputsRef.current = inputs
+  }, [inputs])
+
   useResetOnSessionChange({
     session: {
       address: connection.address,
@@ -90,11 +95,18 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     seedInputs: () => {
       const tokensIn = getTokens(connection.config, connection.config?.sellTokens)
       const tokensOut = getTokens(connection.config, connection.config?.buyTokens)
+      const prev = inputsRef.current
+      const keepIn = prev.tokenIn
+        ? tokensIn?.find((token) => token.symbol === prev.tokenIn?.symbol)
+        : undefined
+      const keepOut = prev.tokenOut
+        ? tokensOut?.find((token) => token.symbol === prev.tokenOut?.symbol)
+        : undefined
       return {
         tokensIn,
         tokensOut,
-        tokenIn: tokensIn?.at(0),
-        tokenOut: tokensOut?.at(0),
+        tokenIn: keepIn ?? tokensIn?.at(0),
+        tokenOut: keepOut ?? tokensOut?.at(0),
         route: [],
       }
     },

@@ -81,16 +81,18 @@ export function VaultCard({ vault }: VaultCardProps) {
         </a>
       ) : null}
 
-      {/* Desktop: side hover panel. */}
+      {/* Desktop: side hover panel — slides + fades in from the card. */}
       {linkProps ? (
         <a
           {...linkProps}
           className={cn(
-            'absolute top-1/2 left-full z-10 hidden h-[154px] -translate-y-1/2 items-center pl-3 md:flex',
-            'opacity-0 transition-opacity duration-200 ease-out',
-            'pointer-events-none group-hover/card:pointer-events-auto group-hover/card:opacity-100',
-            'focus-visible:pointer-events-auto focus-visible:opacity-100',
-            'group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100',
+            'absolute top-1/2 left-full z-10 hidden h-[154px] items-center pl-3 md:flex',
+            'translate-x-3 -translate-y-1/2 opacity-0',
+            'pointer-events-none',
+            'transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+            'group-hover/card:pointer-events-auto group-hover/card:translate-x-0 group-hover/card:opacity-100',
+            'focus-visible:pointer-events-auto focus-visible:translate-x-0 focus-visible:opacity-100',
+            'group-focus-within/card:pointer-events-auto group-focus-within/card:translate-x-0 group-focus-within/card:opacity-100',
           )}
           aria-label={`Earn now in ${vault.name}`}
         >
@@ -98,6 +100,8 @@ export function VaultCard({ vault }: VaultCardProps) {
             className={cn(
               'flex h-full min-w-[148px] flex-row items-center justify-center gap-1.5 rounded-2xl bg-[#6c77e9] px-7',
               'text-base tracking-[0.32px] whitespace-nowrap text-white',
+              'origin-left transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+              'scale-95 group-focus-within/card:scale-100 group-hover/card:scale-100',
             )}
           >
             <EarnNowLabel />

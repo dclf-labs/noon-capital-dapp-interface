@@ -67,7 +67,7 @@ describe('getBridgePrimaryAction', () => {
     ).toBe('Next')
   })
 
-  it('surfaces route kill switch and confirm/retry', () => {
+  it('surfaces route kill switch, submit gate, and confirm/retry', () => {
     expect(
       getBridgePrimaryAction({
         ...base,
@@ -75,6 +75,14 @@ describe('getBridgePrimaryAction', () => {
         routeDisabledLabel: 'Sui → Ethereum bridge unavailable',
       }).label,
     ).toBe('Sui → Ethereum bridge unavailable')
+
+    expect(
+      getBridgePrimaryAction({
+        ...base,
+        submitDisabled: true,
+        submitDisabledLabel: 'OFT not configured',
+      }).label,
+    ).toBe('OFT not configured')
 
     expect(getBridgePrimaryAction({ ...base, step: 1 }).label).toBe('Confirm bridge')
     expect(

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   formatBalanceLabel,
+  formatConfirmAmount,
   formatNativeFee,
+  formatNativeFeeDetail,
   formatTokenAmount,
   formatUnitRate,
   formatUsd,
@@ -39,6 +41,19 @@ describe('trade display formatters', () => {
     expect(formatNativeFee(0.001, 'ETH', 18)).toBe('<0.01 ETH')
     expect(formatNativeFee(0.02, 'ETH', 18)).toBe('~0.02 ETH')
     expect(formatUnitRate(1.23456)).toBe('1.2345')
+  })
+
+  it('formats native fee detail without collapsing dust under 0.01', () => {
+    expect(formatNativeFeeDetail(0.000042, 'ETH')).toBe('~0.000042 ETH')
+    expect(formatNativeFeeDetail(0.02, 'SOPH')).toBe('~0.02 SOPH')
+    expect(formatNativeFeeDetail(0, 'ETH')).toBe('~0 ETH')
+  })
+
+  it('formats confirm/success amounts with compact and dust labels', () => {
+    expect(formatConfirmAmount(21)).toBe('21.00')
+    expect(formatConfirmAmount(0.001)).toBe('<0.01')
+    expect(formatConfirmAmount(150_000)).toMatch(/150(\.0+)?K/i)
+    expect(formatConfirmAmount(undefined)).toBe('0')
   })
 })
 

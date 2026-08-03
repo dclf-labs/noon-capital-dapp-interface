@@ -7,17 +7,22 @@ import {
 } from '@/features/_shared'
 import {
   formatBalanceLabel,
-  formatNativeFee,
+  formatNativeFeeDetail,
   formatUnitRate,
+  formatUsd,
 } from '@/features/_shared/trade-display'
+import useGeckoPrice from '@/features/api/hooks/useGeckoPrice'
 import { useBuyBalance, useBuyForm, useBuyPrice, useBuyTxn } from '@/features/buy/hooks/evm/useBuy'
 import useBuySubmit from '@/features/buy/hooks/evm/useBuySubmit'
 import useUpdateBuy from '@/features/buy/hooks/evm/useUpdateBuy'
 import { getSwapSpender } from '@/features/swap/lib/spender'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
+import { useStickyValue } from '@/hooks/ui/useStickyValue'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { TradePanelView } from '@/mock/swap/TradePanelView'
+import { payAmountFromBuyAmount } from '@/mock/buy/buy-amount'
+import { resolveBuyPoweredBy } from '@/mock/buy/powered-by'
+import { BuyFlowView } from '@/pages/swap/BuyFlowView'
 
 export function EvmBuyTrade() {
   const { inputs, connection, step, setStep, setInputs } = useBuyForm()
@@ -26,8 +31,27 @@ export function EvmBuyTrade() {
   const { amountInUsd, isFetchingQuote, isQuoteError, price } = useBuyPrice()
   const { submitFee, txnUrl, setTxnUrl } = useBuyTxn()
   const { setAmountIn, setTokenIn, setTokenOut } = useUpdateBuy()
+  const buyTokenUsd = useGeckoPrice(inputs.tokenOut)
   const approve = useApprove()
   const submit = useBuySubmit()
+
+  const unitOutPerIn = typeof price.data === 'number' && price.data > 0 ? price.data : undefined
+
+  const onBuyAmountChange = useCallback(
+    (buyAmount: number | undefined) => {
+      if (buyAmount === undefined) {
+        setInputs((prev) => ({ ...prev, amountIn: undefined, amountOut: undefined }))
+        return
+      }
+      const pay = payAmountFromBuyAmount(buyAmount, unitOutPerIn)
+      setInputs((prev) => ({
+        ...prev,
+        amountIn: pay,
+        amountOut: buyAmount,
+      }))
+    },
+    [setInputs, unitOutPerIn],
+  )
 
   const [approveStatus, setApproveStatus] = useState<ApproveTxnStatus>('IDLE')
   const [submitStatus, setSubmitStatus] = useState<SubmitTxnStatus>(SubmitTxnStatus.IDLE)
@@ -143,10 +167,25 @@ export function EvmBuyTrade() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
+  const liveFeeLabel = submitFee.isReady ? formatUsd(submitFee.data) : undefined
+  const liveFeeNativeLabel = submitFee.isReady
+    ? formatNativeFeeDetail(submitFee.native, connection.config?.defaultGasToken?.symbol || 'ETH')
+    : undefined
+  const feeLabel = useStickyValue(liveFeeLabel)
+  const feeNativeLabel = useStickyValue(liveFeeNativeLabel)
+  // Don't paint a mismatched symbol/amount while the prior query is used as placeholder.
+  const balanceInLabel =
+    useStickyValue(
+      tokenInBalance.isPlaceholderData || tokenInBalance.isLoading
+        ? undefined
+        : inputModel.balanceLabel,
+    ) ?? inputModel.balanceLabel
+
   return (
-    <TradePanelView
+    <BuyFlowView
       mode="buy"
       step={step}
+      showHero={false}
       isConnected={connection.isConnected}
       unsupported={connection.unsupported}
       tokenIn={inputs.tokenIn}
@@ -156,33 +195,28 @@ export function EvmBuyTrade() {
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
-      balanceInLabel={inputModel.balanceLabel}
+      balanceInLabel={balanceInLabel}
       balanceOutLabel={formatBalanceLabel(
         tokenOutBalance.data,
         inputs.tokenOut?.symbol,
         inputs.tokenOut?.decimals,
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
-      feeLabel={
-        submitFee.data !== undefined
-          ? formatNativeFee(submitFee.data, connection.config?.defaultGasToken?.symbol || 'ETH')
-          : undefined
-      }
+      feeLabel={feeLabel}
+      feeNativeLabel={feeNativeLabel}
+      isLoadingFee={!feeLabel && (submitFee.isLoading || submitFee.isFetching)}
+      poweredBy={resolveBuyPoweredBy(connection.config)}
       isFetchingQuote={isFetchingQuote}
       isInsufficientBalance={isInsufficientBalance}
       isApproved={isApproved}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
-      statusMessage={
-        approveStatus === 'TXN_FAILURE'
-          ? 'Approval failed'
-          : submitStatus === SubmitTxnStatus.TXN_FAILURE
-            ? 'Swap failed'
-            : undefined
-      }
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+      buyTokenUsdPrice={buyTokenUsd.data}
+      unitOutPerIn={unitOutPerIn}
+      onBuyAmountChange={onBuyAmountChange}
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}

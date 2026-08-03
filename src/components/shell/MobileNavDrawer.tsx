@@ -1,11 +1,11 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 
 import { AnimatePresence, motion } from 'motion/react'
 import { Link } from 'react-router-dom'
 
 import { CloseIcon, InfoIcon } from '@/assets/icons'
 import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
-import { SHELL_SELECTION_SPRING } from '@/components/shell/constants'
+import { SHELL_SELECTION_CLOSE_MS, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
 import { NetworkSelector } from '@/components/shell/NetworkSelector'
 import type { ShellNavItem } from '@/components/shell/types'
 import { WalletAvatarButton } from '@/components/shell/WalletAvatarButton'
@@ -38,13 +38,40 @@ export function MobileNavDrawer({
 }: MobileNavDrawerProps) {
   const titleId = useId()
   const navBgId = useId()
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current != null) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+  }
+
+  /** Let the selection pill spring settle, then dismiss the drawer. */
+  const closeAfterSelection = () => {
+    clearCloseTimer()
+    closeTimerRef.current = setTimeout(() => {
+      closeTimerRef.current = null
+      onClose()
+    }, SHELL_SELECTION_CLOSE_MS)
+  }
 
   useEffect(() => {
-    if (!open) return
+    return () => clearCloseTimer()
+  }, [])
+
+  useEffect(() => {
+    if (!open) {
+      clearCloseTimer()
+      return
+    }
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        clearCloseTimer()
+        onClose()
+      }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => {
@@ -188,7 +215,7 @@ export function MobileNavDrawer({
                     title={item.label}
                     aria-current={active ? 'page' : undefined}
                     className={classNames}
-                    onClick={onClose}
+                    onClick={closeAfterSelection}
                   >
                     {content}
                   </Link>

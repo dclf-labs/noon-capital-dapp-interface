@@ -13,7 +13,7 @@ function VaultsToolbar({
   if (!onSortClick && !onFilterClick) return null
 
   const chip =
-    'flex items-center gap-0.5 rounded-full bg-stone-100 py-1 pr-2 pl-1.5 text-sm leading-5 font-book text-stone-600 transition-colors hover:text-primary focus-visible:text-primary'
+    'flex items-center gap-0.5 rounded-full bg-stone-100 py-1 pr-2 pl-1.5 text-sm leading-5 font-book text-stone-600 ring-0 outline-none transition-colors hover:text-primary focus:outline-none focus-visible:ring-0 focus-visible:outline-none'
 
   return (
     <div className="flex items-start gap-2 self-end">
@@ -40,11 +40,11 @@ export function VaultsPageView({ vaults, onSortClick, onFilterClick }: VaultsPag
       <div className="flex w-full flex-col items-center gap-6 md:gap-12">
         <VaultsHero />
 
-        <div className="flex w-full flex-col gap-2">
+        {/* Centered vault column — hover Earn Now panel can still paint outside to the right. */}
+        <div className="flex w-full max-w-[70%] min-w-[45%] flex-col items-stretch gap-2 overflow-visible">
           <VaultsToolbar onSortClick={onSortClick} onFilterClick={onFilterClick} />
 
-          {/* Desktop: reserve space for the Earn Now hover panel. */}
-          <div className="flex w-full flex-col gap-8 md:pr-[11rem]">
+          <div className="flex w-full flex-col gap-8 overflow-visible">
             {vaults.map((vault) => (
               <VaultCard key={vault.id} vault={vault} />
             ))}

@@ -151,8 +151,8 @@ export function MockGalleryPage() {
       <section style={section}>
         <h2 style={{ margin: 0, fontSize: 16 }}>Bridge — BridgePanel</h2>
         <BridgePanel
-          step={0}
           isConnected
+          connectedAddress="0x1111111111111111111111111111111111111111"
           sourceNetworks={[
             { id: 1, name: 'Ethereum' },
             { id: 8453, name: 'Base' },
@@ -171,10 +171,12 @@ export function MockGalleryPage() {
           amount={12.345678}
           amountUsd={12.34}
           balanceInLabel="Bal: 1,000.00 sUSN"
+          balanceOutLabel="Bal: 0.00 sUSN"
           receiverLabel="EVM receiver"
           receiverValue="0x1111111111111111111111111111111111111111"
           receiverPlaceholder="0x…"
           onReceiverChange={noop}
+          feeLabel="~$0.21"
           protocolLabel="Hyperlane"
           isFetchingFee={false}
           isInsufficientBalance={false}

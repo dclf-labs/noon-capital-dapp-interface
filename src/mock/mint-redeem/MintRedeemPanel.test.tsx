@@ -161,7 +161,7 @@ describe('MintRedeemPanel behaviour', () => {
       tokenOut: usn,
       variableTokens: [usdc],
     })
-    expect(screen.getByDisplayValue('USDC')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /select send token/i })).toHaveTextContent('USDC')
     expect(screen.getByDisplayValue('USN')).toBeInTheDocument()
 
     rerender(
@@ -187,7 +187,7 @@ describe('MintRedeemPanel behaviour', () => {
       />,
     )
     expect(screen.getByDisplayValue('USN')).toBeInTheDocument()
-    expect(screen.getByRole('combobox')).toHaveValue(`${usdc.contractAddress}:${usdc.symbol}`)
+    expect(screen.getByRole('button', { name: /select receive token/i })).toHaveTextContent('USDC')
   })
 
   it('shows confirm copy with amounts and invokes primary', async () => {

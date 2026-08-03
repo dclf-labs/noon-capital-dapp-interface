@@ -47,6 +47,12 @@ export const SHELL_SELECTION_SPRING = {
 }
 
 /**
+ * Wait for the selection pill spring to settle before closing a dropdown /
+ * mobile menu after a choice (matches `NetworkSelector`).
+ */
+export const SHELL_SELECTION_CLOSE_MS = 260
+
+/**
  * Network dropdown panel — above shell chrome (sidebar 30, mobile drawer 100),
  * below modals / AppKit (1000).
  */
@@ -109,7 +115,8 @@ export function shellNavForPath(pathname: string): ShellNavItem[] {
 function isShellNavActive(id: string, pathname: string): boolean {
   switch (id) {
     case 'home':
-      return pathname === '/'
+      // Home product surface: landing + Buy (/swap) share the Home rail highlight.
+      return pathname === '/' || pathname.startsWith('/swap')
     case 'vaults':
       return pathname === '/vaults' || pathname.startsWith('/vaults/')
     case 'usn':

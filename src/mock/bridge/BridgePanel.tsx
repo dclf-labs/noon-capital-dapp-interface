@@ -1,354 +1,414 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 import { NumericFormat } from 'react-number-format'
 
-import type { Token } from '@/config/token'
-import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
+  formatTradeReceiveDisplay,
   parseTradePayInput,
   toTradePayAmount,
   TRADE_PAY_DECIMALS,
-  TRADE_RECEIVE_DISPLAY_DECIMALS,
-} from '@/features/_shared/trade-input-format'
-import { down } from '@/lib/format'
-import * as styles from '@/mock/bridge/bridge-styles'
+} from '@/features/_shared'
+import { formatUsd } from '@/features/_shared/trade-display'
+import { tokenIconSrc } from '@/lib/token-icon'
+import { cn, truncateAddress } from '@/lib/utils'
+import { BridgeNetworkPicker } from '@/mock/bridge/BridgeNetworkPicker'
+import { BRIDGE_ETA_LABEL, DEFAULT_BRIDGE_FEE_LABEL } from '@/mock/bridge/constants'
+import { resolveBridgeStatusNotice } from '@/mock/bridge/status-notice'
+import { StatusCallout } from '@/mock/bridge/StatusCallout'
+import type { BridgePanelProps } from '@/mock/bridge/types'
+import { TokenDropdown } from '@/mock/buy/TokenDropdown'
 
-/**
- * Bridge form UI. Receive mirrors send 1:1 (OFT); pay uses `amount` (not amountIn/Out).
- * Confirm/LZ submit may still apply a 1% `minAmountLd` haircut under the hood.
- */
+const focusReset =
+  'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
 
-export type BridgeNetworkOption = {
-  id: number
-  name: string
-}
+export type { BridgeNetworkOption, BridgePanelProps } from '@/mock/bridge/types'
 
-export type BridgePanelProps = {
-  step: number
-  isConnected: boolean
-  unsupported?: boolean
-  sourceNetworks: BridgeNetworkOption[]
-  destinationNetworks: BridgeNetworkOption[]
-  sourceChainId?: number
-  destinationChainId?: number
-  onSourceChange: (chainId: number) => void
-  onDestinationChange: (chainId: number | undefined) => void
-  tokens?: Token[]
-  token?: Token
-  onTokenChange: (token: Token) => void
-  amount?: number
-  amountUsd: number
-  balanceInLabel?: string
-  balanceOutLabel?: string
-  receiverLabel: string
-  receiverValue: string
-  receiverPlaceholder: string
-  onReceiverChange: (value: string) => void
-  feeLabel?: string
-  gasLabel?: string
-  protocolLabel?: string
-  warning?: string
-  isFetchingFee: boolean
-  isInsufficientBalance: boolean
-  primaryLabel: string
-  primaryDisabled: boolean
-  primaryLoading?: boolean
-  statusMessage?: string
-  txnUrl?: string
-  onAmountChange: (amount: number | undefined) => void
-  onHalf: () => void
-  onMax: () => void
-  onPrimary: () => void
-  onBack?: () => void
-  onReset?: () => void
-  presetsDisabled?: boolean
-}
-
+/** Presentational bridge card — step 0 (Figma). Fully controlled by live adapters. */
 export function BridgePanel({
-  step,
   isConnected,
   unsupported,
+  connectedAddress,
   sourceNetworks,
   destinationNetworks,
   sourceChainId,
   destinationChainId,
   onSourceChange,
   onDestinationChange,
+  onFlipNetworks,
   tokens,
   token,
   onTokenChange,
   amount,
   amountUsd,
-  balanceInLabel,
-  balanceOutLabel,
-  receiverLabel,
+  balanceInLabel = 'Bal: —',
+  balanceOutLabel = 'Bal: —',
   receiverValue,
   receiverPlaceholder,
   onReceiverChange,
-  feeLabel,
-  gasLabel,
-  protocolLabel,
+  feeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  etaLabel = BRIDGE_ETA_LABEL,
   warning,
-  isFetchingFee,
-  isInsufficientBalance,
-  primaryLabel,
-  primaryDisabled,
-  primaryLoading,
-  statusMessage,
-  txnUrl,
+  isFetchingFee = false,
+  isLoadingFee = false,
+  isInsufficientBalance = false,
+  primaryLabel = 'Enter amount',
+  primaryDisabled = true,
+  primaryLoading = false,
+  presetsDisabled = false,
   onAmountChange,
   onHalf,
   onMax,
   onPrimary,
-  onBack,
-  onReset,
-  presetsDisabled,
 }: BridgePanelProps) {
+  const amountId = useId()
+  const receiveId = useId()
+  const receiverId = useId()
   const amountValue = toTradePayAmount(amount)
+
   const [payFocused, setPayFocused] = useState(false)
   const [payDraft, setPayDraft] = useState<string | undefined>(undefined)
+  const [editingReceiver, setEditingReceiver] = useState(false)
 
   const clearPayDraft = () => {
     setPayFocused(false)
     setPayDraft(undefined)
   }
 
-  if (!isConnected) {
-    return <p style={styles.muted}>Connect a wallet on Home to bridge.</p>
+  const onAmountValueChange = (values: { floatValue?: number; value: string }) => {
+    if (payFocused) setPayDraft(values.value)
+    const parsed = parseTradePayInput(values)
+    if (parsed.kind === 'draft') return
+    if (parsed.kind === 'clear') {
+      onAmountChange(undefined)
+      return
+    }
+    onAmountChange(parsed.amount)
   }
 
-  if (unsupported) {
-    return (
-      <p style={styles.errorText}>
-        Wallet network does not match the selected source. Switch to continue.
-      </p>
-    )
-  }
+  const displayPay = payFocused && payDraft !== undefined ? payDraft : (amountValue ?? '')
+  const displayReceive =
+    amountValue != null ? formatTradeReceiveDisplay(amountValue) : formatTradeReceiveDisplay(0)
+  const hasAmount = amountValue != null && amountValue > 0
+  const canFlip = Boolean(onFlipNetworks && sourceChainId && destinationChainId)
+  const notice = resolveBridgeStatusNotice(warning)
 
-  if (step >= 2) {
-    return (
-      <section style={{ display: 'grid', gap: 12 }}>
-        <h2 style={{ margin: 0, fontSize: 18 }}>Bridge submitted</h2>
-        <p style={styles.muted}>Funds usually arrive in 15–20 minutes.</p>
-        {txnUrl ? (
-          <a href={txnUrl} target="_blank" rel="noreferrer noopener" style={styles.link}>
-            View on explorer
-          </a>
-        ) : (
-          <p style={styles.muted}>Waiting for explorer link…</p>
-        )}
-        <button type="button" style={styles.button} onClick={onReset}>
-          Bridge more
-        </button>
-      </section>
-    )
-  }
+  return (
+    <>
+      {unsupported ? (
+        <div className="mb-3 w-full">
+          <StatusCallout
+            type="error"
+            title="Wallet network does not match the selected network."
+            description="Switch network in the header and approve the wallet prompt."
+          />
+        </div>
+      ) : null}
 
-  if (step === 1) {
-    return (
-      <section style={{ display: 'grid', gap: 12 }}>
-        <h2 style={{ margin: 0, fontSize: 18 }}>Confirm bridge</h2>
-        <p style={styles.muted}>
-          {formatTokenAmount(amountValue, token?.symbol, TRADE_PAY_DECIMALS)} →{' '}
-          {formatTokenAmount(amountValue, token?.symbol, TRADE_RECEIVE_DISPLAY_DECIMALS)}
-        </p>
-        {protocolLabel ? <p style={styles.muted}>Route {protocolLabel}</p> : null}
-        {feeLabel ? <p style={styles.muted}>Bridge fee {feeLabel}</p> : null}
-        {gasLabel ? <p style={styles.muted}>Network fee {gasLabel}</p> : null}
-        {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
-        <div style={styles.row}>
-          {onBack ? (
-            <button type="button" style={styles.buttonSecondary} onClick={onBack}>
-              Back
+      <div className="w-full overflow-hidden rounded-xl border border-stone-300 bg-white shadow-[0px_4px_4px_0px_rgba(111,125,185,0.05)]">
+        {/* Sending / Receiving networks */}
+        <div className="flex w-full items-stretch border-b border-stone-200">
+          <div className="min-w-0 flex-1 border-r border-stone-200">
+            <BridgeNetworkPicker
+              label="sending"
+              networks={sourceNetworks}
+              value={sourceChainId}
+              onChange={onSourceChange}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <BridgeNetworkPicker
+              label="receiving"
+              networks={destinationNetworks}
+              value={destinationChainId}
+              placeholder="Select network"
+              onChange={(chainId) => onDestinationChange(chainId)}
+            />
+          </div>
+        </div>
+
+        <div className="relative flex w-full flex-col gap-1 p-2">
+          {/* You're sending */}
+          <div className="flex w-full flex-col gap-3 rounded-lg border border-stone-200 bg-stone-50 p-4">
+            <div className="flex w-full items-center gap-2">
+              <p className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500 uppercase">
+                You&apos;re sending
+              </p>
+              {isConnected && connectedAddress ? (
+                <span className="flex items-center gap-1 rounded-md bg-emerald-100 px-1.5 py-1 text-sm leading-5 font-medium text-emerald-600">
+                  {truncateAddress(connectedAddress)}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex w-full items-center gap-2">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <label className="sr-only" htmlFor={amountId}>
+                  Send amount
+                </label>
+                <NumericFormat
+                  id={amountId}
+                  inputMode="decimal"
+                  decimalScale={TRADE_PAY_DECIMALS}
+                  thousandSeparator
+                  allowNegative={false}
+                  allowedDecimalSeparators={['.']}
+                  placeholder="0.00"
+                  value={displayPay}
+                  onFocus={() => setPayFocused(true)}
+                  onBlur={clearPayDraft}
+                  onValueChange={onAmountValueChange}
+                  isAllowed={(values) => {
+                    const parts = values.value.split('.')
+                    if (parts[0] && parts[0].length > 18) return false
+                    return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
+                  }}
+                  className={cn(
+                    'w-full bg-transparent text-left text-2xl leading-8 font-medium tabular-nums',
+                    focusReset,
+                    hasAmount || (payFocused && payDraft && payDraft !== '0')
+                      ? 'text-stone-900'
+                      : 'text-stone-600',
+                  )}
+                />
+                <p className="text-sm leading-5 text-stone-500 tabular-nums">
+                  {formatUsd(amountUsd)}
+                </p>
+              </div>
+              <TokenDropdown
+                token={token}
+                tokens={tokens}
+                onChange={(next) => {
+                  clearPayDraft()
+                  onTokenChange(next)
+                }}
+                size="sm"
+                label={`Select bridge token${token ? `, currently ${token.symbol}` : ''}`}
+              />
+            </div>
+
+            <div className="h-px w-full bg-stone-200" />
+
+            <div className="flex w-full items-center gap-2">
+              <p className="min-w-0 flex-1 text-sm leading-5 text-stone-600">{balanceInLabel}</p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={presetsDisabled}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={onHalf}
+                  className={cn(
+                    'rounded-md border border-stone-200 bg-stone-50 px-1.5 py-0.5',
+                    'text-sm leading-5 font-medium text-stone-600',
+                    focusReset,
+                    presetsDisabled && 'cursor-not-allowed opacity-50',
+                  )}
+                >
+                  HALF
+                </button>
+                <button
+                  type="button"
+                  disabled={presetsDisabled}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={onMax}
+                  className={cn(
+                    'rounded-md border border-stone-200 bg-stone-50 px-1.5 py-0.5',
+                    'text-sm leading-5 font-medium text-stone-600',
+                    focusReset,
+                    presetsDisabled && 'cursor-not-allowed opacity-50',
+                  )}
+                >
+                  MAX
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Flip — Figma uses horizontal swap icon rotated -90° so arrows read up/down. */}
+          <div className="absolute top-1/2 left-1/2 z-10 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+            <button
+              type="button"
+              disabled={!canFlip}
+              aria-label="Flip sending and receiving networks"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onFlipNetworks}
+              className={cn(
+                'flex items-center justify-center rounded-md border border-stone-200 bg-white p-2',
+                focusReset,
+                canFlip ? 'hover:bg-stone-50' : 'cursor-not-allowed opacity-40',
+              )}
+            >
+              <img
+                src="/assets/bridge/arrow-swap-horizontal.svg"
+                alt=""
+                width={28}
+                height={28}
+                className="size-7 -rotate-90"
+              />
             </button>
-          ) : null}
+          </div>
+
+          {/* You're receiving */}
+          <div className="flex w-full flex-col gap-3 rounded-lg border border-stone-200 bg-stone-50 p-4">
+            <div className="flex w-full items-center gap-2">
+              <p className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500 uppercase">
+                You&apos;re receiving
+              </p>
+              {editingReceiver ? (
+                <input
+                  id={receiverId}
+                  value={receiverValue}
+                  placeholder={receiverPlaceholder}
+                  onChange={(event) => onReceiverChange(event.target.value)}
+                  onBlur={() => setEditingReceiver(false)}
+                  autoFocus
+                  className={cn(
+                    'max-w-[180px] rounded-md border border-sky-200 bg-sky-50 px-2 py-1',
+                    'text-sm leading-5 font-medium text-sky-800',
+                    focusReset,
+                  )}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => setEditingReceiver(true)}
+                  className={cn(
+                    'flex items-center gap-1 rounded-md bg-sky-50 px-1.5 py-1',
+                    'text-sm leading-5 font-medium text-sky-700',
+                    focusReset,
+                    'hover:bg-sky-100',
+                  )}
+                >
+                  <span>CHANGE</span>
+                  <span className="tabular-nums">
+                    {receiverValue ? truncateAddress(receiverValue) : 'Add'}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex w-full items-center gap-2">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <label className="sr-only" htmlFor={receiveId}>
+                  Receive amount
+                </label>
+                <input
+                  id={receiveId}
+                  readOnly
+                  value={displayReceive}
+                  className={cn(
+                    'w-full bg-transparent text-left text-2xl leading-8 font-medium text-stone-600 tabular-nums',
+                    focusReset,
+                  )}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 rounded-md border border-stone-200 bg-white py-1.5 pr-2 pl-1.5 shadow-[0px_4px_2px_rgba(111,125,185,0.05)]">
+                <span className="relative size-[22px] shrink-0 overflow-hidden rounded-md bg-stone-200">
+                  {token ? (
+                    <img
+                      src={tokenIconSrc(token)}
+                      alt=""
+                      width={22}
+                      height={22}
+                      className="size-full object-cover"
+                    />
+                  ) : null}
+                </span>
+                <span className="text-base leading-6 font-medium text-stone-600">
+                  {token?.symbol ?? '—'}
+                </span>
+              </div>
+            </div>
+
+            <div className="h-px w-full bg-stone-200" />
+
+            <p className="text-sm leading-5 text-stone-600">{balanceOutLabel}</p>
+          </div>
+        </div>
+
+        {/* Old-dapp Info sits between inputs and fee/CTA — not between fee and button. */}
+        {notice || isInsufficientBalance ? (
+          <div className="flex w-full flex-col gap-2 px-4 pt-2">
+            {notice ? (
+              <StatusCallout
+                type={notice.type}
+                title={notice.title}
+                description={notice.description}
+              />
+            ) : null}
+            {isInsufficientBalance ? (
+              <StatusCallout
+                type="error"
+                title="Insufficient wallet balance."
+                description={
+                  token?.symbol
+                    ? `Add ${token.symbol} to your wallet or lower the send amount.`
+                    : 'Add tokens to your wallet or lower the send amount.'
+                }
+              />
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="flex w-full flex-col gap-4 px-4 pt-2 pb-6">
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex w-full items-center gap-1">
+              <img
+                src="/assets/buy/gas-pump.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="size-5 shrink-0"
+              />
+              <span className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500">
+                Bridging fees
+              </span>
+              {(isLoadingFee || isFetchingFee) && feeLabel === DEFAULT_BRIDGE_FEE_LABEL ? (
+                <span
+                  aria-label="Estimating bridge fee"
+                  className="inline-block h-6 w-14 animate-pulse rounded-md bg-stone-200"
+                />
+              ) : (
+                <p className="text-base leading-6 font-semibold text-stone-600 tabular-nums">
+                  {feeLabel}
+                </p>
+              )}
+            </div>
+
+            <div className="hidden w-full items-center gap-1 md:flex">
+              <img
+                src="/assets/bridge/clock.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="size-5 shrink-0"
+              />
+              <span className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500">
+                Bridge ETA
+              </span>
+              <p className="text-base leading-6 font-semibold text-stone-600">{etaLabel}</p>
+            </div>
+          </div>
+
           <button
             type="button"
-            style={primaryDisabled || primaryLoading ? styles.buttonDisabled : styles.button}
             disabled={primaryDisabled || primaryLoading}
+            onMouseDown={(event) => event.preventDefault()}
             onClick={onPrimary}
+            className={cn(
+              'flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-3',
+              'text-base leading-6 font-medium whitespace-nowrap',
+              focusReset,
+              primaryDisabled || primaryLoading
+                ? 'cursor-not-allowed bg-[#e9e9e9] text-[#7b7b7b]'
+                : 'bg-[#6c77e9] text-stone-50 transition-opacity hover:opacity-90',
+              primaryLoading && 'animate-pulse',
+            )}
           >
             {primaryLabel}
           </button>
         </div>
-      </section>
-    )
-  }
-
-  const receiveDisplay =
-    amountValue != null ? down(amountValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
-  const receivePlaceholder = isFetchingFee && amountValue == null ? '…' : '0.00'
-
-  return (
-    <section style={{ display: 'grid', gap: 12 }}>
-      <div style={styles.field}>
-        <div style={styles.row}>
-          <strong>Sending from</strong>
-          <strong>Receiving on</strong>
-        </div>
-        <div style={styles.row}>
-          <select
-            style={styles.select}
-            value={sourceChainId ?? ''}
-            onChange={(event) => onSourceChange(Number(event.target.value))}
-          >
-            <option value="" disabled>
-              Source
-            </option>
-            {sourceNetworks.map((network) => (
-              <option key={network.id} value={network.id}>
-                {network.name}
-              </option>
-            ))}
-          </select>
-          <select
-            style={styles.select}
-            value={destinationChainId ?? ''}
-            onChange={(event) => {
-              const value = event.target.value
-              onDestinationChange(value ? Number(value) : undefined)
-            }}
-          >
-            <option value="">Destination</option>
-            {destinationNetworks.map((network) => (
-              <option key={network.id} value={network.id}>
-                {network.name}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
-
-      <div style={styles.field}>
-        <label style={styles.muted} htmlFor="bridge-receiver">
-          {receiverLabel}
-        </label>
-        <input
-          id="bridge-receiver"
-          style={styles.input}
-          value={receiverValue}
-          placeholder={receiverPlaceholder}
-          spellCheck={false}
-          autoComplete="off"
-          onChange={(event) => onReceiverChange(event.target.value)}
-        />
-      </div>
-
-      <div style={styles.field}>
-        <div style={styles.row}>
-          <strong>Amount</strong>
-          <span style={styles.muted}>{balanceInLabel}</span>
-        </div>
-        <div style={styles.row}>
-          <NumericFormat
-            style={styles.input}
-            inputMode="decimal"
-            placeholder="0.00"
-            decimalScale={TRADE_PAY_DECIMALS}
-            thousandSeparator
-            allowNegative={false}
-            value={payFocused && payDraft !== undefined ? payDraft : (amountValue ?? '')}
-            onFocus={() => setPayFocused(true)}
-            onBlur={() => {
-              setPayFocused(false)
-              setPayDraft(undefined)
-            }}
-            onValueChange={(values) => {
-              if (payFocused) setPayDraft(values.value)
-              const parsed = parseTradePayInput(values)
-              if (parsed.kind === 'draft') return
-              if (parsed.kind === 'clear') {
-                onAmountChange(undefined)
-                return
-              }
-              onAmountChange(parsed.amount)
-            }}
-            isAllowed={(values) => {
-              const parts = values.value.split('.')
-              return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
-            }}
-          />
-          <select
-            style={styles.select}
-            value={token?.symbol || ''}
-            onChange={(event) => {
-              const next = tokens?.find((entry) => entry.symbol === event.target.value)
-              if (next) onTokenChange(next)
-            }}
-          >
-            {(tokens || []).map((entry) => (
-              <option key={entry.symbol} value={entry.symbol}>
-                {entry.symbol}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div style={styles.row}>
-          <span style={styles.muted}>{formatUsd(amountUsd)}</span>
-          <button
-            type="button"
-            style={presetsDisabled ? styles.buttonDisabled : styles.buttonSecondary}
-            disabled={presetsDisabled}
-            onClick={(event) => {
-              event.preventDefault()
-              if (presetsDisabled) return
-              clearPayDraft()
-              onHalf()
-            }}
-          >
-            Half
-          </button>
-          <button
-            type="button"
-            style={presetsDisabled ? styles.buttonDisabled : styles.buttonSecondary}
-            disabled={presetsDisabled}
-            onClick={(event) => {
-              event.preventDefault()
-              if (presetsDisabled) return
-              clearPayDraft()
-              onMax()
-            }}
-          >
-            Max
-          </button>
-        </div>
-      </div>
-
-      <div style={styles.field}>
-        <div style={styles.row}>
-          <strong>You receive</strong>
-          <span style={styles.muted}>{balanceOutLabel}</span>
-        </div>
-        <NumericFormat
-          style={{ ...styles.input, opacity: 0.85 }}
-          readOnly
-          placeholder={receivePlaceholder}
-          decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
-          thousandSeparator
-          allowNegative={false}
-          value={receiveDisplay}
-          // 1:1 OFT send; 2dp is display-only. Title keeps full pay precision.
-          title={amountValue != null ? String(amountValue) : undefined}
-        />
-        {/* UI copy is 1:1; LZ/Sui OFT submit still sets minAmountLd with 1% haircut. */}
-        <p style={styles.muted}>1:1 amount · Slippage 0%</p>
-        {protocolLabel ? <p style={styles.muted}>Route {protocolLabel}</p> : null}
-        {feeLabel ? <p style={styles.muted}>Est. bridge fee {feeLabel}</p> : null}
-        {gasLabel ? <p style={styles.muted}>Est. network fee {gasLabel}</p> : null}
-      </div>
-
-      {warning ? <p style={styles.banner}>{warning}</p> : null}
-      {isInsufficientBalance ? <p style={styles.errorText}>Insufficient balance</p> : null}
-      {statusMessage ? <p style={styles.muted}>{statusMessage}</p> : null}
-
-      <button
-        type="button"
-        style={primaryDisabled || primaryLoading ? styles.buttonDisabled : styles.button}
-        disabled={primaryDisabled || primaryLoading}
-        onClick={onPrimary}
-      >
-        {primaryLabel}
-      </button>
-    </section>
+    </>
   )
 }

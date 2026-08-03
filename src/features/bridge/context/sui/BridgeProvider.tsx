@@ -19,6 +19,7 @@ import { type FormInputs } from '@/features/bridge/context/sui/types'
 import useBridgeAllowance from '@/features/bridge/hooks/sui/useBridgeAllowance'
 import useBridgeFeeQuote from '@/features/bridge/hooks/sui/useBridgeFeeQuote'
 import useBridgeSubmitFee from '@/features/bridge/hooks/sui/useBridgeSubmitFee'
+import { applyBridgeTokenSync } from '@/features/bridge/lib/sync-bridge-tokens'
 import { useResolvedChain } from '@/hooks/connection'
 import { useReadOnlySession } from '@/hooks/connection/useReadOnlySession'
 import { useSuiFamilySession } from '@/hooks/connection/useWalletSession'
@@ -41,6 +42,7 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const prevSourceChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
   const prevDestinationChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
   const prevChainFamilyRef = useRef<'evm' | 'starknet' | 'sui' | undefined>(undefined)
+  const prevTokenRouteKeyRef = useRef('')
 
   const connection = useSuiFamilySession()
   const { chainFamily: resolvedChainFamily } = useResolvedChain()
@@ -175,14 +177,14 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             normalizedDestinationBridgeTokens.has(tokenSymbol.toUpperCase()),
           )
     const tokens = getTokens(connection.config, bridgeTokens)
-    const token = tokens?.at(0)
+    const routeKey = `${connection.config?.id ?? ''}:${inputs.destinationChainId ?? ''}:${bridgeTokens.join(',')}`
 
-    setInputs((prev) => ({
-      ...prev,
-      token,
-      tokens,
-    }))
-    setStep(0)
+    applyBridgeTokenSync(setInputs, tokens)
+
+    if (prevTokenRouteKeyRef.current && prevTokenRouteKeyRef.current !== routeKey) {
+      setStep(0)
+    }
+    prevTokenRouteKeyRef.current = routeKey
   }, [
     connection.config,
     destinationConnection.config,

@@ -45,6 +45,16 @@ export type GasTrackerApiResponse = {
   }
 } & { cacheTimestamp?: number }
 
+/** Prefer live value when > 0; otherwise keep the bundled default (API may send `"0"`). */
+function coalescePositive(
+  live: string | number | undefined,
+  fallback: string | number | undefined,
+): number {
+  const liveNum = toNum(live)
+  if (liveNum > 0) return liveNum
+  return toNum(fallback)
+}
+
 const useGasAndEthPrice = () => {
   const fetcher = async () => {
     return await fetch(`${appEnv.api.baseUrl}/api/v1/gas-and-eth-price`)
@@ -84,54 +94,68 @@ const useGasAndEthPrice = () => {
     queryKey: queryKeys.price.ethAndGas(),
     enabled: true,
     select: (data: GasTrackerApiResponse | undefined) => {
+      const ethUsd = coalescePositive(
+        data?.['ethereum']?.price ?? data?.['ethereum']?.ethPrice,
+        DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.ethPrice ??
+          DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.price,
+      )
+      const ethGas = coalescePositive(
+        data?.['ethereum']?.gasPrice,
+        DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.gasPrice,
+      )
+
       return {
         1: {
-          price: toNum(
-            data?.['ethereum']?.price ||
-              data?.['ethereum']?.ethPrice ||
-              DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.ethPrice,
-          ),
-          gasPrice: toNum(
-            data?.['ethereum']?.gasPrice || DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.gasPrice,
-          ),
+          price: ethUsd,
+          gasPrice: ethGas,
         },
         324: {
-          price: toNum(
-            data?.['ethereum']?.price ||
-              data?.['ethereum']?.ethPrice ||
-              DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.ethPrice,
-          ),
-          gasPrice: toNum(
-            data?.['ethereum']?.gasPrice || DEFAULT_GAS_TRACKER_API_RESPONSE?.[1]?.gasPrice,
-          ),
+          price: ethUsd,
+          gasPrice: ethGas,
+        },
+        // Base / other ETH-gas L2s share mainnet ETH USD via resolveNativeGasUsdPrice fallback.
+        8453: {
+          price: ethUsd,
+          gasPrice: ethGas,
         },
         50104: {
-          price: toNum(data?.['sophon']?.price || DEFAULT_GAS_TRACKER_API_RESPONSE?.[50104]?.price),
-          gasPrice: toNum(
-            data?.['sophon']?.gasPrice || DEFAULT_GAS_TRACKER_API_RESPONSE?.[50104]?.gasPrice,
+          price: coalescePositive(
+            data?.['sophon']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[50104]?.price,
+          ),
+          gasPrice: coalescePositive(
+            data?.['sophon']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[50104]?.gasPrice,
           ),
         },
         239: {
-          price: toNum(data?.['tac']?.price || DEFAULT_GAS_TRACKER_API_RESPONSE?.[239]?.price),
-          gasPrice: toNum(
-            data?.['tac']?.gasPrice || DEFAULT_GAS_TRACKER_API_RESPONSE?.[239]?.gasPrice,
+          price: coalescePositive(
+            data?.['tac']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[239]?.price,
+          ),
+          gasPrice: coalescePositive(
+            data?.['tac']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[239]?.gasPrice,
           ),
         },
         999: {
-          price: toNum(
-            data?.['hyperliquid']?.price || DEFAULT_GAS_TRACKER_API_RESPONSE?.[999]?.price,
+          price: coalescePositive(
+            data?.['hyperliquid']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[999]?.price,
           ),
-          gasPrice: toNum(
-            data?.['hyperliquid']?.gasPrice || DEFAULT_GAS_TRACKER_API_RESPONSE?.[999]?.gasPrice,
+          gasPrice: coalescePositive(
+            data?.['hyperliquid']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[999]?.gasPrice,
           ),
         },
         starknet: {
-          price: toNum(
-            data?.['starknet']?.price || DEFAULT_GAS_TRACKER_API_RESPONSE?.['starknet']?.price,
+          price: coalescePositive(
+            data?.['starknet']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.['starknet']?.price,
           ),
-          gasPrice: toNum(
-            data?.['ethereum']?.gasPrice ||
-              DEFAULT_GAS_TRACKER_API_RESPONSE?.['starknet']?.gasPrice,
+          gasPrice: coalescePositive(
+            data?.['starknet']?.gasPrice ?? data?.['ethereum']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.['starknet']?.gasPrice,
           ),
         },
       }

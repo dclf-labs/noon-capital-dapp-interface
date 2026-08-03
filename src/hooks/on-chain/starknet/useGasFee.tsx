@@ -3,11 +3,13 @@ import { useMemo } from 'react'
 import { useEstimateFees } from '@starknet-react/core'
 import type { Call } from 'starknet'
 
-import useGasAndEthPrice from '@/features/api/hooks/useGasAndEthPrice'
+import useGasAndEthPrice, {
+  DEFAULT_GAS_TRACKER_API_RESPONSE,
+} from '@/features/api/hooks/useGasAndEthPrice'
 import type { StarknetAddress } from '@/lib/address'
 import type { StarknetConnection } from '@/lib/connection'
 import { bnToStr, toNum, toStr } from '@/lib/format'
-import { GAS_FEE_MULTIPLIER } from '@/lib/gasFee'
+import { GAS_FEE_MULTIPLIER, resolveNativeGasUsdPrice, toGasFeeUsd } from '@/lib/gasFee'
 
 interface ContractActionParams {
   connection: StarknetConnection
@@ -24,7 +26,7 @@ export function useGasFee({
   calls,
   configActionKey,
 }: ContractActionParams) {
-  const { data: ethAndGasPrice } = useGasAndEthPrice()
+  const { data: ethAndGasPrice, isLoading: isPriceLoading } = useGasAndEthPrice()
 
   const {
     data: fee,
@@ -38,25 +40,31 @@ export function useGasFee({
   })
 
   return useMemo(() => {
+    const decimals = connection?.config?.defaultGasToken?.decimals
     const baseFeeInNative =
-      toNum(bnToStr(fee?.overall_fee, connection?.config?.defaultGasToken?.decimals)) ||
-      toNum(
-        bnToStr(
-          connection?.config?.gasLimits?.[toStr(configActionKey)],
-          connection?.config?.defaultGasToken?.decimals,
-        ),
-      ) ||
+      toNum(bnToStr(fee?.overall_fee, decimals)) ||
+      toNum(bnToStr(connection?.config?.gasLimits?.[toStr(configActionKey)], decimals)) ||
       0
 
-    const gasFeeInNative = baseFeeInNative * GAS_FEE_MULTIPLIER
+    const native = baseFeeInNative * GAS_FEE_MULTIPLIER
+    // Starknet pays gas in STRK — never fall back to mainnet ETH USD.
+    const usdPrice = resolveNativeGasUsdPrice(
+      ethAndGasPrice || DEFAULT_GAS_TRACKER_API_RESPONSE,
+      'starknet',
+      { allowMainnetEthFallback: false },
+    )
+    const usd = toGasFeeUsd(native, usdPrice)
+    const isReady = native > 0 && usdPrice > 0
 
     return {
-      isLoading,
+      isLoading: isLoading || (isPriceLoading && !isReady),
       isError,
-      isFetching,
-      gasUsed: gasFeeInNative,
-      data:
-        gasFeeInNative * toNum(ethAndGasPrice?.['starknet']?.price || ethAndGasPrice?.['1']?.price),
+      isFetching: isFetching || isPriceLoading,
+      /** Legacy field: Starknet submit path historically stored native fee here. */
+      gasUsed: native,
+      native,
+      data: usd,
+      isReady,
     }
   }, [
     fee?.overall_fee,
@@ -67,6 +75,7 @@ export function useGasFee({
     isError,
     isFetching,
     ethAndGasPrice,
+    isPriceLoading,
   ])
 }
 

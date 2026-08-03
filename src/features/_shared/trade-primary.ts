@@ -94,7 +94,7 @@ export function getTradePrimaryAction({
       : isBusySubmit
         ? 'Submitting…'
         : mode === 'buy'
-          ? 'Confirm buy'
+          ? 'Confirm the transaction'
           : 'Confirm sell',
     disabled: (requiresApproval && !isApproved) || !quoteReady || isBusySubmit,
     loading: isBusySubmit,

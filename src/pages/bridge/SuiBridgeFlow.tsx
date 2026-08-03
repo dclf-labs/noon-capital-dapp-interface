@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
@@ -12,15 +12,20 @@ import {
 } from '@/features/bridge/hooks/sui/useBridge'
 import useBridgeSubmit from '@/features/bridge/hooks/sui/useBridgeSubmit'
 import useUpdateBridge from '@/features/bridge/hooks/sui/useUpdateBridge'
+import { isSuiOftSourceConfigured } from '@/features/bridge/lib/sui-oft'
 import { getBridgePrimaryAction } from '@/features/bridge/primary'
 import { isBridgePairAllowed, isSuiToEthBridgeDisabled } from '@/features/bridge/route'
-import { type Address, sanitizeEVMAddress } from '@/lib/address'
+import { useSelectActiveChain } from '@/hooks/connection'
+import { useStickyValue } from '@/hooks/ui/useStickyValue'
+import { type Address, isEVMAddressValid, sanitizeEVMAddress } from '@/lib/address'
+import { getChainConfig } from '@/lib/chain'
 import { canWriteSession } from '@/lib/wallet-session'
-import { BridgePanel } from '@/mock/bridge/BridgePanel'
+import { BRIDGE_RECEIVER_NOTICE } from '@/mock/bridge/constants'
 import {
   getBridgeDestinationNetworks,
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
+import { BridgeFlowView } from '@/pages/bridge/BridgeFlowView'
 
 export function SuiBridgeFlow() {
   const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =
@@ -29,6 +34,7 @@ export function SuiBridgeFlow() {
   const { amountInUsd, feeQuote } = useBridgePrice()
   const { submitFee, txnUrl, setTxnUrl } = useBridgeTxn()
   const { setAmount, setToken, setDestinationChainId, setReceiverAddress } = useUpdateBridge()
+  const { selectActiveChain } = useSelectActiveChain()
   const submit = useBridgeSubmit(
     connection,
     inputs.token,
@@ -40,6 +46,7 @@ export function SuiBridgeFlow() {
   )
 
   const [receiverDraft, setReceiverDraft] = useState('')
+  const dismissedHashRef = useRef<string | undefined>(undefined)
 
   const inputModel = useTradeInputModel({
     amount: inputs.amount,
@@ -50,15 +57,17 @@ export function SuiBridgeFlow() {
 
   const pairAllowed = isBridgePairAllowed(inputs.sourceChainId, inputs.destinationChainId)
   const routeDisabled = isSuiToEthBridgeDisabled(inputs.sourceChainId, inputs.destinationChainId)
+  const oftConfigured = isSuiOftSourceConfigured(inputs.token)
   const isBusySubmit = submit.mutationStatus.isPending
+  const hasValidReceiver = isEVMAddressValid(inputs.receiverAddress as Address | undefined)
 
   useEffect(() => {
-    if (submit.mutationStatus.isSuccess) {
-      if (submit.txnHash && connection.config?.explorerUrl) {
-        setTxnUrl(`${connection.config.explorerUrl}/tx/${submit.txnHash}`)
-      }
-      setStep(2)
+    if (!submit.mutationStatus.isSuccess || !submit.txnHash) return
+    if (dismissedHashRef.current === submit.txnHash) return
+    if (connection.config?.explorerUrl) {
+      setTxnUrl(`${connection.config.explorerUrl}/tx/${submit.txnHash}`)
     }
+    setStep(2)
   }, [
     connection.config?.explorerUrl,
     setStep,
@@ -76,7 +85,7 @@ export function SuiBridgeFlow() {
         hasSourceNetwork: !!inputs.sourceChainId,
         hasDestinationNetwork: !!inputs.destinationChainId,
         pairAllowed,
-        hasReceiver: !!inputs.receiverAddress,
+        hasReceiver: hasValidReceiver,
         hasToken: !!inputs.token,
         amount: inputs.amount,
         isBalanceLoading: tokenInBalance.isLoading,
@@ -86,6 +95,8 @@ export function SuiBridgeFlow() {
         isInsufficientBalance,
         routeDisabled,
         routeDisabledLabel: 'Sui → Ethereum bridge unavailable',
+        submitDisabled: !oftConfigured,
+        submitDisabledLabel: 'OFT not configured',
         requiresApproval: false,
         isApproved: true,
         isBusyApprove: false,
@@ -97,13 +108,14 @@ export function SuiBridgeFlow() {
       connection.unsupported,
       feeQuote.isError,
       feeQuote.isLoading,
+      hasValidReceiver,
       inputs.amount,
       inputs.destinationChainId,
-      inputs.receiverAddress,
       inputs.sourceChainId,
       inputs.token,
       isBusySubmit,
       isInsufficientBalance,
+      oftConfigured,
       pairAllowed,
       routeDisabled,
       step,
@@ -128,21 +140,57 @@ export function SuiBridgeFlow() {
       setStep(1)
       return
     }
-    if (!canWriteSession(connection) || routeDisabled) return
+    if (!canWriteSession(connection) || routeDisabled || !oftConfigured || !hasValidReceiver) {
+      return
+    }
     void submit.onSubmit()
-  }, [connection, routeDisabled, setStep, step, submit])
+  }, [connection, hasValidReceiver, oftConfigured, routeDisabled, setStep, step, submit])
+
+  const onDestinationChange = useCallback(
+    (chainId: number | undefined) => {
+      setDestinationChainId(chainId)
+      setReceiverDraft('')
+      setInputs((prev) => ({ ...prev, amount: undefined }))
+    },
+    [setDestinationChainId, setInputs],
+  )
+
+  const onReset = useCallback(() => {
+    if (submit.txnHash) dismissedHashRef.current = submit.txnHash
+    setStep(0)
+    setInputs((prev) => ({ ...prev, amount: undefined }))
+    setTxnUrl(undefined)
+  }, [setInputs, setStep, setTxnUrl, submit.txnHash])
+
+  const gasSymbol = connection.config?.defaultGasToken?.symbol || 'SUI'
+  const feeRouteKey = `${inputs.sourceChainId ?? ''}:${inputs.destinationChainId ?? ''}:${inputs.token?.contractAddress ?? ''}`
+
+  // Sui submitFee is a native LZ fee proxy (not USD) — keep native formatting for both rows.
+  const feeLabel = useStickyValue(
+    feeQuote.data !== undefined ? formatNativeFee(feeQuote.data, gasSymbol) : undefined,
+    feeRouteKey,
+  )
+  const gasLabel = useStickyValue(
+    submitFee.data !== undefined ? formatNativeFee(submitFee.data, gasSymbol) : undefined,
+    feeRouteKey,
+  )
 
   return (
-    <BridgePanel
+    <BridgeFlowView
       step={step}
+      chainFamily="sui"
+      showHero={false}
       isConnected={connection.isConnected}
       unsupported={connection.unsupported}
+      connectedAddress={connection.address}
       sourceNetworks={getBridgeSourceNetworks('sui')}
       destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId, 'sui')}
       sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
       destinationChainId={inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined}
-      onSourceChange={() => undefined}
-      onDestinationChange={(chainId) => setDestinationChainId(chainId)}
+      onSourceChange={(chainId) => {
+        void selectActiveChain(chainId)
+      }}
+      onDestinationChange={onDestinationChange}
       tokens={inputs.tokens}
       token={inputs.token}
       onTokenChange={setToken}
@@ -161,28 +209,36 @@ export function SuiBridgeFlow() {
         setReceiverDraft(value)
         setReceiverAddress(sanitizeEVMAddress(value) as Address | undefined)
       }}
-      feeLabel={
-        feeQuote.data !== undefined
-          ? formatNativeFee(feeQuote.data, connection.config?.defaultGasToken?.symbol || 'SUI')
-          : undefined
-      }
-      gasLabel={
-        submitFee.data !== undefined
-          ? formatNativeFee(submitFee.data, connection.config?.defaultGasToken?.symbol || 'SUI')
-          : undefined
+      feeLabel={feeLabel}
+      networkFeeLabel={gasLabel}
+      bridgeFeeLabel={feeLabel}
+      sourceName={inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined}
+      destinationName={
+        inputs.destinationChainId ? getChainConfig(inputs.destinationChainId).name : undefined
       }
       protocolLabel="LayerZero"
       warning={
         routeDisabled
-          ? 'Sui → Ethereum bridging is temporarily disabled.'
-          : 'Make sure you control the receiver wallet on the destination network.'
+          ? {
+              type: 'warning',
+              title: 'Bridge under maintenance',
+              description:
+                'Sui → Ethereum bridging is temporarily unavailable. Please try again later.',
+            }
+          : !oftConfigured
+            ? {
+                type: 'warning',
+                title: 'Token not configured',
+                description: 'This token is not configured for Sui OFT bridging.',
+              }
+            : BRIDGE_RECEIVER_NOTICE
       }
       isFetchingFee={feeQuote.isLoading}
+      isLoadingFee={!feeLabel && feeQuote.isLoading}
       isInsufficientBalance={isInsufficientBalance}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled || !isApproved}
       primaryLoading={primary.loading}
-      statusMessage={submit.mutationStatus.isError ? 'Bridge failed' : undefined}
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountChange={onAmountChange}
@@ -196,11 +252,7 @@ export function SuiBridgeFlow() {
       }}
       onPrimary={onPrimary}
       onBack={() => setStep(0)}
-      onReset={() => {
-        setStep(0)
-        setInputs((prev) => ({ ...prev, amount: undefined }))
-        setTxnUrl(undefined)
-      }}
+      onReset={onReset}
     />
   )
 }

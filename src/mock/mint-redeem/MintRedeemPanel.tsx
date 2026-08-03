@@ -13,6 +13,7 @@ import {
 } from '@/features/_shared/trade-input-format'
 import type { MintRedeemMode } from '@/features/mint-redeem'
 import { down } from '@/lib/format'
+import { TokenDropdown } from '@/mock/buy/TokenDropdown'
 import * as styles from '@/mock/mint-redeem/mint-redeem-styles'
 
 export type MintRedeemPanelProps = {
@@ -48,10 +49,6 @@ export type MintRedeemPanelProps = {
   onBack?: () => void
   onReset?: () => void
   presetsDisabled?: boolean
-}
-
-function tokenKey(token: Token): string {
-  return `${token.contractAddress}:${token.symbol}`
 }
 
 export function MintRedeemPanel({
@@ -209,20 +206,13 @@ export function MintRedeemPanel({
             }}
           />
           {mode === 'mint' ? (
-            <select
-              style={styles.select}
-              value={variableToken ? tokenKey(variableToken) : ''}
-              onChange={(event) => {
-                const next = variableTokens?.find((t) => tokenKey(t) === event.target.value)
-                if (next) onVariableTokenChange(next)
-              }}
-            >
-              {(variableTokens || []).map((token) => (
-                <option key={tokenKey(token)} value={tokenKey(token)}>
-                  {token.symbol}
-                </option>
-              ))}
-            </select>
+            <TokenDropdown
+              token={variableToken}
+              tokens={variableTokens}
+              onChange={onVariableTokenChange}
+              size="sm"
+              label={`Select send token${variableToken ? `, currently ${variableToken.symbol}` : ''}`}
+            />
           ) : (
             <input
               style={{ ...styles.select, opacity: 0.85 }}
@@ -280,20 +270,13 @@ export function MintRedeemPanel({
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
           {mode === 'redeem' ? (
-            <select
-              style={styles.select}
-              value={variableToken ? tokenKey(variableToken) : ''}
-              onChange={(event) => {
-                const next = variableTokens?.find((t) => tokenKey(t) === event.target.value)
-                if (next) onVariableTokenChange(next)
-              }}
-            >
-              {(variableTokens || []).map((token) => (
-                <option key={tokenKey(token)} value={tokenKey(token)}>
-                  {token.symbol}
-                </option>
-              ))}
-            </select>
+            <TokenDropdown
+              token={variableToken}
+              tokens={variableTokens}
+              onChange={onVariableTokenChange}
+              size="sm"
+              label={`Select receive token${variableToken ? `, currently ${variableToken.symbol}` : ''}`}
+            />
           ) : (
             <input
               style={{ ...styles.select, opacity: 0.85 }}

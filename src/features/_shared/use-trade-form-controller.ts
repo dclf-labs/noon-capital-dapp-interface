@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from 'react'
 
 import {
   normalizePreviewQuote,
@@ -164,9 +164,20 @@ export type ResetOnSessionChangeOptions<TInputs> = {
   seedInputs?: () => Partial<TInputs>
 }
 
+type SeenSessionKey = {
+  key: string
+  address: string
+  chainId: string
+  connected: boolean
+}
+
 /**
- * Clear amounts / step / txn URL when wallet address, chain, or connection drops.
- * Also resets step + txn when the session becomes unsupported.
+ * Clear amounts / step / txn URL when wallet address or connection drops.
+ * Chain-only switches reseed tokens and reset step (like noon/dapp) but keep
+ * amounts so the buy card does not flash empty on EVM→EVM network changes.
+ *
+ * Identity reseeds run during render (not in an effect) so the first paint after a
+ * chain switch already has the new tokens — avoids a one-frame “reload” flash.
  */
 export function useResetOnSessionChange<TInputs extends object>({
   session,
@@ -175,45 +186,49 @@ export function useResetOnSessionChange<TInputs extends object>({
   setTxnUrl,
   seedInputs,
 }: ResetOnSessionChangeOptions<TInputs>) {
-  const seedRef = useRef(seedInputs)
+  const address = (session.address ?? '').toLowerCase()
+  const chainId = String(session.chainId ?? '')
+  const connected = Boolean(session.isConnected)
+  const identityKey = `${connected ? '1' : '0'}:${address}:${chainId}`
+  const [seen, setSeen] = useState<SeenSessionKey | null>(null)
 
-  useEffect(() => {
-    seedRef.current = seedInputs
-  })
+  if (seen?.key !== identityKey) {
+    const isFirst = seen === null
+    // Same wallet, still connected, only product chain changed (EVM→EVM).
+    const chainOnlyChange = Boolean(
+      seen &&
+      seen.connected &&
+      connected &&
+      seen.address !== '' &&
+      seen.address === address &&
+      seen.chainId !== chainId,
+    )
 
-  const identityKey = `${session.isConnected ? '1' : '0'}:${(session.address ?? '').toLowerCase()}:${String(session.chainId ?? '')}`
-  const prevIdentityRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    const prev = prevIdentityRef.current
-    if (prev === identityKey) return
-
-    const isFirst = prev === null
-    prevIdentityRef.current = identityKey
-
-    const seeded = seedRef.current?.() ?? {}
+    setSeen({ key: identityKey, address, chainId, connected })
+    const seeded = seedInputs?.() ?? {}
 
     if (isFirst) {
       if (Object.keys(seeded).length > 0) {
         setInputs((prevInputs) => ({ ...prevInputs, ...seeded }))
       }
-      return
+    } else {
+      setInputs((prevInputs) => {
+        const next = { ...prevInputs, ...seeded } as TInputs & {
+          amountIn?: unknown
+          amountOut?: unknown
+          amount?: unknown
+        }
+        if (!chainOnlyChange) {
+          if ('amountIn' in next) next.amountIn = undefined
+          if ('amountOut' in next) next.amountOut = undefined
+          if ('amount' in next) next.amount = undefined
+        }
+        return next as TInputs
+      })
+      setStep(0)
+      setTxnUrl?.(undefined)
     }
-
-    setInputs((prevInputs) => {
-      const next = { ...prevInputs, ...seeded } as TInputs & {
-        amountIn?: unknown
-        amountOut?: unknown
-        amount?: unknown
-      }
-      if ('amountIn' in next) next.amountIn = undefined
-      if ('amountOut' in next) next.amountOut = undefined
-      if ('amount' in next) next.amount = undefined
-      return next as TInputs
-    })
-    setStep(0)
-    setTxnUrl?.(undefined)
-  }, [identityKey, setInputs, setStep, setTxnUrl])
+  }
 
   useEffect(() => {
     if (session.unsupported) {

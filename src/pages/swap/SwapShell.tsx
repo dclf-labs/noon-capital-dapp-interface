@@ -1,43 +1,9 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
-import { useResolvedChain } from '@/hooks/connection'
-import { NetworkSwitcher } from '@/mock/swap/NetworkSwitcher'
-import * as styles from '@/mock/swap/trade-styles'
-
+/**
+ * Buy / Sell route shell. Product chrome (hero tabs) lives in each page view;
+ * app chrome comes from `AppShell`.
+ */
 export function SwapShell() {
-  const { chainFamily, config } = useResolvedChain()
-
-  return (
-    <div style={styles.page}>
-      <header style={{ display: 'grid', gap: 8 }}>
-        <h1 style={{ margin: 0, fontSize: 22 }}>Buy / Sell</h1>
-        <p style={styles.muted}>
-          Active network: <strong>{config.name}</strong> ({chainFamily})
-        </p>
-        <NetworkSwitcher />
-        <nav style={styles.row}>
-          <NavLink
-            to="/swap/buy"
-            style={({ isActive }) => ({
-              ...styles.buttonSecondary,
-              ...(isActive ? { background: '#111', color: '#fff' } : null),
-            })}
-          >
-            Buy
-          </NavLink>
-          <NavLink
-            to="/swap/sell"
-            style={({ isActive }) => ({
-              ...styles.buttonSecondary,
-              ...(isActive ? { background: '#111', color: '#fff' } : null),
-            })}
-          >
-            Sell
-          </NavLink>
-        </nav>
-      </header>
-
-      <Outlet />
-    </div>
-  )
+  return <Outlet />
 }

@@ -22,6 +22,9 @@ export type BridgePrimaryParams = {
   isInsufficientBalance: boolean
   routeDisabled: boolean
   routeDisabledLabel?: string
+  /** Extra disabled gate (e.g. Sui OFT missing) with its own label. */
+  submitDisabled?: boolean
+  submitDisabledLabel?: string
   requiresApproval: boolean
   isApproved: boolean
   tokenSymbol?: string
@@ -51,6 +54,8 @@ export function getBridgePrimaryAction({
   isInsufficientBalance,
   routeDisabled,
   routeDisabledLabel,
+  submitDisabled,
+  submitDisabledLabel,
   requiresApproval,
   isApproved,
   tokenSymbol,
@@ -95,6 +100,13 @@ export function getBridgePrimaryAction({
   if (routeDisabled) {
     return {
       label: routeDisabledLabel || 'Bridge unavailable',
+      disabled: true,
+      loading: false,
+    }
+  }
+  if (submitDisabled) {
+    return {
+      label: submitDisabledLabel || 'Bridge unavailable',
       disabled: true,
       loading: false,
     }

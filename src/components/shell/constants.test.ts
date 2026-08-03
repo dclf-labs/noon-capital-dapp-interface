@@ -17,11 +17,11 @@ describe('NETWORK_SELECTOR_Z_INDEX', () => {
 })
 
 describe('shellNavForPath', () => {
-  it('marks Home active only on `/`', () => {
-    const home = shellNavForPath('/').find((item) => item.id === 'home')
-    const vaults = shellNavForPath('/').find((item) => item.id === 'vaults')
-    expect(home?.active).toBe(true)
-    expect(vaults?.active).toBe(false)
+  it('marks Home active on `/` and Buy (`/swap`)', () => {
+    expect(shellNavForPath('/').find((item) => item.id === 'home')?.active).toBe(true)
+    expect(shellNavForPath('/').find((item) => item.id === 'vaults')?.active).toBe(false)
+    expect(shellNavForPath('/swap/buy').find((item) => item.id === 'home')?.active).toBe(true)
+    expect(shellNavForPath('/swap/buy').find((item) => item.id === 'vaults')?.active).toBe(false)
   })
 
   it('marks Vaults active on `/vaults` and nested vault routes', () => {

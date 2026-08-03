@@ -22,7 +22,8 @@ import { type FormInputs } from '@/features/bridge/context/evm/types'
 import useBridgeAllowance from '@/features/bridge/hooks/evm/useBridgeAllowance'
 import useBridgeFeeQuote from '@/features/bridge/hooks/evm/useBridgeFeeQuote'
 import useBridgeSubmitFee from '@/features/bridge/hooks/evm/useBridgeSubmitFee'
-import { useResolvedChain } from '@/hooks/connection'
+import { applyBridgeTokenSync } from '@/features/bridge/lib/sync-bridge-tokens'
+import { useResolvedChain, useSelectActiveChain } from '@/hooks/connection'
 import { useReadOnlySession } from '@/hooks/connection/useReadOnlySession'
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import useEvmDestinationTokenBalance from '@/hooks/on-chain/evm/useDestinationTokenBalance'
@@ -30,9 +31,13 @@ import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
 import useStarknetDestinationTokenBalance from '@/hooks/on-chain/starknet/useDestinationTokenBalance'
 import useSuiDestinationTokenBalance from '@/hooks/on-chain/sui/useDestinationTokenBalance'
 import type { SuiAddress } from '@/lib/address'
-import { getActiveEvmChainIds } from '@/lib/chain'
+import { getActiveEvmChainIds, isEvmChainId } from '@/lib/chain'
 import { type EVMConnection } from '@/lib/connection'
 import { toNum } from '@/lib/format'
+import { useActiveChainStore } from '@/state/active-chain'
+
+/** Cover the gap after `isPending` clears before wagmi reports the new chain. */
+const EVM_SWITCH_UNSUPPORTED_GRACE_MS = 2000
 
 type DestinationNetworkType = 'starknet' | 'sui' | 'evm'
 
@@ -77,7 +82,10 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const prevSourceChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
   const prevDestinationChainIdRef = useRef<ProtocolChainId | undefined>(undefined)
   const prevChainFamilyRef = useRef<'evm' | 'starknet' | 'sui' | undefined>(undefined)
+  const prevTokenRouteKeyRef = useRef('')
 
+  const selectedChainId = useActiveChainStore((s) => s.selectedChainId)
+  const { isSwitchingEvmNetwork } = useSelectActiveChain()
   const { chainId: resolvedChainId, chainFamily: resolvedChainFamily } = useResolvedChain()
   const sourceChainId = inputs.sourceChainId
     ? (toNum(inputs.sourceChainId) as ProtocolChainId)
@@ -86,7 +94,31 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     ? (toNum(inputs.destinationChainId) as ProtocolChainId)
     : undefined
 
-  const connection = useEvmTargetSession(sourceChainId, { fallbackToDefault: false })
+  const liveConnection = useEvmTargetSession(sourceChainId, { fallbackToDefault: false })
+
+  // EVM→EVM: keep queries + banner quiet while the wallet catches up (same as Buy).
+  const [softUnsupported, setSoftUnsupported] = useState(false)
+  useEffect(() => {
+    if (!isEvmChainId(selectedChainId)) return
+    setSoftUnsupported(true)
+    const timer = window.setTimeout(
+      () => setSoftUnsupported(false),
+      EVM_SWITCH_UNSUPPORTED_GRACE_MS,
+    )
+    return () => window.clearTimeout(timer)
+  }, [selectedChainId])
+  useEffect(() => {
+    if (!liveConnection.unsupported) setSoftUnsupported(false)
+  }, [liveConnection.unsupported])
+
+  const isEvmSwitchSettling = isSwitchingEvmNetwork || softUnsupported
+  const connection = useMemo(
+    () => ({
+      ...liveConnection,
+      unsupported: Boolean(liveConnection.unsupported && !isEvmSwitchSettling),
+    }),
+    [liveConnection, isEvmSwitchSettling],
+  )
   const evmDestinationConnection = useReadOnlySession(destinationChainId, inputs.receiverAddress)
   const starknetDestinationConnection = useReadOnlySession(
     starknetConfig.id,
@@ -403,14 +435,15 @@ export const BridgeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             normalizedDestinationBridgeTokens.has(tokenSymbol.toUpperCase()),
           )
     const tokens = getTokens(connection.config, bridgeTokens)
-    const token = tokens?.at(0)
+    const routeKey = `${connection.config?.id ?? ''}:${destinationChainId ?? ''}:${bridgeTokens.join(',')}`
 
-    setInputs((prev) => ({
-      ...prev,
-      token,
-      tokens,
-    }))
-    setStep(0)
+    applyBridgeTokenSync(setInputs, tokens)
+
+    // Reset confirm/success only when the route identity actually changes.
+    if (prevTokenRouteKeyRef.current && prevTokenRouteKeyRef.current !== routeKey) {
+      setStep(0)
+    }
+    prevTokenRouteKeyRef.current = routeKey
   }, [connection.config, destinationConnection.config, destinationChainId, setInputs, setStep])
 
   // Initialize source chain from connected chain, destination as undefined

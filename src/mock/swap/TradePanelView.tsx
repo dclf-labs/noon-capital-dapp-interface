@@ -13,6 +13,7 @@ import {
 } from '@/features/_shared/trade-input-format'
 import type { TradeMode } from '@/features/_shared/trade-primary'
 import { down } from '@/lib/format'
+import { TokenDropdown } from '@/mock/buy/TokenDropdown'
 import * as styles from '@/mock/swap/trade-styles'
 
 export type TradePanelViewProps = {
@@ -48,10 +49,6 @@ export type TradePanelViewProps = {
   onBack?: () => void
   onReset?: () => void
   presetsDisabled?: boolean
-}
-
-function tokenOptionKey(token: Token): string {
-  return `${token.contractAddress}:${token.symbol}`
 }
 
 export function TradePanelView({
@@ -211,20 +208,13 @@ export function TradePanelView({
               return !parts[1] || parts[1].length <= TRADE_PAY_DECIMALS
             }}
           />
-          <select
-            style={styles.select}
-            value={tokenIn ? tokenOptionKey(tokenIn) : ''}
-            onChange={(event) => {
-              const next = tokensIn?.find((token) => tokenOptionKey(token) === event.target.value)
-              if (next) onTokenInChange(next)
-            }}
-          >
-            {(tokensIn || []).map((token) => (
-              <option key={tokenOptionKey(token)} value={tokenOptionKey(token)}>
-                {token.symbol}
-              </option>
-            ))}
-          </select>
+          <TokenDropdown
+            token={tokenIn}
+            tokens={tokensIn}
+            onChange={onTokenInChange}
+            size="sm"
+            label={`Select pay token${tokenIn ? `, currently ${tokenIn.symbol}` : ''}`}
+          />
         </div>
         <div style={styles.row}>
           <span style={styles.muted}>{formatUsd(amountInUsd)}</span>
@@ -274,20 +264,13 @@ export function TradePanelView({
             // Field shows ≤2dp; title keeps full stored 6dp for hover/debug.
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
-          <select
-            style={styles.select}
-            value={tokenOut ? tokenOptionKey(tokenOut) : ''}
-            onChange={(event) => {
-              const next = tokensOut?.find((token) => tokenOptionKey(token) === event.target.value)
-              if (next) onTokenOutChange(next)
-            }}
-          >
-            {(tokensOut || []).map((token) => (
-              <option key={tokenOptionKey(token)} value={tokenOptionKey(token)}>
-                {token.symbol}
-              </option>
-            ))}
-          </select>
+          <TokenDropdown
+            token={tokenOut}
+            tokens={tokensOut}
+            onChange={onTokenOutChange}
+            size="sm"
+            label={`Select receive token${tokenOut ? `, currently ${tokenOut.symbol}` : ''}`}
+          />
         </div>
         {unitRateLabel ? <p style={styles.muted}>Rate {unitRateLabel}</p> : null}
         {feeLabel ? <p style={styles.muted}>Est. fee {feeLabel}</p> : null}

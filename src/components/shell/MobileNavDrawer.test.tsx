@@ -81,10 +81,17 @@ describe('MobileNavDrawer', () => {
     expect(props.onClose).toHaveBeenCalled()
   })
 
-  it('navigates and closes when an enabled link is clicked', async () => {
-    const user = userEvent.setup()
+  it('waits for the selection pill before closing after a nav click', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     const { props } = renderDrawer()
-    await user.click(screen.getByRole('link', { name: 'Vaults' }))
-    expect(props.onClose).toHaveBeenCalled()
+
+    await user.click(screen.getByRole('link', { name: 'Home' }))
+    expect(props.onClose).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(260)
+    expect(props.onClose).toHaveBeenCalledTimes(1)
+
+    vi.useRealTimers()
   })
 })

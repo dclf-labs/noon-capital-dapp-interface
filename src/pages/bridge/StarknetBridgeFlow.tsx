@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
-import { formatBalanceLabel, formatNativeFee } from '@/features/_shared/trade-display'
+import {
+  formatBalanceLabel,
+  formatNativeFee,
+  formatNativeFeeDetail,
+  formatUsd,
+} from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
 import {
   useBridgeBalance,
@@ -14,13 +19,17 @@ import useBridgeSubmit from '@/features/bridge/hooks/starknet/useBridgeSubmit'
 import useUpdateBridge from '@/features/bridge/hooks/starknet/useUpdateBridge'
 import { getBridgePrimaryAction } from '@/features/bridge/primary'
 import { isBridgePairAllowed } from '@/features/bridge/route'
-import { type Address, sanitizeEVMAddress } from '@/lib/address'
+import { useSelectActiveChain } from '@/hooks/connection'
+import { useStickyValue } from '@/hooks/ui/useStickyValue'
+import { type Address, isEVMAddressValid, sanitizeEVMAddress } from '@/lib/address'
+import { getChainConfig } from '@/lib/chain'
 import { canWriteSession } from '@/lib/wallet-session'
-import { BridgePanel } from '@/mock/bridge/BridgePanel'
+import { BRIDGE_RECEIVER_NOTICE } from '@/mock/bridge/constants'
 import {
   getBridgeDestinationNetworks,
   getBridgeSourceNetworks,
 } from '@/pages/bridge/bridge-networks'
+import { BridgeFlowView } from '@/pages/bridge/BridgeFlowView'
 
 export function StarknetBridgeFlow() {
   const { inputs, connection, destinationConnection, step, setStep, setInputs, tokenOut } =
@@ -29,6 +38,7 @@ export function StarknetBridgeFlow() {
   const { amountInUsd, feeQuote } = useBridgePrice()
   const { submitFee, txnUrl, setTxnUrl } = useBridgeTxn()
   const { setAmount, setToken, setDestinationChainId, setReceiverAddress } = useUpdateBridge()
+  const { selectActiveChain } = useSelectActiveChain()
   const submit = useBridgeSubmit(
     connection,
     inputs.token,
@@ -40,6 +50,8 @@ export function StarknetBridgeFlow() {
   )
 
   const [receiverDraft, setReceiverDraft] = useState('')
+  // Prevent success effect from re-opening step 2 after "Bridge more" with the same tx.
+  const dismissedHashRef = useRef<string | undefined>(undefined)
 
   const inputModel = useTradeInputModel({
     amount: inputs.amount,
@@ -50,14 +62,15 @@ export function StarknetBridgeFlow() {
 
   const pairAllowed = isBridgePairAllowed(inputs.sourceChainId, inputs.destinationChainId)
   const isBusySubmit = submit.mutationStatus.isPending
+  const hasValidReceiver = isEVMAddressValid(inputs.receiverAddress as Address | undefined)
 
   useEffect(() => {
-    if (submit.mutationStatus.isSuccess) {
-      if (submit.txnHash && connection.config?.explorerUrl) {
-        setTxnUrl(`${connection.config.explorerUrl}/tx/${submit.txnHash}`)
-      }
-      setStep(2)
+    if (!submit.mutationStatus.isSuccess || !submit.txnHash) return
+    if (dismissedHashRef.current === submit.txnHash) return
+    if (connection.config?.explorerUrl) {
+      setTxnUrl(`${connection.config.explorerUrl}/tx/${submit.txnHash}`)
     }
+    setStep(2)
   }, [
     connection.config?.explorerUrl,
     setStep,
@@ -75,7 +88,7 @@ export function StarknetBridgeFlow() {
         hasSourceNetwork: !!inputs.sourceChainId,
         hasDestinationNetwork: !!inputs.destinationChainId,
         pairAllowed,
-        hasReceiver: !!inputs.receiverAddress,
+        hasReceiver: hasValidReceiver,
         hasToken: !!inputs.token,
         amount: inputs.amount,
         isBalanceLoading: tokenInBalance.isLoading,
@@ -95,9 +108,9 @@ export function StarknetBridgeFlow() {
       connection.unsupported,
       feeQuote.isError,
       feeQuote.isLoading,
+      hasValidReceiver,
       inputs.amount,
       inputs.destinationChainId,
-      inputs.receiverAddress,
       inputs.sourceChainId,
       inputs.token,
       isBusySubmit,
@@ -125,21 +138,58 @@ export function StarknetBridgeFlow() {
       setStep(1)
       return
     }
-    if (!canWriteSession(connection)) return
+    if (!canWriteSession(connection) || !hasValidReceiver) return
     submit.onSubmit()
-  }, [connection, setStep, step, submit])
+  }, [connection, hasValidReceiver, setStep, step, submit])
+
+  const onDestinationChange = useCallback(
+    (chainId: number | undefined) => {
+      setDestinationChainId(chainId)
+      setReceiverDraft('')
+      setInputs((prev) => ({ ...prev, amount: undefined }))
+    },
+    [setDestinationChainId, setInputs],
+  )
+
+  const onReset = useCallback(() => {
+    if (submit.txnHash) dismissedHashRef.current = submit.txnHash
+    setStep(0)
+    setInputs((prev) => ({ ...prev, amount: undefined }))
+    setTxnUrl(undefined)
+  }, [setInputs, setStep, setTxnUrl, submit.txnHash])
+
+  const gasSymbol = connection.config?.defaultGasToken?.symbol || 'STRK'
+  const feeRouteKey = `${inputs.sourceChainId ?? ''}:${inputs.destinationChainId ?? ''}:${inputs.token?.contractAddress ?? ''}`
+
+  const feeLabel = useStickyValue(
+    feeQuote.data !== undefined ? formatNativeFee(feeQuote.data, gasSymbol) : undefined,
+    feeRouteKey,
+  )
+  const gasLabel = useStickyValue(
+    submitFee.isReady ? formatUsd(submitFee.data) : undefined,
+    feeRouteKey,
+  )
+  const gasNativeLabel = useStickyValue(
+    submitFee.isReady ? formatNativeFeeDetail(submitFee.native, gasSymbol) : undefined,
+    feeRouteKey,
+  )
 
   return (
-    <BridgePanel
+    <BridgeFlowView
       step={step}
+      chainFamily="starknet"
+      showHero={false}
       isConnected={connection.isConnected}
       unsupported={connection.unsupported}
+      connectedAddress={connection.address}
       sourceNetworks={getBridgeSourceNetworks('starknet')}
       destinationNetworks={getBridgeDestinationNetworks(inputs.sourceChainId, 'starknet')}
       sourceChainId={inputs.sourceChainId ? Number(inputs.sourceChainId) : undefined}
       destinationChainId={inputs.destinationChainId ? Number(inputs.destinationChainId) : undefined}
-      onSourceChange={() => undefined}
-      onDestinationChange={(chainId) => setDestinationChainId(chainId)}
+      onSourceChange={(chainId) => {
+        void selectActiveChain(chainId)
+      }}
+      onDestinationChange={onDestinationChange}
       tokens={inputs.tokens}
       token={inputs.token}
       onTokenChange={setToken}
@@ -158,24 +208,22 @@ export function StarknetBridgeFlow() {
         setReceiverDraft(value)
         setReceiverAddress(sanitizeEVMAddress(value) as Address | undefined)
       }}
-      feeLabel={
-        feeQuote.data !== undefined
-          ? formatNativeFee(feeQuote.data, connection.config?.defaultGasToken?.symbol || 'ETH')
-          : undefined
-      }
-      gasLabel={
-        submitFee.data !== undefined
-          ? formatNativeFee(submitFee.data, connection.config?.defaultGasToken?.symbol || 'ETH')
-          : undefined
+      feeLabel={feeLabel}
+      networkFeeLabel={gasLabel}
+      networkFeeNativeLabel={gasNativeLabel}
+      bridgeFeeLabel={feeLabel}
+      sourceName={inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined}
+      destinationName={
+        inputs.destinationChainId ? getChainConfig(inputs.destinationChainId).name : undefined
       }
       protocolLabel="Hyperlane"
-      warning="Make sure you control the receiver wallet on the destination network."
+      warning={BRIDGE_RECEIVER_NOTICE}
       isFetchingFee={feeQuote.isLoading}
+      isLoadingFee={!feeLabel && feeQuote.isLoading}
       isInsufficientBalance={isInsufficientBalance}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled || !isApproved}
       primaryLoading={primary.loading}
-      statusMessage={submit.mutationStatus.isError ? 'Bridge failed' : undefined}
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountChange={onAmountChange}
@@ -189,11 +237,7 @@ export function StarknetBridgeFlow() {
       }}
       onPrimary={onPrimary}
       onBack={() => setStep(0)}
-      onReset={() => {
-        setStep(0)
-        setInputs((prev) => ({ ...prev, amount: undefined }))
-        setTxnUrl(undefined)
-      }}
+      onReset={onReset}
     />
   )
 }

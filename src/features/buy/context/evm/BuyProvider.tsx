@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { getTokens } from '@/config'
 import { getAmountUsd } from '@/features/_shared/trade-amounts'
@@ -20,10 +20,14 @@ import { type FormInputs } from '@/features/buy/context/evm/types'
 import useBuyAllowance from '@/features/buy/hooks/evm/useBuyAllowance'
 import useBuySubmitFee from '@/features/buy/hooks/evm/useBuySubmitFee'
 import usePreviewBuy from '@/features/buy/hooks/evm/usePreviewBuy'
+import { useSelectActiveChain } from '@/hooks/connection/useSelectActiveChain'
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
 import { isEvmChainId } from '@/lib/chain'
 import { useActiveChainStore } from '@/state/active-chain'
+
+/** Cover the gap after `isPending` clears before wagmi reports the new chain. */
+const EVM_SWITCH_UNSUPPORTED_GRACE_MS = 2000
 
 const INITIAL_BUY_INPUTS: FormInputs = {
   tokenIn: undefined,
@@ -39,8 +43,35 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     useTradeFormController(INITIAL_BUY_INPUTS)
 
   const selectedChainId = useActiveChainStore((s) => s.selectedChainId)
-  const connection = useEvmTargetSession(
+  const { isSwitchingEvmNetwork } = useSelectActiveChain()
+  const liveConnection = useEvmTargetSession(
     isEvmChainId(selectedChainId) ? selectedChainId : undefined,
+  )
+
+  // EVM→EVM only: family toggles swap trees (no flash). Same tree must not paint the
+  // mismatch banner / disable queries during the wallet catch-up window.
+  const [softUnsupported, setSoftUnsupported] = useState(false)
+  useEffect(() => {
+    if (!isEvmChainId(selectedChainId)) return
+    setSoftUnsupported(true)
+    const timer = window.setTimeout(
+      () => setSoftUnsupported(false),
+      EVM_SWITCH_UNSUPPORTED_GRACE_MS,
+    )
+    return () => window.clearTimeout(timer)
+  }, [selectedChainId])
+  useEffect(() => {
+    if (!liveConnection.unsupported) setSoftUnsupported(false)
+  }, [liveConnection.unsupported])
+
+  const isEvmSwitchSettling = isSwitchingEvmNetwork || softUnsupported
+
+  const connection = useMemo(
+    () => ({
+      ...liveConnection,
+      unsupported: Boolean(liveConnection.unsupported && !isEvmSwitchSettling),
+    }),
+    [liveConnection, isEvmSwitchSettling],
   )
 
   // Balances/allowance follow the live token so Half/Max stay correct while amount debounces.
@@ -80,6 +111,11 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setInputs((prev) => (prev.amountOut === undefined ? prev : { ...prev, amountOut: undefined }))
   }, [preview.isError, setInputs, step])
 
+  const inputsRef = useRef(inputs)
+  useEffect(() => {
+    inputsRef.current = inputs
+  }, [inputs])
+
   useResetOnSessionChange({
     session: {
       address: connection.address,
@@ -93,11 +129,18 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     seedInputs: () => {
       const tokensIn = getTokens(connection.config, connection.config?.sellTokens)
       const tokensOut = getTokens(connection.config, connection.config?.buyTokens)
+      const prev = inputsRef.current
+      const keepIn = prev.tokenIn
+        ? tokensIn?.find((token) => token.symbol === prev.tokenIn?.symbol)
+        : undefined
+      const keepOut = prev.tokenOut
+        ? tokensOut?.find((token) => token.symbol === prev.tokenOut?.symbol)
+        : undefined
       return {
         tokensIn,
         tokensOut,
-        tokenIn: tokensIn?.at(0),
-        tokenOut: tokensOut?.at(0),
+        tokenIn: keepIn ?? tokensIn?.at(0),
+        tokenOut: keepOut ?? tokensOut?.at(0),
       }
     },
   })
@@ -128,10 +171,19 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       price,
       tokenPrice,
       amountInUsd,
-      isFetchingQuote: preview.isLoading || isDebouncing,
-      isQuoteError: preview.isError,
+      // Avoid amount-field pulse while the new chain’s quote pipeline catches up.
+      isFetchingQuote: isEvmSwitchSettling ? false : preview.isLoading || isDebouncing,
+      isQuoteError: isEvmSwitchSettling ? false : preview.isError,
     }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, preview.isError, isDebouncing],
+    [
+      amountInUsd,
+      price,
+      tokenPrice,
+      preview.isLoading,
+      preview.isError,
+      isDebouncing,
+      isEvmSwitchSettling,
+    ],
   )
 
   const txnValue = useMemo(

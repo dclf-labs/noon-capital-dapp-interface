@@ -59,6 +59,7 @@
     "@layerzerolabs/lz-v2-utilities": "^3.0.168",
     "@mysten/dapp-kit-react": "^2.1.14",
     "@mysten/sui": "^2.23.1",
+    "@radix-ui/react-popover": "^1.1.23",
     "@reown/appkit": "^1.8.23",
     "@reown/appkit-adapter-wagmi": "^1.8.23",
     "@starknet-react/chains": "^5.0.3",

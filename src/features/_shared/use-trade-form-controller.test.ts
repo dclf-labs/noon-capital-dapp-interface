@@ -281,7 +281,7 @@ describe('trade form helpers', () => {
     expect(result.current.inputs.route).toEqual([])
   })
 
-  it('clears amounts and txn on session identity change', () => {
+  it('clears amounts and txn on wallet address change', () => {
     const { result, rerender } = renderHook(
       ({ address }: { address?: string }) => {
         const form = useTradeFormController<{ amountIn?: number; amountOut?: number }>({
@@ -310,6 +310,54 @@ describe('trade form helpers', () => {
     expect(result.current.inputs.amountIn).toBeUndefined()
     expect(result.current.inputs.amountOut).toBeUndefined()
     expect(result.current.txnUrl).toBeUndefined()
+    expect(result.current.step).toBe(0)
+  })
+
+  it('keeps amounts on chain-only change and reseeds tokens', () => {
+    const { result, rerender } = renderHook(
+      ({ chainId }: { chainId: number }) => {
+        const form = useTradeFormController<{
+          amountIn?: number
+          amountOut?: number
+          tokenIn?: { symbol: string }
+        }>({
+          amountIn: undefined,
+          amountOut: undefined,
+          tokenIn: undefined,
+        })
+        useResetOnSessionChange({
+          session: {
+            address: '0x1111111111111111111111111111111111111111',
+            chainId,
+            isConnected: true,
+            unsupported: false,
+          },
+          setInputs: form.setInputs,
+          setStep: form.setStep,
+          setTxnUrl: form.setTxnUrl,
+          seedInputs: () => ({
+            tokenIn: { symbol: chainId === 1 ? 'ETH' : 'USDC' },
+          }),
+        })
+        return form
+      },
+      { initialProps: { chainId: 1 } },
+    )
+
+    act(() => {
+      result.current.setInputs({
+        amountIn: 5,
+        amountOut: 4,
+        tokenIn: { symbol: 'ETH' },
+      })
+      result.current.setStep(1)
+    })
+
+    rerender({ chainId: 8453 })
+
+    expect(result.current.inputs.amountIn).toBe(5)
+    expect(result.current.inputs.amountOut).toBe(4)
+    expect(result.current.inputs.tokenIn?.symbol).toBe('USDC')
     expect(result.current.step).toBe(0)
   })
 

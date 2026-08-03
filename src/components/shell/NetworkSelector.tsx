@@ -4,7 +4,11 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { ChevronDownIcon } from '@/assets/icons'
-import { NETWORK_SELECTOR_Z_INDEX, SHELL_SELECTION_SPRING } from '@/components/shell/constants'
+import {
+  NETWORK_SELECTOR_Z_INDEX,
+  SHELL_SELECTION_CLOSE_MS,
+  SHELL_SELECTION_SPRING,
+} from '@/components/shell/constants'
 import { chainIconSrc, NETWORK_OPTIONS } from '@/components/shell/network'
 import { computeNetworkPanelCoords, isHeaderNetworkChainId } from '@/components/shell/network-panel'
 import { useSelectActiveChain } from '@/hooks/connection'
@@ -13,7 +17,6 @@ import { cn } from '@/lib/utils'
 const chip = 'flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white'
 
 const PANEL_EASE = [0.22, 1, 0.36, 1] as const
-const CLOSE_AFTER_SELECT_MS = 260
 
 /**
  * Header network dropdown — panel is portaled to `document.body` so it stacks
@@ -87,7 +90,7 @@ export function NetworkSelector() {
     closeTimerRef.current = setTimeout(() => {
       closeTimerRef.current = null
       setOpen(false)
-    }, CLOSE_AFTER_SELECT_MS)
+    }, SHELL_SELECTION_CLOSE_MS)
   }
 
   const panel =
@@ -110,9 +113,8 @@ export function NetworkSelector() {
               zIndex: NETWORK_SELECTOR_Z_INDEX,
             }}
             className={cn(
-              'flex max-h-[min(420px,70dvh)] w-[220px] flex-col gap-1 overflow-y-auto',
-              'rounded-lg border border-[#d4d1cf] bg-white p-[12px]',
-              'shadow-[0_12px_40px_rgba(17,17,17,0.08)]',
+              'flex max-h-[min(420px,70dvh)] w-[220px] flex-col overflow-y-auto',
+              'rounded-xl border border-stone-200 bg-white p-1 shadow-lg',
             )}
           >
             {NETWORK_OPTIONS.map((network) => {
@@ -125,11 +127,11 @@ export function NetworkSelector() {
                   aria-checked={selected}
                   onClick={() => selectNetwork(network.chainId)}
                   className={cn(
-                    'relative flex h-10 w-full items-center gap-1.5 rounded-lg pr-3 pl-2 transition-colors',
+                    'relative flex h-10 w-full items-center gap-2 rounded-lg px-2 transition-colors',
                     'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
                     selected
                       ? 'text-white'
-                      : 'text-stone-500 hover:text-primary focus-visible:text-primary',
+                      : 'text-stone-700 hover:text-primary focus-visible:text-primary',
                   )}
                 >
                   {selected ? (
@@ -141,19 +143,19 @@ export function NetworkSelector() {
                   ) : null}
                   <span
                     className={cn(
-                      'relative z-10 size-6 shrink-0 overflow-hidden rounded-[5px]',
+                      'relative z-10 size-5 shrink-0 overflow-hidden rounded-md',
                       selected ? 'bg-white/10' : 'bg-stone-100',
                     )}
                   >
                     <img
                       src={network.iconSrc}
                       alt=""
-                      width={24}
-                      height={24}
+                      width={20}
+                      height={20}
                       className="size-full object-cover"
                     />
                   </span>
-                  <span className="relative z-10 truncate text-base leading-6 font-medium">
+                  <span className="relative z-10 truncate text-sm leading-5 font-book">
                     {network.name}
                   </span>
                 </button>

@@ -12,7 +12,9 @@ export {
 } from './trade-amounts'
 export {
   formatBalanceLabel,
+  formatConfirmAmount,
   formatNativeFee,
+  formatNativeFeeDetail,
   formatTokenAmount,
   formatUnitRate,
   formatUsd,

@@ -65,11 +65,13 @@ describe('AppShell', () => {
 
     // Content row wraps [sidebar | header+main column]; footer is after that row.
     const contentRow = sidebar.parentElement?.parentElement
-    expect(contentRow).toBeTruthy()
+    if (!(contentRow instanceof HTMLElement)) {
+      throw new Error('expected AppShell content row')
+    }
     expect(contentRow).toContainElement(header)
     expect(sidebar.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(
-      contentRow?.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING,
+      contentRow.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
   })
 })

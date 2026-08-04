@@ -5,7 +5,7 @@
  *
  * Available Suisse Int'l cuts: Regular 400, Book 450, Medium 500, SemiBold 600, Bold 700.
  * Figma also references Suisse Light — we do not ship that cut; map Light → Regular 400.
- * Denton file is "Denton Test"; CSS family name stays `Denton` (same as old dapp).
+ * Denton file is "Denton Test"; CSS family name stays `Denton`.
  */
 
 @layer base {

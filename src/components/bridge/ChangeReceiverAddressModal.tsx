@@ -39,7 +39,7 @@ const FAMILY_COPY: Record<ReceiverAddressFamily, FamilyCopy> = {
     placeholder: '0x…',
     submitLabel: 'Change address',
     noticeTitle:
-      'Before proceeding, please ensure that you can access the wallet address on the receiving chain.',
+      'Before proceeding, please ensure that you can access the entered wallet address on the receiving chain.',
     noticeDescription:
       'This is especially important if you use wallets like Gnosis Safe. If you cannot access this address, please change the receiving wallet address to avoid any issues.',
   },
@@ -47,17 +47,19 @@ const FAMILY_COPY: Record<ReceiverAddressFamily, FamilyCopy> = {
     label: 'Enter the Starknet address:',
     placeholder: '0x…',
     submitLabel: 'Set Starknet address',
-    noticeTitle: 'Starknet address required',
+    noticeTitle:
+      'Before proceeding, please ensure that you can access this Starknet wallet on the destination network.',
     noticeDescription:
-      'When bridging to Starknet, you need to provide a valid Starknet wallet address. Please ensure you have access to this address on Starknet.',
+      'Bridged assets are sent to Starknet only. An Ethereum (EVM) address will not work here. If you use a Starknet wallet such as Argent or Braavos, confirm you control this account before continuing.',
   },
   sui: {
     label: 'Enter the Sui address:',
     placeholder: '0x…',
     submitLabel: 'Set Sui address',
-    noticeTitle: 'Sui address required',
+    noticeTitle:
+      'Before proceeding, please ensure that you can access this Sui wallet on the destination network.',
     noticeDescription:
-      'When bridging to Sui, you need to provide a valid Sui wallet address. Please ensure you have access to this address on Sui.',
+      'Bridged assets are sent to Sui only. An Ethereum (EVM) address will not work here. Double-check the address in your Sui wallet before continuing to avoid losing access to your funds.',
   },
 }
 
@@ -93,10 +95,14 @@ export function ChangeReceiverAddressModal({
 
   const debounced = useDebounce(draft, 350)
   const isDebouncing = debounced !== draft
-  // Family-strict Starknet / Sui / EVM validation (EVM paste rejected on Starknet & Sui).
   const validationError = getReceiverAddressError(family, debounced)
   const isValid = Boolean(debounced.trim()) && validationError == null
   const submitDisabled = !isValid || isDebouncing
+  const primaryLabel = isDebouncing
+    ? 'Validating address'
+    : validationError
+      ? 'Invalid address'
+      : copy.submitLabel
 
   const close = useCallback(() => onOpenChange?.(false), [onOpenChange])
 
@@ -111,7 +117,6 @@ export function ChangeReceiverAddressModal({
 
   const onSubmit = useCallback(() => {
     if (submitDisabled) return
-    // Re-validate + sanitize on submit — Starknet / Sui never accept EVM addresses.
     if (getReceiverAddressError(family, debounced)) return
     const sanitized = sanitizeReceiverAddress(family, debounced)
     if (!sanitized) return
@@ -160,7 +165,7 @@ export function ChangeReceiverAddressModal({
                   id={titleId}
                   className="font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900 md:text-[32px] md:leading-10 md:tracking-[-1.6px]"
                 >
-                  Change Address
+                  Change receiving address
                 </h2>
               </div>
               <button
@@ -235,7 +240,7 @@ export function ChangeReceiverAddressModal({
                     : 'bg-accent text-stone-50 transition-opacity hover:opacity-90',
                 )}
               >
-                {isDebouncing ? 'Processing address' : copy.submitLabel}
+                {primaryLabel}
               </button>
             </div>
           </motion.div>

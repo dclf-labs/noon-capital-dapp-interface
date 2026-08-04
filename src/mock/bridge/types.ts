@@ -41,11 +41,16 @@ export type BridgePanelProps = {
   feeLabel?: string
   /** Source-chain submit gas in USD (Network fee row). */
   networkFeeLabel?: string
+  /** Native-unit tip for the network fee USD value. */
+  networkFeeNativeLabel?: string
   /** Destination / bridge quote in USD (Gas fee row). */
   gasFeeLabel?: string
+  /** Native-unit tip for the gas fee USD value. */
+  gasFeeNativeLabel?: string
   /** Always `$0` — Protocol fee row. */
   protocolFeeLabel?: string
-  feeNativeLabel?: string
+  /** Native-unit tip for the protocol fee USD value. */
+  protocolFeeNativeLabel?: string
   etaLabel?: string
   protocolLabel?: string
   /** Receiver / maintenance notice — rendered above fees. */
@@ -79,9 +84,12 @@ export type BridgeConfirmPanelProps = {
   sourceAddressExplorerUrl?: string
   destinationAddressExplorerUrl?: string
   networkFeeLabel?: string
+  networkFeeNativeLabel?: string
   /** Destination / bridge quote in USD (Gas fee). */
   gasFeeLabel?: string
+  gasFeeNativeLabel?: string
   protocolFeeLabel?: string
+  protocolFeeNativeLabel?: string
   bridgeFeeLabel?: string
   etaLabel?: string
   warning?: string | BridgeStatusNotice

@@ -24,9 +24,9 @@ export function HalfMaxButtons({
   const labels = LABELS[casing]
   const chip = cn(
     'rounded-md border border-stone-200 bg-stone-50 px-1.5 py-0.5',
-    'text-sm leading-5 font-medium text-stone-600',
+    'text-sm leading-5 font-medium text-stone-600 transition-colors',
     FOCUS_RESET,
-    disabled && 'cursor-not-allowed opacity-50',
+    disabled ? 'cursor-not-allowed opacity-50' : 'hover:text-primary',
   )
 
   return (

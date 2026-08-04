@@ -23,6 +23,7 @@ This repository is a frontend interface. Especially sensitive areas:
 - Remember every `VITE_*` variable is public in the browser bundle; restrict third-party API keys by HTTP referrer / domain when the provider supports it
 - Read runtime config via `appEnv` (`src/lib/env`) — do not scatter raw `import.meta.env` reads in features
 - Gate transaction writes with `canWriteSession(connection)`; never treat typed receiver addresses as connected wallets
+- Validate bridge receiver addresses per family in `src/lib/address.ts` / `src/lib/receiver-address.ts`: EVM via viem; Starknet requires 63–64 hex digits + felt252 (`validateAndParseAddress`); Sui requires a full 64-hex body (no short-form padding). Reject cross-family pastes (especially EVM into Starknet/Sui)
 - Production deploys (Vercel or otherwise) **must** set a real `VITE_WALLETCONNECT_PROJECT_ID` — empty values fail closed at AppKit bootstrap (`resolveWalletConnectProjectId`)
 - Optional `VITE_GA_MEASUREMENT_ID` is HTML-injected only; omit it to disable analytics
 - Starknet uses **Infura** (`VITE_STARKNET_INFURA_API_KEY`) or an explicit `VITE_STARKNET_RPC_URL`

@@ -2,7 +2,7 @@ import { useId } from 'react'
 
 import { NumericFormat } from 'react-number-format'
 
-import { WalletIcon } from '@/assets/icons'
+import { ArrowSwapHorizontalIcon, WalletIcon } from '@/assets/icons'
 import {
   formatTradeReceiveDisplay,
   isTradePayInputAllowed,
@@ -52,8 +52,11 @@ export function BridgePanel({
   onOpenReceiverModal,
   feeLabel = DEFAULT_BRIDGE_FEE_LABEL,
   networkFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  networkFeeNativeLabel,
   gasFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  gasFeeNativeLabel,
   protocolFeeLabel = '$0',
+  protocolFeeNativeLabel,
   etaLabel = BRIDGE_ETA_LABEL,
   warning,
   isFetchingFee = false,
@@ -175,17 +178,16 @@ export function BridgePanel({
             onMouseDown={preventMouseDownFocus}
             onClick={onFlipNetworks}
             className={cn(
-              'flex cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white p-1.5 md:p-2',
+              'flex cursor-pointer items-center justify-center rounded-md border border-stone-200 bg-white p-1.5 text-accent md:p-2',
               FOCUS_RESET,
-              canFlip ? 'hover:bg-stone-50' : 'cursor-not-allowed',
+              canFlip ? 'transition-colors hover:text-primary' : 'cursor-not-allowed',
             )}
           >
-            <img
-              src="/assets/bridge/arrow-swap-horizontal.svg"
-              alt=""
+            <ArrowSwapHorizontalIcon
               width={28}
               height={28}
               className="size-5 -rotate-90 md:size-7"
+              aria-hidden
             />
           </button>
         </div>
@@ -293,8 +295,11 @@ export function BridgePanel({
           <BridgingFeesCollapsible
             totalLabel={feeLabel}
             protocolFeeLabel={protocolFeeLabel}
+            protocolFeeNativeLabel={protocolFeeNativeLabel}
             networkFeeLabel={networkFeeLabel}
+            networkFeeNativeLabel={networkFeeNativeLabel}
             gasFeeLabel={gasFeeLabel}
+            gasFeeNativeLabel={gasFeeNativeLabel}
             isLoading={isLoadingFee || isFetchingFee}
           />
 

@@ -3,7 +3,11 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { ChangeReceiverAddressModal } from '@/components/bridge/ChangeReceiverAddressModal'
 import { useTradeInputModel } from '@/features/_shared'
 import { getPresetAmount } from '@/features/_shared/trade-amounts'
-import { formatBalanceLabel, formatFeeUsd } from '@/features/_shared/trade-display'
+import {
+  formatBalanceLabel,
+  formatFeeUsd,
+  formatNativeFeeDetail,
+} from '@/features/_shared/trade-display'
 import { getTradeMaxAmount } from '@/features/_shared/trade-input-format'
 import { canFlipBridgeNetworks, requestBridgeNetworkFlip } from '@/features/bridge/flip'
 import {
@@ -188,6 +192,17 @@ export function StarknetBridgeFlow() {
     liveGasFeeUsd != null ? formatFeeUsd(liveGasFeeUsd) : undefined,
     feeRouteKey,
   )
+  const networkFeeNativeLabel = useStickyValue(
+    submitFee.isReady ? formatNativeFeeDetail(submitFee.native, gasSymbol) : undefined,
+    feeRouteKey,
+  )
+  const gasFeeNativeLabel = useStickyValue(
+    feeQuote.data != null && feeQuote.data > 0
+      ? formatNativeFeeDetail(feeQuote.data, gasSymbol)
+      : undefined,
+    feeRouteKey,
+  )
+  const protocolFeeNativeLabel = formatNativeFeeDetail(0, gasSymbol)
 
   return (
     <>
@@ -230,8 +245,11 @@ export function StarknetBridgeFlow() {
         onOpenReceiverModal={() => setIsReceiverAddressModalOpen(true)}
         feeLabel={feeLabel}
         networkFeeLabel={networkFeeLabel}
+        networkFeeNativeLabel={networkFeeNativeLabel}
         gasFeeLabel={gasFeeLabel}
+        gasFeeNativeLabel={gasFeeNativeLabel}
         protocolFeeLabel="$0"
+        protocolFeeNativeLabel={protocolFeeNativeLabel}
         sourceName={inputs.sourceChainId ? getChainConfig(inputs.sourceChainId).name : undefined}
         destinationName={
           inputs.destinationChainId ? getChainConfig(inputs.destinationChainId).name : undefined

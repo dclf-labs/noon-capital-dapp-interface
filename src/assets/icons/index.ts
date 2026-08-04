@@ -7,6 +7,7 @@
  * Noon logo) may be SVGR + `currentColor`.
  */
 export { default as ArrowBackIcon } from '@/assets/icons/arrow-back.svg?react'
+export { default as ArrowSwapHorizontalIcon } from '@/assets/icons/arrow-swap-horizontal.svg?react'
 export { default as ArrowUpRightIcon } from '@/assets/icons/arrow-up-right.svg?react'
 export { default as ChevronDownIcon } from '@/assets/icons/chevron-down.svg?react'
 export { default as CloseIcon } from '@/assets/icons/close.svg?react'

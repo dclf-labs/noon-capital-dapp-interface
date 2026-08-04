@@ -5,6 +5,7 @@ import {
   isSuiAddressValid,
   sanitizeEVMAddress,
   sanitizeInput,
+  sanitizeStarknetAddress,
   sanitizeSuiAddress,
   type StarknetAddress,
   type SuiAddress,
@@ -17,6 +18,8 @@ export type SanitizedReceiverAddress = Address | StarknetAddress | SuiAddress
 
 export type ReceiverAddressErrorCode =
   'evm_paste' | 'invalid_evm' | 'invalid_starknet' | 'invalid_sui'
+
+export { sanitizeStarknetAddress }
 
 /**
  * Strip non-address characters while typing.
@@ -35,17 +38,6 @@ export function filterReceiverAddressInput(family: ReceiverAddressFamily, raw: s
   return hasPrefix ? `0x${body}` : body
 }
 
-/**
- * Normalize a Starknet felt address: trim/sanitize, ensure `0x`, validate.
- * Rejects EVM 20-byte addresses (common paste mistake when destination is Starknet).
- */
-export function sanitizeStarknetAddress(input: string): StarknetAddress | undefined {
-  const sanitizedInput = sanitizeInput(input)
-  if (!sanitizedInput) return undefined
-  const formatted = sanitizedInput.startsWith('0x') ? sanitizedInput : `0x${sanitizedInput}`
-  return isStarknetAddressValid(formatted) ? (formatted as StarknetAddress) : undefined
-}
-
 /** Family-strict sanitize + normalize for submit. */
 export function sanitizeReceiverAddress(
   family: ReceiverAddressFamily,
@@ -62,8 +54,8 @@ export function sanitizeReceiverAddress(
 }
 
 /**
- * Family-strict validity — uses the same sanitize path as submit so Starknet / Sui
- * (optional `0x`, short forms) match what will actually be stored.
+ * Family-strict validity — uses the same sanitize path as submit so the UI only
+ * enables when the value can actually be stored (optional `0x` allowed).
  */
 export function isReceiverAddressValid(
   family: ReceiverAddressFamily,
@@ -90,7 +82,6 @@ export function getReceiverAddressError(
       return 'invalid_evm'
     }
     case 'starknet': {
-      // Explicit EVM paste check (with or without relying on starknet helper order).
       if (isEVMAddressValid(trimmed as Address)) return 'evm_paste'
       const formatted = trimmed.startsWith('0x') ? trimmed : `0x${trimmed}`
       if (isEVMAddressValid(formatted as Address)) return 'evm_paste'
@@ -105,7 +96,7 @@ export function getReceiverAddressError(
   }
 }
 
-/** Direct family checks (no sanitize) — useful for already-normalized stored values. */
+/** Direct family checks — for already-normalized stored values. */
 export function isStoredReceiverAddressValid(
   family: ReceiverAddressFamily,
   value: string | undefined,

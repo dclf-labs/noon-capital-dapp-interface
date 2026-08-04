@@ -125,10 +125,11 @@ export function StarknetWalletSelector({
                   id={titleId}
                   className="font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900 md:text-[32px] md:leading-10 md:tracking-[-1.6px]"
                 >
-                  Connect Starknet wallet
+                  Connect your Starknet wallet
                 </h2>
                 <p className="mt-1 text-sm leading-5 font-book text-stone-500">
-                  Choose a wallet to continue on Starknet.
+                  Select a Starknet wallet to connect. Make sure the extension or app is installed
+                  and unlocked before continuing.
                 </p>
               </div>
               <button

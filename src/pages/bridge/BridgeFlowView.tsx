@@ -149,8 +149,11 @@ export function BridgeFlowView({
             bridgeFeeLabel={panelProps.feeLabel}
             etaLabel={panelProps.etaLabel}
             networkFeeLabel={panelProps.networkFeeLabel ?? '—'}
+            networkFeeNativeLabel={panelProps.networkFeeNativeLabel}
             gasFeeLabel={panelProps.gasFeeLabel ?? '—'}
+            gasFeeNativeLabel={panelProps.gasFeeNativeLabel}
             protocolFeeLabel={panelProps.protocolFeeLabel}
+            protocolFeeNativeLabel={panelProps.protocolFeeNativeLabel}
             warning={panelProps.warning}
             primaryLabel={panelProps.primaryLabel}
             primaryDisabled={panelProps.primaryDisabled || panelProps.unsupported}

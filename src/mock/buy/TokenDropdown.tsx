@@ -280,8 +280,8 @@ export function TokenDropdown({
                 'gap-1.5 rounded-md border border-stone-200 bg-white py-1.5 pr-2 pl-1.5',
                 'text-base leading-6 font-medium text-stone-600',
                 'shadow-[0px_4px_2px_rgba(111,125,185,0.05)]',
-                'transition-colors hover:bg-stone-50',
-                open && 'bg-stone-50',
+                'transition-colors hover:bg-stone-50 hover:text-primary',
+                open && 'bg-stone-50 text-primary',
               )
             : cn(
                 'text-stone-500 transition-colors hover:text-primary',
@@ -298,8 +298,7 @@ export function TokenDropdown({
           width={20}
           height={20}
           className={cn(
-            'size-5 shrink-0 transition-transform duration-200 ease-out',
-            variant === 'outlined' && 'text-stone-500',
+            'size-5 shrink-0 text-current transition-transform duration-200 ease-out',
             open && 'rotate-180',
           )}
           aria-hidden

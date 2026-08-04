@@ -1,0 +1,34 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M23.9166 17.4883L18.0716 23.345"
+    stroke="currentColor"
+    stroke-width="2.8"
+    stroke-miterlimit="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M4.08398 17.4883L23.9173 17.4883"
+    stroke="currentColor"
+    stroke-width="2.8"
+    stroke-miterlimit="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M4.08398 10.5115L9.92899 4.65486"
+    stroke="currentColor"
+    stroke-width="2.8"
+    stroke-miterlimit="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M23.9173 10.5116L4.08398 10.5116"
+    stroke="currentColor"
+    stroke-width="2.8"
+    stroke-miterlimit="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

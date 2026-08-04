@@ -127,8 +127,11 @@ export function BridgeConfirmPanel({
   sourceAddressExplorerUrl,
   destinationAddressExplorerUrl,
   networkFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  networkFeeNativeLabel,
   gasFeeLabel = DEFAULT_BRIDGE_FEE_LABEL,
+  gasFeeNativeLabel,
   protocolFeeLabel = '$0',
+  protocolFeeNativeLabel,
   bridgeFeeLabel,
   etaLabel = BRIDGE_ETA_LABEL,
   warning,
@@ -200,8 +203,11 @@ export function BridgeConfirmPanel({
           <BridgingFeesCollapsible
             totalLabel={totalFeeLabel}
             protocolFeeLabel={protocolFeeLabel}
+            protocolFeeNativeLabel={protocolFeeNativeLabel}
             networkFeeLabel={networkFeeLabel}
+            networkFeeNativeLabel={networkFeeNativeLabel}
             gasFeeLabel={gasFeeLabel}
+            gasFeeNativeLabel={gasFeeNativeLabel}
             isLoading={isLoadingFee}
           />
 

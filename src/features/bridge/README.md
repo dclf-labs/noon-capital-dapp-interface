@@ -38,7 +38,16 @@ Destination network lists are filtered with `isBridgePairAllowed` in `pages/brid
 - Amount field is named `amount` (not amountIn/Out) — receive mirrors send.
 - Gate writes with `canWriteSession`; destinations use `useReadOnlySession`.
 
+## Receiver addresses
+
+Change-address modal validation lives in `src/lib/receiver-address.ts` (family-strict filters + errors) on top of `src/lib/address.ts`:
+
+- **EVM** — viem `isAddress` / checksum; non-zero
+- **Starknet** — 63–64 hex digits (optional `0x`), felt252 via `validateAndParseAddress`; EVM pastes rejected
+- **Sui** — exactly 64 hex digits (optional `0x`); short hex is invalid
+
 ## Tests
 
 - `route.test.ts`, `primary.test.ts`, `lib/bridge.test.ts`, `lib/sui-oft.test.ts`
 - `pages/bridge/BridgePanel.test.tsx`, `bridge-networks.test.ts`
+- `src/lib/address.test.ts`, `src/lib/receiver-address.test.ts`

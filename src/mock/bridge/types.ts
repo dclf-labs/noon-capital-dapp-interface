@@ -8,7 +8,7 @@ export type BridgeNetworkOption = {
   disabled?: boolean
 }
 
-/** Status / warning notice shown between inputs and fees (old-dapp Info). */
+/** Status / warning notice shown between inputs and fees. */
 export type BridgeStatusNotice = {
   title: string
   description?: string
@@ -36,7 +36,7 @@ export type BridgePanelProps = {
   receiverLabel: string
   receiverValue: string
   receiverPlaceholder: string
-  /** Opens the Change Address modal (old-dapp CHANGE / SET ADDRESS). */
+  /** Opens the Change Address modal. */
   onOpenReceiverModal: () => void
   feeLabel?: string
   /** Source-chain submit gas in USD (Network fee row). */
@@ -48,7 +48,7 @@ export type BridgePanelProps = {
   feeNativeLabel?: string
   etaLabel?: string
   protocolLabel?: string
-  /** Receiver / maintenance notice — rendered above fees like old-dapp Info. */
+  /** Receiver / maintenance notice — rendered above fees. */
   warning?: string | BridgeStatusNotice
   isFetchingFee?: boolean
   isLoadingFee?: boolean
@@ -72,7 +72,7 @@ export type BridgeConfirmPanelProps = {
   sourceChainIconSrc?: string
   /** `/assets/chains/…` for the destination network row. */
   destinationChainIconSrc?: string
-  /** Connected wallet on the source chain (old-dapp SubmitTxnInfo `address`). */
+  /** Connected wallet on the source chain. */
   sourceAddress?: string
   receiverValue?: string
   /** Chain `addressExplorerUrl` bases for from/to explorer links. */

@@ -27,9 +27,11 @@ Heavy React submit/approve hooks and wallet SDK glue stay **outside** the thresh
 
 | Area            | Specs                                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------- |
-| Env             | `src/lib/env/index.test.ts`                                                                 |
+| Env             | `src/lib/env/index.test.ts` (Infura / explicit URL → Starknet RPC)                          |
+| Production CSP  | `src/lib/env/vercel-csp.test.ts` (`connect-src` Infura, Noon API, Blast, …)                 |
 | Format / units  | `src/lib/format.test.ts`, `src/lib/format.display.test.ts`                                  |
 | Wallet session  | `wallet-session`, `wallet-query-sync`, `evm-submit`, `active-network.scenarios`             |
+| Wallet chrome   | `shell-wallet-chrome`, `connector-icon`, shell header / drawer                              |
 | Trade forms     | `_shared/use-trade-form-controller`, `trade-amounts`, `trade-input-format`, `trade-display` |
 | Buy / sell UI   | `mock/swap/TradePanelView.test.tsx`                                                         |
 | Mint / redeem   | `features/mint-redeem/*`, `mock/mint-redeem/MintRedeemPanel.test.tsx`                       |

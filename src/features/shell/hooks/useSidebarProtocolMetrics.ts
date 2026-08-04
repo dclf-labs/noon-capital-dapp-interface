@@ -6,7 +6,7 @@ import useProtocolTvl from '@/features/api/hooks/useProtocolTvl'
 import { formatSidebarProtocolMetrics } from '@/features/shell/hooks/sidebar-protocol-metrics'
 
 /**
- * Sidebar protocol metrics — same sources as the legacy dapp chrome:
+ * Sidebar protocol metrics:
  * - APY 7D / 28D from `GET /api/v1/protocol-metrics`
  * - TVL from `GET /api/v1/capital` (`tvl`)
  *

@@ -70,9 +70,8 @@ export type ChangeReceiverAddressModalProps = {
 }
 
 /**
- * Bridge destination “Change Address” modal — old-dapp receiving-address dialogs,
- * restyled for the Noon Capital shell. Validates strictly by destination family
- * (EVM / Starknet / Sui).
+ * Bridge destination “Change Address” modal for the Noon Capital shell.
+ * Validates strictly by destination family (EVM / Starknet / Sui).
  */
 export function ChangeReceiverAddressModal({
   family,

@@ -11,6 +11,7 @@ import { appEnv } from '@/lib/env'
 import { toNum } from '@/lib/format'
 import { secureRandomNonce } from '@/lib/secure-random'
 import { ApiRequestStatus } from '@/lib/types'
+import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
 const sendLinkReferral = async (
@@ -98,6 +99,7 @@ const useLinkReferral = () => {
         setTxnStatus?.(ApiRequestStatus.IDLE)
 
         if (
+          !canWriteSession(connection) ||
           !connection.config?.id ||
           !connection.address ||
           !refferalCode ||

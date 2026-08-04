@@ -31,7 +31,7 @@ export type BuyFlowViewProps = TradePanelViewProps & {
   onBuyAmountChange?: (buyAmount: number | undefined) => void
 }
 
-/** Same spring as noon/dapp `TransactionFlow` — no height tween. */
+/** Shared step-panel spring — no height tween. */
 const PANEL_TRANSITION = {
   x: { type: 'spring' as const, stiffness: 300, damping: 30 },
   opacity: { duration: 0.2 },
@@ -43,7 +43,7 @@ const PANEL_TRANSITION = {
  * - step 1 → Figma confirm (on-chain submit)
  * - step ≥ 2 → Figma success (tx minted)
  *
- * Step motion matches noon/dapp `TransactionFlow`:
+ * Step motion (`popLayout` + spring x):
  * enter bridges the previous panel height, center settles to `auto`.
  */
 export function BuyFlowView({

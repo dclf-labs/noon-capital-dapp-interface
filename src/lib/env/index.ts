@@ -4,7 +4,7 @@
  * Prefer `appEnv` everywhere in app code. Do not read `import.meta.env.VITE_*`
  * outside this module (except `index.html` for GA injection).
  *
- * @see `.env.example` for canonical keys
+ * @see `.env.example` for keys
  * @see `./README.md` for usage patterns
  */
 import { z } from 'zod'
@@ -12,7 +12,7 @@ import { z } from 'zod'
 const optionalString = z.string().optional().default('')
 
 /**
- * Canonical Vite env keys after alternate-name normalization.
+ * Canonical Vite env keys.
  *
  * Kept intentionally small — only vars the app actually reads (or useful RPC overrides).
  */
@@ -36,11 +36,6 @@ export const envSchema = z.object({
   VITE_STARKNET_RPC_URL: optionalString,
   /** Infura API key → builds Starknet mainnet RPC when no explicit URL. */
   VITE_STARKNET_INFURA_API_KEY: optionalString,
-  /**
-   * Legacy alias for Infura key (old-dapp / Alchemy-named env).
-   * Prefer `VITE_STARKNET_INFURA_API_KEY`.
-   */
-  VITE_STARKNET_ALCHEMY_API_KEY: optionalString,
 
   /** Optional protocol RPC overrides (else public defaults in chain config). */
   VITE_ETHEREUM_RPC_URL: optionalString,
@@ -59,35 +54,35 @@ export type AppEnvRaw = z.infer<typeof envSchema>
 
 type RawRecord = Record<string, unknown>
 
-function firstString(...values: unknown[]): string {
-  for (const value of values) {
-    if (typeof value === 'string' && value.trim()) return value.trim()
-  }
-  return ''
+function trimString(value: unknown): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : ''
 }
 
-/**
- * Map alternate `VITE_APP_*` env names → canonical keys.
- * Canonical wins when both are set.
- */
+/** Trim string env values before Zod parse. */
 export function normalizeRawEnv(raw: RawRecord): RawRecord {
-  return {
-    ...raw,
-    VITE_API_BASE_URL: firstString(raw.VITE_API_BASE_URL, raw.VITE_APP_API_BASE_URL),
-    VITE_WALLETCONNECT_PROJECT_ID: firstString(
-      raw.VITE_WALLETCONNECT_PROJECT_ID,
-      raw.VITE_APP_WALLET_CONNECT_PROJECT_ID,
-    ),
-    VITE_STARKNET_INFURA_API_KEY: firstString(
-      raw.VITE_STARKNET_INFURA_API_KEY,
-      raw.VITE_STARKNET_ALCHEMY_API_KEY,
-      raw.VITE_APP_STARKNET_ALCHEMY_API_KEY,
-    ),
-    VITE_STARKNET_ALCHEMY_API_KEY: firstString(
-      raw.VITE_STARKNET_ALCHEMY_API_KEY,
-      raw.VITE_APP_STARKNET_ALCHEMY_API_KEY,
-    ),
+  const keys = [
+    'VITE_API_BASE_URL',
+    'VITE_WALLETCONNECT_PROJECT_ID',
+    'VITE_GA_MEASUREMENT_ID',
+    'VITE_STARKNET_RPC_URL',
+    'VITE_STARKNET_INFURA_API_KEY',
+    'VITE_ETHEREUM_RPC_URL',
+    'VITE_BASE_RPC_URL',
+    'VITE_SUI_RPC_URL',
+    'VITE_TAC_RPC_URL',
+    'VITE_ZKSYNC_RPC_URL',
+    'VITE_SOPHON_RPC_URL',
+    'VITE_BERACHAIN_RPC_URL',
+    'VITE_CITREA_RPC_URL',
+    'VITE_HYPEREVM_RPC_URL',
+    'VITE_MONAD_RPC_URL',
+  ] as const
+
+  const next: RawRecord = { ...raw }
+  for (const key of keys) {
+    if (key in raw) next[key] = trimString(raw[key])
   }
+  return next
 }
 
 export function parseEnv(input: unknown): AppEnvRaw {
@@ -107,9 +102,8 @@ export const DEFAULT_SUI_RPC_URL = 'https://fullnode.mainnet.sui.io:443'
 
 function buildStarknetRpcUrl(raw: AppEnvRaw): string {
   if (raw.VITE_STARKNET_RPC_URL) return raw.VITE_STARKNET_RPC_URL
-  const infuraKey = raw.VITE_STARKNET_INFURA_API_KEY || raw.VITE_STARKNET_ALCHEMY_API_KEY
-  if (infuraKey) {
-    return `https://starknet-mainnet.infura.io/v3/${infuraKey}`
+  if (raw.VITE_STARKNET_INFURA_API_KEY) {
+    return `https://starknet-mainnet.infura.io/v3/${raw.VITE_STARKNET_INFURA_API_KEY}`
   }
   return DEFAULT_STARKNET_RPC
 }
@@ -145,9 +139,13 @@ export function createAppEnv(raw: AppEnvRaw) {
     },
 
     rpc: {
+      /**
+       * Resolved Starknet JSON-RPC used by wallet (`jsonRpcProvider`), chain registry,
+       * and protocol config. Order: explicit URL → Infura key URL → public Blast.
+       */
       starknet: buildStarknetRpcUrl(raw),
-      /** Infura project id for Starknet-react `infuraProvider`. */
-      starknetInfuraApiKey: raw.VITE_STARKNET_INFURA_API_KEY || raw.VITE_STARKNET_ALCHEMY_API_KEY,
+      /** Infura project id used to build `rpc.starknet` when no explicit URL is set. */
+      starknetInfuraApiKey: raw.VITE_STARKNET_INFURA_API_KEY,
       ethereum: raw.VITE_ETHEREUM_RPC_URL,
       base: raw.VITE_BASE_RPC_URL,
       /** Empty when unset — callers fall back to Mysten / protocol config. */
@@ -165,7 +163,7 @@ export function createAppEnv(raw: AppEnvRaw) {
 
 export type AppEnv = ReturnType<typeof createAppEnv>
 
-/** Snapshot of `import.meta.env` (canonical + alternate names) for `parseEnv`. */
+/** Snapshot of `import.meta.env` for `parseEnv`. */
 function readImportMetaEnv(): RawRecord {
   const e = import.meta.env
   return {
@@ -175,14 +173,10 @@ function readImportMetaEnv(): RawRecord {
     SSR: e.SSR,
     BASE_URL: e.BASE_URL,
     VITE_API_BASE_URL: e.VITE_API_BASE_URL,
-    VITE_APP_API_BASE_URL: e.VITE_APP_API_BASE_URL,
     VITE_WALLETCONNECT_PROJECT_ID: e.VITE_WALLETCONNECT_PROJECT_ID,
-    VITE_APP_WALLET_CONNECT_PROJECT_ID: e.VITE_APP_WALLET_CONNECT_PROJECT_ID,
     VITE_GA_MEASUREMENT_ID: e.VITE_GA_MEASUREMENT_ID,
     VITE_STARKNET_RPC_URL: e.VITE_STARKNET_RPC_URL,
     VITE_STARKNET_INFURA_API_KEY: e.VITE_STARKNET_INFURA_API_KEY,
-    VITE_STARKNET_ALCHEMY_API_KEY: e.VITE_STARKNET_ALCHEMY_API_KEY,
-    VITE_APP_STARKNET_ALCHEMY_API_KEY: e.VITE_APP_STARKNET_ALCHEMY_API_KEY,
     VITE_ETHEREUM_RPC_URL: e.VITE_ETHEREUM_RPC_URL,
     VITE_BASE_RPC_URL: e.VITE_BASE_RPC_URL,
     VITE_SUI_RPC_URL: e.VITE_SUI_RPC_URL,

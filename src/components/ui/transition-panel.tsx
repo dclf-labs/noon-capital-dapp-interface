@@ -11,7 +11,7 @@ import {
 
 import { cn } from '@/lib/utils'
 
-/** Matches noon/dapp TransactionFlow spring slide (no height tween). */
+/** Shared TransactionFlow spring slide (no height tween). */
 const TRANSITION_PANEL_DEFAULT: Transition = {
   x: { type: 'spring', stiffness: 300, damping: 30 },
   opacity: { duration: 0.2 },
@@ -65,7 +65,7 @@ export type TransitionPanelProps = {
 } & Omit<MotionProps, 'children' | 'variants' | 'transition'>
 
 /**
- * Indexed step panel — same contract as noon/dapp (`popLayout` + spring x).
+ * Indexed step panel — `popLayout` + spring x.
  */
 export function TransitionPanel({
   children,

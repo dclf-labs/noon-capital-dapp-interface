@@ -10,6 +10,7 @@ import { starknetAbis } from '@/lib/abis'
 import { getAddressOrZeroAddress, isEVMAddressValid } from '@/lib/address'
 import { type EVMConnection, type StarknetConnection } from '@/lib/connection'
 import { strToBn, toBn } from '@/lib/format'
+import { canWriteSession } from '@/lib/wallet-session'
 
 const useHyperlaneBridgeSubmit = (
   connection: StarknetConnection | undefined,
@@ -27,6 +28,8 @@ const useHyperlaneBridgeSubmit = (
 
   const { send, data, isPending, isError, isSuccess } = useSendTransaction({
     calls:
+      !!connection &&
+      canWriteSession(connection) &&
       contract &&
       !!tokenIn?.hyperlane &&
       !!connection?.config?.defaultGasToken?.decimals &&

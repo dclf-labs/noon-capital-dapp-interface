@@ -11,7 +11,7 @@ import { StatusCallout } from '@/mock/bridge/StatusCallout'
 import type { BridgeConfirmPanelProps } from '@/mock/bridge/types'
 import { TokenSymbolMark } from '@/mock/buy/TokenSymbolMark'
 
-/** `${addressExplorerUrl}/${address}` — same join as old-dapp SubmitTxnInfo. */
+/** `${addressExplorerUrl}/${address}` explorer join. */
 function addressExplorerHref(
   addressExplorerUrl: string | undefined,
   address: string | undefined,

@@ -3,8 +3,7 @@ import { type ReactNode, useMemo } from 'react'
 import { mainnet } from '@starknet-react/chains'
 import {
   braavos,
-  infuraProvider,
-  publicProvider,
+  jsonRpcProvider,
   ready,
   StarknetConfig,
   useInjectedConnectors,
@@ -18,18 +17,21 @@ interface StarknetWalletProviderProps {
   children: ReactNode
 }
 
-/** Starknet-react provider: Infura when keyed, else public RPC. */
+/**
+ * Starknet-react provider — always uses `appEnv.rpc.starknet` so explicit
+ * `VITE_STARKNET_RPC_URL`, Infura-built URL, and the public Blast default stay aligned
+ * with chain readers / protocol config. See `src/lib/env/README.md` and `src/wallet/README.md`.
+ */
 function createStarknetProvider() {
-  const infuraKey = appEnv.rpc.starknetInfuraApiKey
-  if (infuraKey) {
-    return infuraProvider({ apiKey: infuraKey })
-  }
-  return publicProvider()
+  const nodeUrl = appEnv.rpc.starknet
+  return jsonRpcProvider({
+    rpc: () => ({ nodeUrl }),
+  })
 }
 
 /**
- * Discovers injected Starknet wallets and always surfaces Ready (Argent) + Braavos,
- * matching old-dapp `useInjectedConnectors` behavior.
+ * Discovers injected Starknet wallets and always surfaces Ready (Argent) + Braavos
+ * via `useInjectedConnectors`.
  */
 function StarknetConfigWithConnectors({ children }: { children: ReactNode }) {
   const { connectors } = useInjectedConnectors({

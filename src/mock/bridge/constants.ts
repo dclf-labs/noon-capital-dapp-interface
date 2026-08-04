@@ -10,7 +10,7 @@ export const BRIDGE_SUCCESS_NOTE =
 
 export const DEFAULT_BRIDGE_FEE_LABEL = '—'
 
-/** Default receiver-access notice — same role as old-dapp bridge `Info` (neutral). */
+/** Default receiver-access notice (neutral). */
 export const BRIDGE_RECEIVER_NOTICE: BridgeStatusNotice = {
   type: 'neutral',
   title:

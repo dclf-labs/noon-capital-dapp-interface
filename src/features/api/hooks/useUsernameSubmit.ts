@@ -9,6 +9,7 @@ import { type EVMConnection } from '@/lib/connection'
 import { appEnv } from '@/lib/env'
 import { secureRandomNonce } from '@/lib/secure-random'
 import { ApiRequestStatus } from '@/lib/types'
+import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
 const sendUsernameUpdate = async (
@@ -81,7 +82,13 @@ const useUsernameSubmit = () => {
       try {
         setTxnStatus?.(ApiRequestStatus.IDLE)
 
-        if (!connection.config?.id || !connection.address || !username || !username?.length) {
+        if (
+          !canWriteSession(connection) ||
+          !connection.config?.id ||
+          !connection.address ||
+          !username ||
+          !username?.length
+        ) {
           throw new Error('Invalid parameters')
         }
 

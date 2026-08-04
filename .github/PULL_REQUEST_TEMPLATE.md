@@ -39,3 +39,4 @@ CI runs `format:check`, `lint`, `typecheck`, `test:coverage` (with thresholds), 
 - [ ] Wallet / chain behavior verified on at least one testnet if applicable
 - [ ] Env vars documented if new `VITE_*` keys were added (`.env.example`, README, `src/lib/env`)
 - [ ] New keys exposed on `appEnv` (not raw `import.meta.env` in feature code)
+- [ ] New production RPC/API hosts allowlisted in `vercel.json` `connect-src` (+ `src/lib/env/vercel-csp.test.ts`)

@@ -58,7 +58,7 @@ export const SHELL_SELECTION_CLOSE_MS = 260
 
 /**
  * Idle list / dropdown / modal option hover.
- * Soft `stone-100` reads cleaner on white panels than old-dapp `stone-200`.
+ * Soft `stone-100` idle option surface on white panels.
  * Do not apply when the option is selected (selected uses the black pill).
  */
 export const LIST_OPTION_IDLE =

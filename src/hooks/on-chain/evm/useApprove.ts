@@ -12,6 +12,7 @@ import { type EvmAddress, getAddressOrZeroAddress } from '@/lib/address'
 import { type EVMConnection } from '@/lib/connection'
 import { getTxnPayload } from '@/lib/evmTxn'
 import type { TxnStatus } from '@/lib/types'
+import { canWriteSession } from '@/lib/wallet-session'
 import { wagmiConfig } from '@/wallet/evm/config'
 
 const useApprove = () => {
@@ -29,6 +30,7 @@ const useApprove = () => {
         setTxnStatus?.('IDLE')
 
         if (
+          !canWriteSession(connection) ||
           !connection.config?.id ||
           !connection.address ||
           !spender ||

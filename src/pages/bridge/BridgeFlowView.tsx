@@ -25,7 +25,7 @@ export type BridgeFlowViewProps = BridgePanelProps & {
   onReset?: () => void
 }
 
-/** Same spring as BuyFlowView / noon/dapp `TransactionFlow` — no height tween. */
+/** Same spring as BuyFlowView step panel — no height tween. */
 const PANEL_TRANSITION = {
   x: { type: 'spring' as const, stiffness: 300, damping: 30 },
   opacity: { duration: 0.2 },

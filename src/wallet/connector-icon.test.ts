@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveConnectorIconSrc } from '@/wallet/connector-icon'
+import { isSafeConnectorIconSrc, resolveConnectorIconSrc } from '@/wallet/connector-icon'
 
 describe('resolveConnectorIconSrc', () => {
   it('returns undefined when there is no connector', () => {
@@ -52,5 +52,17 @@ describe('resolveConnectorIconSrc', () => {
       },
     }
     expect(resolveConnectorIconSrc(connector, 'starknet')).toBeUndefined()
+  })
+
+  it('rejects unsafe connector icon schemes', () => {
+    expect(isSafeConnectorIconSrc('javascript:alert(1)')).toBe(false)
+    expect(isSafeConnectorIconSrc('data:text/html,<svg>')).toBe(false)
+    expect(isSafeConnectorIconSrc('//evil.example/x.png')).toBe(false)
+    expect(isSafeConnectorIconSrc('/assets/shell/metamask.svg')).toBe(true)
+    expect(isSafeConnectorIconSrc('https://example.com/w.svg')).toBe(true)
+    expect(isSafeConnectorIconSrc('data:image/svg+xml;base64,abc')).toBe(true)
+    expect(
+      resolveConnectorIconSrc({ id: 'evil', icon: 'javascript:alert(1)' }, 'evm'),
+    ).toBeUndefined()
   })
 })

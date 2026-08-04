@@ -57,10 +57,28 @@ export function normalizeConnectorIconSource(connector: unknown): ConnectorIconS
   return { id, name, icon }
 }
 
+/**
+ * Allow only safe image URL schemes for `<img src>`.
+ * Rejects javascript:/vbscript: and non-image data URIs.
+ */
+export function isSafeConnectorIconSrc(src: string | undefined): src is string {
+  if (!src) return false
+  const value = src.trim()
+  if (!value) return false
+  if (value.startsWith('/')) {
+    // Same-origin asset paths only — block protocol-relative `//evil`.
+    return !value.startsWith('//') && !value.includes('\\') && !value.includes('..')
+  }
+  const lower = value.toLowerCase()
+  if (lower.startsWith('https://')) return true
+  if (lower.startsWith('data:image/')) return true
+  return false
+}
+
 function iconFromConnector(icon: ConnectorIcon): string | undefined {
   if (!icon) return undefined
-  if (typeof icon === 'string') return icon || undefined
-  return icon.light || icon.dark || undefined
+  const raw = typeof icon === 'string' ? icon : icon.light || icon.dark
+  return isSafeConnectorIconSrc(raw) ? raw : undefined
 }
 
 function iconFromFamilyId(id: string | undefined, chainFamily: ChainFamily): string | undefined {
@@ -106,9 +124,10 @@ export function resolveConnectorIconSrc(
   const snap = normalizeConnectorIconSource(connector)
   if (!snap) return undefined
 
-  return (
+  const resolved =
     iconFromConnector(snap.icon) ??
     iconFromFamilyId(snap.id, chainFamily) ??
     iconFromFamilyName(snap.id, snap.name, chainFamily)
-  )
+
+  return isSafeConnectorIconSrc(resolved) ? resolved : undefined
 }

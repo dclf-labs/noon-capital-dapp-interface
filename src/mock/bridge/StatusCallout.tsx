@@ -11,8 +11,7 @@ export type StatusCalloutProps = {
 }
 
 /**
- * Compact status / warning banner — mirrors old-dapp `Info` placement and
- * hierarchy (icon + title + optional description, left-aligned).
+ * Compact status / warning banner (icon + title + optional description, left-aligned).
  */
 export function StatusCallout({
   title,

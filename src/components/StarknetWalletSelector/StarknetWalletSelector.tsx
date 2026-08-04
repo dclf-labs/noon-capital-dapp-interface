@@ -20,13 +20,9 @@ import { resolveConnectorIconSrc } from '@/wallet/connector-icon'
 const focusReset =
   'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
 
-function connectorIconSrc(
-  connectorId: string | undefined,
-  icon: Connector['icon'] | undefined,
-): string {
-  return (
-    resolveConnectorIconSrc({ id: connectorId, icon }, 'starknet') ?? '/assets/chains/starknet.svg'
-  )
+/** Safe icon URL — never read `connector.icon` raw (Starknet getters can throw). */
+function connectorIconSrc(connector: Connector): string {
+  return resolveConnectorIconSrc(connector, 'starknet') ?? '/assets/chains/starknet.svg'
 }
 
 type StarknetWalletSelectorProps = {
@@ -35,8 +31,8 @@ type StarknetWalletSelectorProps = {
 }
 
 /**
- * Branded Starknet wallet picker — same role as old-dapp `StarknetWalletSelector`,
- * with the shared black active pill used by shell dropdowns / menubar.
+ * Branded Starknet wallet picker with the shared black active pill
+ * used by shell dropdowns / menubar.
  */
 export function StarknetWalletSelector({
   isOpen = false,
@@ -184,7 +180,7 @@ export function StarknetWalletSelector({
                         )}
                       >
                         <img
-                          src={connectorIconSrc(connector.id, connector.icon)}
+                          src={connectorIconSrc(connector)}
                           alt=""
                           width={32}
                           height={32}

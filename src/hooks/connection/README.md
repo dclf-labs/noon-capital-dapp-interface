@@ -5,6 +5,8 @@ Canonical API: **`useWalletSession`** (`useWalletSession.ts`).
 Wallet SDKs (AppKit/wagmi, starknet-react, Sui dapp-kit) are the **only** signing authority.
 Zustand `selectedChainId` is the dapp product network (default Ethereum, persisted) — it never implies `isConnected`.
 
+Provider wiring and Starknet RPC resolution live under [`src/wallet/README.md`](../../wallet/README.md) and [`src/lib/env/README.md`](../../lib/env/README.md).
+
 Naming:
 
 - `selectedChainId` — Zustand product network (all pages)

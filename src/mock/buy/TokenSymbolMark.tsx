@@ -66,7 +66,7 @@ export function TokenSymbolMark({
     <span className={cn('leading-none whitespace-nowrap', styles.type, className)}>
       <span
         className={cn(
-          // Same optical nudge as old-dapp avatars beside Louize (`mb-1.5 inline-block align-middle`).
+          // Optical nudge beside Louize display type (`mb-1.5 inline-block align-middle`).
           'relative mb-1.5 inline-block shrink-0 align-middle',
           styles.gutter,
         )}

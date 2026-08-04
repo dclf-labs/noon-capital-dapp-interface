@@ -1,6 +1,6 @@
 # Noon Capital DApp Interface
 
-Multichain wallet foundation for the Noon Capital protocol — React, TypeScript, Vite, and EVM / Starknet / Sui connectors.
+Noon Capital protocol interface — React, TypeScript, Vite, with EVM / Starknet / Sui wallets.
 
 ## Stack
 
@@ -61,11 +61,15 @@ Copy `.env.example` → `.env`. App code should read **`appEnv`** (`src/lib/env`
 | `VITE_API_BASE_URL`                              | Recommended                     | Noon backend (`https://back.noon.capital`)                           |
 | `VITE_WALLETCONNECT_PROJECT_ID`                  | **Yes** in production / deploys | https://dashboard.reown.com — empty fails closed at AppKit bootstrap |
 | `VITE_STARKNET_INFURA_API_KEY`                   | Recommended                     | Builds Starknet Infura RPC when `VITE_STARKNET_RPC_URL` is unset     |
-| `VITE_STARKNET_RPC_URL`                          | No                              | Explicit Starknet RPC (wins over Infura)                             |
+| `VITE_STARKNET_RPC_URL`                          | No                              | Explicit Starknet RPC (wins over Infura key)                         |
 | `VITE_ETHEREUM_RPC_URL` / `BASE` / `SUI` / `TAC` | No                              | Optional protocol RPC overrides (else public defaults)               |
 | `VITE_GA_MEASUREMENT_ID`                         | No                              | Injected into `index.html` only; empty disables analytics            |
 
 Set these in `.env` locally and in Vercel (or your host) for deploys. CI may use a placeholder WalletConnect id when the GitHub secret is unset — that is **not** enough for production.
+
+**Starknet:** wallet + protocol readers share `appEnv.rpc.starknet` (explicit URL → Infura → public Blast). Set `VITE_STARKNET_INFURA_API_KEY` or `VITE_STARKNET_RPC_URL`.
+
+**Production CSP:** `vercel.json` `connect-src` must allow the Noon API, Infura, and any custom RPC hosts. Adding a new `VITE_*_RPC_URL` host without updating CSP will break production fetches (Vite local does not enforce CSP).
 
 ## Scripts
 
@@ -156,7 +160,7 @@ src/
   test/               # Test setup + helpers
   wallet/
     evm/              # AppKit + wagmi
-    starknet/         # starknet-react
+    starknet/         # starknet-react (jsonRpcProvider → appEnv.rpc.starknet)
     sui/              # dApp Kit
 docs/
   ARCHITECTURE.md     # State / session / product conventions
@@ -165,8 +169,10 @@ docs/
 
 See:
 
-- `docs/ARCHITECTURE.md` — sessions, product rules, layout
+- `docs/ARCHITECTURE.md` — sessions, product rules, layout, Starknet RPC / CSP
 - `docs/TESTING.md` — Vitest coverage include list + UI-value conventions
+- `src/lib/env/README.md` — `appEnv`, Starknet URL resolution, CSP checklist
+- `src/wallet/README.md` — wallet provider stack (EVM / Starknet / Sui)
 - `src/features/README.md` — domain modules
 - `src/pages/README.md` — route shells / flows
 - `src/mock/README.md` — presentational UI + gallery

@@ -25,6 +25,11 @@ This repository is a frontend interface. Especially sensitive areas:
 - Gate transaction writes with `canWriteSession(connection)`; never treat typed receiver addresses as connected wallets
 - Production deploys (Vercel or otherwise) **must** set a real `VITE_WALLETCONNECT_PROJECT_ID` — empty values fail closed at AppKit bootstrap (`resolveWalletConnectProjectId`)
 - Optional `VITE_GA_MEASUREMENT_ID` is HTML-injected only; omit it to disable analytics
+- Starknet uses **Infura** (`VITE_STARKNET_INFURA_API_KEY`) or an explicit `VITE_STARKNET_RPC_URL`
+- Production CSP lives in `vercel.json`. New API/RPC origins must be added to `connect-src` (and `src/lib/env/vercel-csp.test.ts`) or browsers will block them on Vercel. Local Vite does not apply this CSP
+- Gate on-chain writes and wallet-signed API calls with `canWriteSession(connection)` before prompting the wallet
+- Username / referral signing currently uses a static `Authentication <address>` message while the HTTP body carries an unbound nonce + payload. Treat backend verification of that signature carefully; prefer binding nonce + action + fields into the signed message (or EIP-712) in a coordinated API change
+- Restrict Infura / other RPC / WalletConnect project keys by HTTP referrer or domain in the provider dashboards — all `VITE_*` values are public in the bundle
 
 ## CI notes
 

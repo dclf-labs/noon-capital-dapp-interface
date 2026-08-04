@@ -2,7 +2,7 @@
 
 ## Current shape
 
-This repo is a **multichain dapp interface** (EVM AppKit, Starknet, Sui) with a shared chain registry and co-located feature modules.
+This repo is the **Noon Capital dapp** (EVM AppKit, Starknet, Sui) with a shared chain registry and co-located feature modules.
 
 Product surfaces are **separate routes and shells** — buy/sell (DEX), mint/redeem, stake/unstake/withdraw, and bridge must not be folded into one another:
 
@@ -46,7 +46,7 @@ Thin route screens live under `src/pages/<surface>/`; presentational panels unde
 | `src/lib/evm-submit.ts`       | Shared EVM write + receipt (`canWriteSession` gated)               |
 | `src/lib/abis/`               | Contract ABIs (`evm/` / `starknet/`)                               |
 | `src/state/`                  | Zustand stores                                                     |
-| `src/wallet/<family>/`        | `config`, `provider`, `reader`                                     |
+| `src/wallet/<family>/`        | `config`, `provider`, `reader` (see `src/wallet/README.md`)        |
 | `src/providers/`              | `AppProviders` (+ `WalletQuerySync`)                               |
 
 ## Wallet sessions
@@ -93,16 +93,41 @@ All amount-entry products share `_shared` primitives (see `src/features/_shared/
 
 ## Env / analytics
 
-Validated in `src/lib/env` as **`appEnv`**. Prefer canonical names; a few alternate `VITE_APP_*` keys still normalize. See `.env.example` and `src/lib/env/README.md`.
+Validated in `src/lib/env` as **`appEnv`**. See `.env.example` and `src/lib/env/README.md`.
 
 | Variable                                         | Runtime role                                |
 | ------------------------------------------------ | ------------------------------------------- |
 | `VITE_API_BASE_URL`                              | Noon backend API base                       |
 | `VITE_WALLETCONNECT_PROJECT_ID`                  | Required in production (AppKit fail-closed) |
 | `VITE_STARKNET_INFURA_API_KEY`                   | Builds Infura RPC when URL unset            |
-| `VITE_STARKNET_RPC_URL`                          | Optional Starknet RPC override              |
+| `VITE_STARKNET_RPC_URL`                          | Optional Starknet RPC override (wins)       |
 | `VITE_ETHEREUM_RPC_URL` / `BASE` / `SUI` / `TAC` | Optional protocol RPC overrides             |
 | `VITE_GA_MEASUREMENT_ID`                         | Optional; injected into `index.html` only   |
+
+## Starknet RPC / wallet provider
+
+`appEnv.rpc.starknet` is the single Starknet JSON-RPC URL for:
+
+| Consumer                                     | Role                                      |
+| -------------------------------------------- | ----------------------------------------- |
+| `src/wallet/starknet/provider.tsx`           | `jsonRpcProvider({ rpc: () => nodeUrl })` |
+| `src/chains/registry.ts` (`starknetMainnet`) | Chain metadata RPC list                   |
+| `src/config/chains/starknet.ts`              | Protocol config `rpcUrl`                  |
+
+Resolution order: explicit `VITE_STARKNET_RPC_URL` → Infura URL from key → public Blast.
+
+Use one Starknet RPC for wallet and readers — do not split providers.
+
+## Production CSP (`vercel.json`)
+
+Deployed headers include a strict `Content-Security-Policy`. `connect-src` must allow:
+
+- Noon API (`https://back.noon.capital` by default)
+- Starknet Infura (`https://starknet-mainnet.infura.io`)
+- Public Starknet fallbacks used by the app (Blast; Lava if needed)
+- Any host used by `VITE_*_RPC_URL` overrides
+
+Local Vite does not apply this CSP — regressions show up on Vercel. See `src/lib/env/vercel-csp.test.ts`.
 
 ## Chain readers
 
@@ -124,6 +149,7 @@ Validated in `src/lib/env` as **`appEnv`**. Prefer canonical names; a few altern
 - Never ask users for private keys / seed phrases
 - Gate user-scoped API fetches with `isAddressValid`
 - Document new `VITE_*` keys in `.env.example`, README, and `src/lib/env`
+- Allowlist new production RPC/API hosts in `vercel.json` `connect-src` (+ CSP test)
 
 ## Testing
 

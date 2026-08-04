@@ -16,7 +16,7 @@ type KeepMountedFamilyStackProps = {
  * Keep every chain-family tree mounted and stacked in one grid cell.
  * Inactive panels stay `invisible` (not unmounted / not `display:none`) so
  * network switches update values in place without a remount flash — same goal
- * as noon/dapp’s in-family form updates, with cross-family keep-alive on top.
+ * as in-family form updates, with cross-family keep-alive on top.
  */
 export function KeepMountedFamilyStack({ activeId, panels }: KeepMountedFamilyStackProps) {
   return (

@@ -173,7 +173,7 @@ type SeenSessionKey = {
 
 /**
  * Clear amounts / step / txn URL when wallet address or connection drops.
- * Chain-only switches reseed tokens and reset step (like noon/dapp) but keep
+ * Chain-only switches reseed tokens and reset step but keep
  * amounts so the buy card does not flash empty on EVM→EVM network changes.
  *
  * Identity reseeds run during render (not in an effect) so the first paint after a

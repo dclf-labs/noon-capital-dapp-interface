@@ -40,17 +40,14 @@ describe('parseEnv', () => {
     spy.mockRestore()
   })
 
-  it('normalizes alternate VITE_APP_* names into canonical keys', () => {
+  it('trims string env values', () => {
     const env = parseEnv({
       ...validEnv,
-      VITE_APP_API_BASE_URL: 'https://legacy.api/',
-      VITE_APP_WALLET_CONNECT_PROJECT_ID: 'legacy-wc',
-      VITE_APP_STARKNET_ALCHEMY_API_KEY: 'legacy-starknet',
+      VITE_API_BASE_URL: '  https://api.example.test/  ',
+      VITE_STARKNET_INFURA_API_KEY: '  infura-key  ',
     })
-    expect(env.VITE_API_BASE_URL).toBe('https://legacy.api/')
-    expect(env.VITE_WALLETCONNECT_PROJECT_ID).toBe('legacy-wc')
-    expect(env.VITE_STARKNET_INFURA_API_KEY).toBe('legacy-starknet')
-    expect(env.VITE_STARKNET_ALCHEMY_API_KEY).toBe('legacy-starknet')
+    expect(env.VITE_API_BASE_URL).toBe('https://api.example.test/')
+    expect(env.VITE_STARKNET_INFURA_API_KEY).toBe('infura-key')
   })
 })
 
@@ -65,26 +62,14 @@ describe('createAppEnv', () => {
     expect(app.api.baseUrl).toBe('https://api.example.test')
   })
 
-  it('prefers the canonical WalletConnect project id', () => {
+  it('exposes the WalletConnect project id', () => {
     const app = createAppEnv(
       parseEnv({
         ...validEnv,
-        VITE_WALLETCONNECT_PROJECT_ID: 'canonical',
-        VITE_APP_WALLET_CONNECT_PROJECT_ID: 'legacy',
+        VITE_WALLETCONNECT_PROJECT_ID: 'wc-project',
       }),
     )
-    expect(app.walletConnect.projectId).toBe('canonical')
-  })
-
-  it('falls back to the alternate WalletConnect project id', () => {
-    const app = createAppEnv(
-      parseEnv({
-        ...validEnv,
-        VITE_WALLETCONNECT_PROJECT_ID: '',
-        VITE_APP_WALLET_CONNECT_PROJECT_ID: 'legacy-id',
-      }),
-    )
-    expect(app.walletConnect.projectId).toBe('legacy-id')
+    expect(app.walletConnect.projectId).toBe('wc-project')
   })
 
   it('prefers an explicit Starknet RPC URL', () => {
@@ -109,28 +94,19 @@ describe('createAppEnv', () => {
     expect(app.rpc.starknetInfuraApiKey).toBe('infura-key')
   })
 
-  it('accepts the legacy Alchemy-named Starknet key as Infura', () => {
-    const app = createAppEnv(
-      parseEnv({
-        ...validEnv,
-        VITE_APP_STARKNET_ALCHEMY_API_KEY: 'legacy-key',
-      }),
-    )
-    expect(app.rpc.starknet).toBe('https://starknet-mainnet.infura.io/v3/legacy-key')
-    expect(app.rpc.starknetInfuraApiKey).toBe('legacy-key')
-  })
-
   it('falls back to the public Blast Starknet endpoint', () => {
     expect(createAppEnv(parseEnv(validEnv)).rpc.starknet).toMatch(/blastapi\.io/)
+    expect(createAppEnv(parseEnv(validEnv)).rpc.starknetInfuraApiKey).toBe('')
   })
 })
 
 describe('normalizeRawEnv', () => {
-  it('prefers canonical keys over alternate names', () => {
+  it('trims known string keys', () => {
     const normalized = normalizeRawEnv({
-      VITE_API_BASE_URL: 'canonical',
-      VITE_APP_API_BASE_URL: 'legacy',
+      VITE_API_BASE_URL: '  https://api.example.test  ',
+      VITE_WALLETCONNECT_PROJECT_ID: '  wc  ',
     })
-    expect(normalized.VITE_API_BASE_URL).toBe('canonical')
+    expect(normalized.VITE_API_BASE_URL).toBe('https://api.example.test')
+    expect(normalized.VITE_WALLETCONNECT_PROJECT_ID).toBe('wc')
   })
 })

@@ -55,8 +55,9 @@ describe('getStakeUnstakePrimaryAction', () => {
         mode: 'unstake',
         requiresApproval: false,
         isApproved: false,
+        tokenInSymbol: 'sUSN',
       }).label,
-    ).toBe('Next')
+    ).toBe('Unstake sUSN')
   })
 
   it('shows Retry approve / Approving states', () => {
@@ -77,8 +78,18 @@ describe('getStakeUnstakePrimaryAction', () => {
     ).toMatchObject({ label: 'Approving', disabled: true, loading: true })
   })
 
-  it('disables Next without amountOut', () => {
+  it('disables action CTA without amountOut', () => {
     expect(getStakeUnstakePrimaryAction({ ...base, amountOut: undefined }).disabled).toBe(true)
+  })
+
+  it('shows Stake / Unstake with token symbol on step 0', () => {
+    expect(
+      getStakeUnstakePrimaryAction({
+        ...base,
+        mode: 'stake',
+        tokenInSymbol: 'USN',
+      }).label,
+    ).toBe('Stake USN')
   })
 
   it('shows Confirm / Retry labels per mode', () => {
@@ -105,6 +116,6 @@ describe('getStakeUnstakePrimaryAction', () => {
         step: 1,
         isBusySubmit: true,
       }),
-    ).toMatchObject({ label: 'Submitting', disabled: true, loading: true })
+    ).toMatchObject({ label: 'Staking', disabled: true, loading: true })
   })
 })

@@ -29,4 +29,11 @@ describe('resolveBuyPoweredBy', () => {
       }).venue,
     ).toBe('ekubo')
   })
+
+  it('includes a protocol home URL for each venue', () => {
+    expect(resolveBuyPoweredBy(undefined).href).toBe('https://uniswap.org/')
+    expect(resolveBuyPoweredBy({ syncswapV3Router: '0x1' }).href).toBe('https://syncswap.xyz/')
+    expect(resolveBuyPoweredBy({ ekuboRouter: '0x1' }).href).toBe('https://ekubo.org/')
+    expect(resolveBuyPoweredBy({ useCurvePools: true }).href).toBe('https://curve.finance/')
+  })
 })

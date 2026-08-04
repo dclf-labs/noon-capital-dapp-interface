@@ -1,3 +1,5 @@
+import { formatActionTokenLabel } from '@/features/_shared/action-label'
+
 export type TradeMode = 'buy' | 'sell'
 
 export type TradePrimaryAction = {
@@ -21,6 +23,8 @@ export type TradePrimaryParams = {
   isApproved: boolean
   requiresApproval: boolean
   tokenInSymbol?: string
+  /** Receive token — used for buy CTA (`Buy USN`). */
+  tokenOutSymbol?: string
   approveStatus?: 'IDLE' | 'PROCESSING' | 'TXN_SUBMITTED_ON_CHAIN' | 'TXN_FAILURE' | string
   isBusyApprove?: boolean
   isBusySubmit: boolean
@@ -45,6 +49,7 @@ export function getTradePrimaryAction({
   isApproved,
   requiresApproval,
   tokenInSymbol,
+  tokenOutSymbol,
   approveStatus,
   isBusyApprove = false,
   isBusySubmit,
@@ -85,14 +90,20 @@ export function getTradePrimaryAction({
   }
 
   if (step === 0) {
-    return { label: 'Next', disabled: !quoteReady, loading: false }
+    const label =
+      mode === 'buy'
+        ? formatActionTokenLabel('Buy', tokenOutSymbol)
+        : formatActionTokenLabel('Sell', tokenInSymbol)
+    return { label, disabled: !quoteReady, loading: false }
   }
 
   return {
     label: submitFailed
       ? 'Retry swap'
       : isBusySubmit
-        ? 'Submitting'
+        ? mode === 'buy'
+          ? 'Buying'
+          : 'Selling'
         : mode === 'buy'
           ? 'Confirm the transaction'
           : 'Confirm sell',

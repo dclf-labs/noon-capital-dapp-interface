@@ -20,6 +20,7 @@ import { type FormInputs } from '@/features/buy/context/evm/types'
 import useBuyAllowance from '@/features/buy/hooks/evm/useBuyAllowance'
 import useBuySubmitFee from '@/features/buy/hooks/evm/useBuySubmitFee'
 import usePreviewBuy from '@/features/buy/hooks/evm/usePreviewBuy'
+import { resolveBuyEvmChainId } from '@/features/buy/supported-networks'
 import { useSelectActiveChain } from '@/hooks/connection/useSelectActiveChain'
 import { useEvmTargetSession } from '@/hooks/connection/useWalletSession'
 import useTokenBalance from '@/hooks/on-chain/evm/useTokenBalance'
@@ -44,22 +45,22 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const selectedChainId = useActiveChainStore((s) => s.selectedChainId)
   const { isSwitchingEvmNetwork } = useSelectActiveChain()
-  const liveConnection = useEvmTargetSession(
-    isEvmChainId(selectedChainId) ? selectedChainId : undefined,
-  )
+  // Unsupported product networks still render the Ethereum buy form.
+  const buyChainId = resolveBuyEvmChainId(selectedChainId)
+  const liveConnection = useEvmTargetSession(buyChainId)
 
   // EVM→EVM only: family toggles swap trees (no flash). Same tree must not paint the
   // mismatch banner / disable queries during the wallet catch-up window.
   const [softUnsupported, setSoftUnsupported] = useState(false)
   useEffect(() => {
-    if (!isEvmChainId(selectedChainId)) return
+    if (!isEvmChainId(buyChainId)) return
     setSoftUnsupported(true)
     const timer = window.setTimeout(
       () => setSoftUnsupported(false),
       EVM_SWITCH_UNSUPPORTED_GRACE_MS,
     )
     return () => window.clearTimeout(timer)
-  }, [selectedChainId])
+  }, [buyChainId])
   useEffect(() => {
     if (!liveConnection.unsupported) setSoftUnsupported(false)
   }, [liveConnection.unsupported])

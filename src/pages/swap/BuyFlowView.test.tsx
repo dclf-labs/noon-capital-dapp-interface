@@ -4,12 +4,28 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Token } from '@/config/token'
+import { getTacChainId } from '@/lib/chain'
 import { BuyFlowView } from '@/pages/swap/BuyFlowView'
 
 const connectWalletFamily = vi.fn()
+const selectActiveChain = vi.fn()
+let resolvedChainId = 1
 
 vi.mock('@/wallet/useConnectWalletFamily', () => ({
   useConnectWalletFamily: () => connectWalletFamily,
+}))
+
+vi.mock('@/hooks/connection', () => ({
+  useResolvedChain: () => ({
+    chainId: resolvedChainId,
+    chainFamily: 'evm',
+    config: {},
+  }),
+  useSelectActiveChain: () => ({
+    selectedChainId: resolvedChainId,
+    selectActiveChain,
+    isSwitchingEvmNetwork: false,
+  }),
 }))
 
 vi.mock('@/hooks/ui/useIsMobile', () => ({
@@ -59,7 +75,9 @@ const baseProps = {
 
 describe('BuyFlowView', () => {
   beforeEach(() => {
+    resolvedChainId = 1
     connectWalletFamily.mockReset().mockResolvedValue(undefined)
+    selectActiveChain.mockReset()
   })
 
   it('renders Figma buy step 0 with empty amount and placeholder 0', () => {
@@ -122,16 +140,33 @@ describe('BuyFlowView', () => {
           {...baseProps}
           isConnected
           chainFamily="starknet"
-          primaryLabel="Next"
+          primaryLabel="Buy USN"
           primaryDisabled={false}
           onPrimary={onPrimary}
         />
       </MemoryRouter>,
     )
 
-    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Buy USN' }))
     expect(connectWalletFamily).not.toHaveBeenCalled()
     expect(onPrimary).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens the switch-network modal when the product network is unsupported', async () => {
+    resolvedChainId = getTacChainId() ?? 239
+    const user = userEvent.setup()
+    const onPrimary = vi.fn()
+    render(
+      <MemoryRouter initialEntries={['/swap/buy']}>
+        <BuyFlowView {...baseProps} isConnected onPrimary={onPrimary} />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Switch network' }))
+    expect(onPrimary).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog', { name: /switch network/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ethereum/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^tac$/i })).not.toBeInTheDocument()
   })
 
   it('renders Figma confirm step with fee + compact amounts', () => {

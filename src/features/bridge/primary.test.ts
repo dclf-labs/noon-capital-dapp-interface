@@ -64,8 +64,9 @@ describe('getBridgePrimaryAction', () => {
         ...base,
         requiresApproval: false,
         isApproved: false,
+        tokenSymbol: 'sUSN',
       }).label,
-    ).toBe('Next')
+    ).toBe('Bridge sUSN')
   })
 
   it('surfaces route kill switch, submit gate, and confirm/retry', () => {

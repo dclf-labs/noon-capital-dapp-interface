@@ -2,6 +2,7 @@
 
 export { buyTokenAmountFromUsd, payAmountFromBuyAmount } from '@/mock/buy/buy-amount'
 export { BuyConfirmPanel } from '@/mock/buy/BuyConfirmPanel'
+export { BuyNetworkSwitchModal } from '@/mock/buy/BuyNetworkSwitchModal'
 export { BuyPageView } from '@/mock/buy/BuyPageView'
 export { BuyPanel } from '@/mock/buy/BuyPanel'
 export { BuyStepShell } from '@/mock/buy/BuyStepShell'

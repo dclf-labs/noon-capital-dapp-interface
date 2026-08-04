@@ -27,7 +27,7 @@ export function NetworkFeeHover({
           className="size-5 shrink-0 text-stone-400"
           aria-hidden
         />
-        <span className="text-sm leading-5 font-book text-stone-500">Network fee (gas)</span>
+        <span className="text-sm leading-5 font-book text-stone-500">Network fee</span>
         <InfoTipIcon content={NETWORK_FEE_TIP} label="About network fee" size={12} />
       </div>
 

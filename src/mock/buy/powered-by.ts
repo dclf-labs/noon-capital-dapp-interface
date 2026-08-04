@@ -6,6 +6,8 @@ export type BuyPoweredBy = {
   venue: BuyPoweredByVenue
   name: string
   logoSrc: string
+  /** Protocol home page — opens from the badge. */
+  href: string
   /** Full wordmark logo — hide the separate text label. */
   wordmark?: boolean
 }
@@ -15,22 +17,26 @@ const VENUES: Record<BuyPoweredByVenue, BuyPoweredBy> = {
     venue: 'uniswap',
     name: 'Uniswap',
     logoSrc: '/assets/buy/uniswap.svg',
+    href: 'https://uniswap.org/',
     wordmark: true,
   },
   syncswap: {
     venue: 'syncswap',
     name: 'Syncswap',
     logoSrc: '/assets/tokens/SYNCSWAP.svg',
+    href: 'https://syncswap.xyz/',
   },
   ekubo: {
     venue: 'ekubo',
     name: 'Ekubo',
     logoSrc: '/assets/tokens/EKUBO.svg',
+    href: 'https://ekubo.org/',
   },
   curve: {
     venue: 'curve',
     name: 'Curve',
     logoSrc: '/assets/tokens/CRV.svg',
+    href: 'https://curve.finance/',
   },
 }
 

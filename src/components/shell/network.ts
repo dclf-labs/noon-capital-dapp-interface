@@ -32,9 +32,9 @@ export const HEADER_NETWORK_KEYS = [
   'starknet',
 ] as const satisfies readonly ChainKey[]
 
-/** Active header networks with icon + protocol id. */
-export function getNetworkOptions(): NetworkOption[] {
-  return HEADER_NETWORK_KEYS.map((key) => {
+/** Build network options for an ordered allowlist of chain keys. */
+export function networkOptionsForKeys(keys: readonly ChainKey[]): NetworkOption[] {
+  return keys.map((key) => {
     const chain = chainList.find((entry) => entry.key === key)
     if (!chain) throw new Error(`Missing chain definition: ${key}`)
     const chainId = protocolIdForChainKey(key)
@@ -45,6 +45,11 @@ export function getNetworkOptions(): NetworkOption[] {
       iconSrc: chainIconSrc(chainId),
     }
   })
+}
+
+/** Active header networks with icon + protocol id. */
+export function getNetworkOptions(): NetworkOption[] {
+  return networkOptionsForKeys(HEADER_NETWORK_KEYS)
 }
 
 /** Static header network list — safe to reuse across renders. */

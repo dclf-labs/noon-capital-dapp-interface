@@ -1,3 +1,5 @@
+import { formatActionTokenLabel } from '@/features/_shared/action-label'
+
 export type StakeUnstakeMode = 'stake' | 'unstake'
 
 export type StakeUnstakePrimaryAction = {
@@ -80,15 +82,20 @@ export function getStakeUnstakePrimaryAction({
   }
 
   if (step === 0) {
-    return { label: 'Next', disabled: !amountOut, loading: false }
+    const label =
+      mode === 'stake'
+        ? formatActionTokenLabel('Stake', tokenInSymbol)
+        : formatActionTokenLabel('Unstake', tokenInSymbol)
+    return { label, disabled: !amountOut, loading: false }
   }
 
   const confirm = mode === 'stake' ? 'Confirm stake' : 'Confirm unstake'
   const retry = mode === 'stake' ? 'Retry stake' : 'Retry unstake'
+  const busy = mode === 'stake' ? 'Staking' : 'Unstaking'
   const approvedOk = !requiresApproval || isApproved
 
   return {
-    label: submitFailed ? retry : isBusySubmit ? 'Submitting' : confirm,
+    label: submitFailed ? retry : isBusySubmit ? busy : confirm,
     disabled: !approvedOk || !amountOut || isBusySubmit,
     loading: isBusySubmit,
   }

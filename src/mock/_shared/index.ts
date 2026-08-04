@@ -5,6 +5,7 @@ export { PrimaryCtaButton } from '@/mock/_shared/PrimaryCtaButton'
 export { ProductStepShell } from '@/mock/_shared/ProductStepShell'
 export { SafeExplorerLink } from '@/mock/_shared/SafeExplorerLink'
 export { StepPanelHeader } from '@/mock/_shared/StepPanelHeader'
+export { SuccessCheckIcon } from '@/mock/_shared/SuccessCheckIcon'
 export {
   accentCtaClassName,
   BRIDGE_PANEL_SHELL,

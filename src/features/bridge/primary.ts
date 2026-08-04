@@ -1,3 +1,5 @@
+import { formatActionTokenLabel } from '@/features/_shared/action-label'
+
 export type BridgePrimaryAction = {
   label: string
   disabled: boolean
@@ -129,7 +131,11 @@ export function getBridgePrimaryAction({
   }
 
   if (step === 0) {
-    return { label: 'Next', disabled: false, loading: false }
+    return {
+      label: formatActionTokenLabel('Bridge', tokenSymbol),
+      disabled: false,
+      loading: false,
+    }
   }
 
   return {

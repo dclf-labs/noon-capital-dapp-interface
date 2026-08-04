@@ -2,9 +2,12 @@ import { useState } from 'react'
 
 import type { ChainFamily } from '@/chains'
 import { TransitionPanel } from '@/components/ui/transition-panel'
+import { isBuySupportedChainId } from '@/features/buy/supported-networks'
+import { useResolvedChain } from '@/hooks/connection'
 import { useElementSize } from '@/hooks/ui/useElementSize'
 import { buyTokenAmountFromUsd, payAmountFromBuyAmount } from '@/mock/buy/buy-amount'
 import { BuyConfirmPanel } from '@/mock/buy/BuyConfirmPanel'
+import { BuyNetworkSwitchModal } from '@/mock/buy/BuyNetworkSwitchModal'
 import { BuyPanel } from '@/mock/buy/BuyPanel'
 import { BuyStepShell } from '@/mock/buy/BuyStepShell'
 import { BuySuccessPanel } from '@/mock/buy/BuySuccessPanel'
@@ -58,6 +61,8 @@ export function BuyFlowView({
   ...props
 }: BuyFlowViewProps) {
   const connectWalletFamily = useConnectWalletFamily()
+  const { chainId } = useResolvedChain()
+  const [switchOpen, setSwitchOpen] = useState(false)
   const {
     step,
     isConnected,
@@ -104,7 +109,16 @@ export function BuyFlowView({
     })
   }
 
-  const showConnect = !isConnected
+  const needsNetworkSwitch = !isBuySupportedChainId(chainId)
+  const showConnect = !needsNetworkSwitch && !isConnected
+
+  const step0Label = needsNetworkSwitch
+    ? 'Switch network'
+    : showConnect
+      ? 'Connect wallet'
+      : primaryLabel
+  const step0Disabled = needsNetworkSwitch || showConnect ? false : primaryDisabled
+  const step0Loading = needsNetworkSwitch || showConnect ? false : primaryLoading
 
   const applyBuyAmount = (buyAmount: number | undefined) => {
     if (onBuyAmountChange) {
@@ -159,11 +173,11 @@ export function BuyFlowView({
             balanceInLabel={balanceInLabel}
             networkFeeLabel={feeLabel ?? '—'}
             networkFeeNativeLabel={feeNativeLabel}
-            primaryLabel={showConnect ? 'Connect wallet' : primaryLabel}
-            primaryDisabled={showConnect ? false : primaryDisabled}
-            primaryLoading={showConnect ? false : primaryLoading}
+            primaryLabel={step0Label}
+            primaryDisabled={step0Disabled}
+            primaryLoading={step0Loading}
             isConnected={isConnected}
-            presetsDisabled={presetsDisabled || unsupported}
+            presetsDisabled={presetsDisabled || unsupported || needsNetworkSwitch}
             isFetchingQuote={isFetchingQuote}
             isLoadingFee={feeLoading}
             onBuyAmountChange={applyBuyAmount}
@@ -174,6 +188,10 @@ export function BuyFlowView({
             onTokenInChange={onTokenInChange}
             onTokenOutChange={onTokenOutChange}
             onPrimary={() => {
+              if (needsNetworkSwitch) {
+                setSwitchOpen(true)
+                return
+              }
               if (showConnect) {
                 void connectWalletFamily(chainFamily)
                 return
@@ -191,11 +209,17 @@ export function BuyFlowView({
             tokenOut={tokenOut}
             networkFeeLabel={feeLabel ?? '—'}
             networkFeeNativeLabel={feeNativeLabel}
-            primaryLabel={primaryLabel}
-            primaryDisabled={primaryDisabled || unsupported}
-            primaryLoading={primaryLoading}
+            primaryLabel={needsNetworkSwitch ? 'Switch network' : primaryLabel}
+            primaryDisabled={needsNetworkSwitch ? false : primaryDisabled || unsupported}
+            primaryLoading={needsNetworkSwitch ? false : primaryLoading}
             isLoadingFee={feeLoading}
-            onPrimary={onPrimary}
+            onPrimary={() => {
+              if (needsNetworkSwitch) {
+                setSwitchOpen(true)
+                return
+              }
+              onPrimary()
+            }}
             onBack={onBack}
           />
         </div>
@@ -209,6 +233,7 @@ export function BuyFlowView({
           />
         </div>
       </TransitionPanel>
+      <BuyNetworkSwitchModal open={switchOpen} onOpenChange={setSwitchOpen} />
     </BuyStepShell>
   )
 }

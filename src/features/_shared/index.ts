@@ -1,3 +1,4 @@
+export { formatActionTokenLabel } from './action-label'
 export { createAlwaysApprovedAllowance } from './always-approved-allowance'
 export type { PreviewQuoteData } from './trade-amounts'
 export {

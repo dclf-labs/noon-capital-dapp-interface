@@ -11,6 +11,8 @@ import {
 import { cn } from '@/lib/utils'
 import {
   FOCUS_RESET,
+  PANEL_INNER,
+  PANEL_OUTER,
   preventMouseDownFocus,
   PrimaryCtaButton,
   usePayAmountDraft,
@@ -99,8 +101,8 @@ export function BuyPanel({
   const hasBuyAmount = buyAmount != null && buyAmount > 0
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-50 shadow-panel">
-      <div className="flex w-full flex-col gap-4 overflow-hidden border border-stone-200 bg-white px-2 pt-2 pb-6 shadow-panel">
+    <div className={PANEL_OUTER}>
+      <div className={PANEL_INNER}>
         <div className="relative flex min-h-60 w-full flex-col items-center justify-center gap-2">
           <p className="absolute top-2.5 left-0 text-sm leading-5 font-book text-stone-500">
             You&apos;re Buying

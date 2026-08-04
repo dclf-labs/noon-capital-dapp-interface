@@ -9,7 +9,10 @@ import { StarknetBuyTrade } from '@/pages/swap/StarknetBuyTrade'
 /** Home → Buy: live EVM / Starknet multi-step flow. */
 export function BuyPage() {
   const { chainFamily } = useResolvedChain()
-  const activeId = chainFamily === 'evm' ? 'evm' : chainFamily === 'starknet' ? 'starknet' : 'none'
+  // Starknet keeps its tree; every other product network (incl. unsupported ones like
+  // TAC / Sui) uses the EVM tree, which falls back to Ethereum form data while
+  // BuyFlowView gates the CTA with Switch network → modal.
+  const activeId = chainFamily === 'starknet' ? 'starknet' : 'evm'
 
   return (
     <div className="flex w-full flex-col items-center pt-6 md:pt-10">
@@ -36,11 +39,6 @@ export function BuyPage() {
             },
           ]}
         />
-        {activeId === 'none' ? (
-          <p className="w-full min-w-0 text-center text-sm text-stone-500 lg:max-w-[70%] lg:min-w-[45%]">
-            Buy is available on EVM and Starknet. Switch the active network above.
-          </p>
-        ) : null}
       </div>
     </div>
   )

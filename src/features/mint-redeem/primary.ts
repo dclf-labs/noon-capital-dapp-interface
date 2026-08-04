@@ -1,3 +1,5 @@
+import { formatActionTokenLabel } from '@/features/_shared/action-label'
+
 export type MintRedeemMode = 'mint' | 'redeem'
 
 export type MintRedeemPrimaryAction = {
@@ -22,6 +24,8 @@ export type MintRedeemPrimaryParams = {
   isInsufficientBalance: boolean
   isApproved: boolean
   tokenInSymbol?: string
+  /** Mint receive token — used for mint CTA (`Mint USN`). */
+  tokenOutSymbol?: string
   approveStatus?: string
   isBusyApprove: boolean
   isBusySubmit: boolean
@@ -45,6 +49,7 @@ export function getMintRedeemPrimaryAction({
   isInsufficientBalance,
   isApproved,
   tokenInSymbol,
+  tokenOutSymbol,
   approveStatus,
   isBusyApprove,
   isBusySubmit,
@@ -89,14 +94,19 @@ export function getMintRedeemPrimaryAction({
   }
 
   if (step === 0) {
-    return { label: 'Next', disabled: !amountOut, loading: false }
+    const label =
+      mode === 'mint'
+        ? formatActionTokenLabel('Mint', tokenOutSymbol)
+        : formatActionTokenLabel('Redeem', tokenInSymbol)
+    return { label, disabled: !amountOut, loading: false }
   }
 
   const confirm = mode === 'mint' ? 'Confirm mint' : 'Confirm redeem'
   const retry = mode === 'mint' ? 'Retry mint' : 'Retry redeem'
+  const busy = mode === 'mint' ? 'Minting' : 'Redeeming'
 
   return {
-    label: submitFailed ? retry : isBusySubmit ? 'Submitting' : confirm,
+    label: submitFailed ? retry : isBusySubmit ? busy : confirm,
     disabled: !isApproved || !amountOut || isBusySubmit,
     loading: isBusySubmit,
   }

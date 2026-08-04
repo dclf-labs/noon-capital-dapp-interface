@@ -64,6 +64,7 @@ export function EvmUnstakeFlow() {
         isInsufficientBalance,
         requiresApproval: false,
         isApproved: true,
+        tokenInSymbol: tokenIn?.symbol,
         isBusyApprove: false,
         isBusySubmit,
         submitFailed: submitStatus === SubmitTxnStatus.TXN_FAILURE,
@@ -78,6 +79,7 @@ export function EvmUnstakeFlow() {
       isQuoteError,
       step,
       submitStatus,
+      tokenIn?.symbol,
       tokenInBalance.isLoading,
     ],
   )

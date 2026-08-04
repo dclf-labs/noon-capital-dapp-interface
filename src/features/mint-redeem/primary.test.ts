@@ -87,7 +87,7 @@ describe('getMintRedeemPrimaryAction', () => {
     expect(action.loading).toBe(true)
   })
 
-  it('requires approval then next, then confirm', () => {
+  it('requires approval then action+token, then confirm', () => {
     expect(
       getMintRedeemPrimaryAction({
         ...base,
@@ -96,7 +96,20 @@ describe('getMintRedeemPrimaryAction', () => {
       }).label,
     ).toBe('Approve USDC')
 
-    expect(getMintRedeemPrimaryAction(base).label).toBe('Next')
+    expect(
+      getMintRedeemPrimaryAction({
+        ...base,
+        mode: 'mint',
+        tokenOutSymbol: 'USN',
+      }).label,
+    ).toBe('Mint USN')
+    expect(
+      getMintRedeemPrimaryAction({
+        ...base,
+        mode: 'redeem',
+        tokenInSymbol: 'USN',
+      }).label,
+    ).toBe('Redeem USN')
 
     expect(
       getMintRedeemPrimaryAction({
@@ -107,7 +120,7 @@ describe('getMintRedeemPrimaryAction', () => {
     ).toBe('Confirm redeem')
   })
 
-  it('disables Next when amountOut is missing even if approved', () => {
+  it('disables action CTA when amountOut is missing even if approved', () => {
     expect(
       getMintRedeemPrimaryAction({
         ...base,
@@ -165,6 +178,6 @@ describe('getMintRedeemPrimaryAction', () => {
         step: 1,
         isBusySubmit: true,
       }),
-    ).toMatchObject({ label: 'Submitting', disabled: true, loading: true })
+    ).toMatchObject({ label: 'Minting', disabled: true, loading: true })
   })
 })

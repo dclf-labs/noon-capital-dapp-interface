@@ -82,14 +82,18 @@ export const MODAL_BACKDROP_CLASS = 'absolute inset-0 bg-black/25 backdrop-blur-
 export const MODAL_PANEL_TRANSITION = { duration: 0.18, ease: MODAL_EASE }
 
 /**
- * Chrome icon control (menu open / close, modal dismiss) — Figma 4819:57195.
- * White tile, 0.67px #E7E5E4 border, soft indigo shadow, 8px pad, 16px icon.
+ * Chrome icon control (menu open / close) — Figma 4819:57195 / 4819:56931.
+ * 32×32 white tile, 5.33px radius, 0.67px #E7E5E4 border, soft indigo shadow.
  */
 export const SHELL_ICON_BUTTON =
-  'flex shrink-0 items-center rounded-[5.33px] border-[0.67px] border-[#E7E5E4] bg-white p-2 text-primary shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-colors hover:text-primary'
+  'flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[5.33px] border-[0.67px] border-[#E7E5E4] bg-white p-2 text-primary shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-colors hover:text-primary'
 
-/** Modal / drawer dismiss control — same bordered tile as the menu chrome. */
-export const MODAL_CLOSE_BUTTON = SHELL_ICON_BUTTON
+/**
+ * Modal / drawer dismiss control — same tile as shell chrome, muted icon that
+ * shifts to primary on hover.
+ */
+export const MODAL_CLOSE_BUTTON =
+  'flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[5.33px] border-[0.67px] border-[#E7E5E4] bg-white p-2 text-stone-500 shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-colors hover:text-primary'
 
 /**
  * Network dropdown panel — above shell chrome (sidebar 30, mobile drawer 100),

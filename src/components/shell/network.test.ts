@@ -5,6 +5,7 @@ import {
   getNetworkOptions,
   HEADER_NETWORK_KEYS,
   NETWORK_OPTIONS,
+  networkOptionsForKeys,
   protocolIdForChainKey,
 } from '@/components/shell/network'
 import { isValidChainId } from '@/lib/chain'
@@ -18,6 +19,7 @@ describe('header network registry', () => {
     const options = getNetworkOptions()
     expect(options).toHaveLength(HEADER_NETWORK_KEYS.length)
     expect(NETWORK_OPTIONS).toEqual(options)
+    expect(networkOptionsForKeys(HEADER_NETWORK_KEYS)).toEqual(options)
 
     const keys = new Set(options.map((o) => o.key))
     const chainIds = new Set(options.map((o) => String(o.chainId)))

@@ -129,10 +129,14 @@ describe('BuyPageView', () => {
         venue: 'syncswap',
         name: 'Syncswap',
         logoSrc: '/assets/tokens/SYNCSWAP.svg',
+        href: 'https://syncswap.xyz/',
       },
     })
     expect(screen.getByText('Powered by')).toBeInTheDocument()
-    expect(screen.getByText('Syncswap')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Syncswap home' })).toHaveAttribute(
+      'href',
+      'https://syncswap.xyz/',
+    )
   })
 
   it('reveals the native gas fee when hovering the fee value on desktop', async () => {

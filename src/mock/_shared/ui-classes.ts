@@ -4,17 +4,23 @@ import { cn } from '@/lib/utils'
 export const FOCUS_RESET =
   'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none'
 
-/** Outer stone shell used by buy / bridge confirm & success cards. */
+/**
+ * Outer stone shell used by buy / bridge confirm & success cards.
+ * Figma `4819:59985` / `4819:60239`: 12px outer radius.
+ */
 export const PANEL_OUTER =
-  'w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-50 shadow-panel'
+  'w-full overflow-hidden rounded-[12px] border border-stone-200 bg-stone-50 shadow-panel'
 
-/** Inner white card nested inside `PANEL_OUTER`. */
+/**
+ * Inner white card nested inside `PANEL_OUTER`.
+ * 11px keeps the inner border parallel to the 12px outer (1px shell).
+ */
 export const PANEL_INNER =
-  'flex w-full flex-col gap-4 overflow-hidden border border-stone-200 bg-white px-2 pt-2 pb-6 shadow-panel'
+  'flex w-full flex-col gap-4 overflow-hidden rounded-[11px] border border-stone-200 bg-white px-2 pt-2 pb-6 shadow-panel'
 
 /** Bridge step-0 single-shell (Figma: stone-300 border, white fill). */
 export const BRIDGE_PANEL_SHELL =
-  'w-full overflow-hidden rounded-xl border border-stone-300 bg-white shadow-panel'
+  'w-full overflow-hidden rounded-[12px] border border-stone-300 bg-white shadow-panel'
 
 const CTA_BASE =
   'flex items-center justify-center gap-1.5 rounded-lg px-4 py-3 text-base leading-6 font-medium whitespace-nowrap'

@@ -48,6 +48,25 @@ describe('getTradePrimaryAction', () => {
     ).toBe(true)
   })
 
+  it('shows Buy / Sell with token symbol on step 0', () => {
+    expect(
+      getTradePrimaryAction({
+        ...base,
+        mode: 'buy',
+        requiresApproval: false,
+        tokenOutSymbol: 'USN',
+      }).label,
+    ).toBe('Buy USN')
+    expect(
+      getTradePrimaryAction({
+        ...base,
+        mode: 'sell',
+        requiresApproval: false,
+        tokenInSymbol: 'USN',
+      }).label,
+    ).toBe('Sell USN')
+  })
+
   it('shows confirm / retry labels on step 1', () => {
     expect(
       getTradePrimaryAction({
@@ -73,5 +92,26 @@ describe('getTradePrimaryAction', () => {
         requiresApproval: false,
       }).label,
     ).toBe('Retry swap')
+  })
+
+  it('shows short action labels while the submit is in flight', () => {
+    expect(
+      getTradePrimaryAction({
+        ...base,
+        step: 1,
+        mode: 'buy',
+        requiresApproval: false,
+        isBusySubmit: true,
+      }).label,
+    ).toBe('Buying')
+    expect(
+      getTradePrimaryAction({
+        ...base,
+        step: 1,
+        mode: 'sell',
+        requiresApproval: false,
+        isBusySubmit: true,
+      }).label,
+    ).toBe('Selling')
   })
 })

@@ -194,9 +194,10 @@ export function TokenDropdown({
             id={menuId}
             role="listbox"
             aria-label={label}
-            initial={{ opacity: 0, y: -10, clipPath: 'inset(0 0 100% 0)' }}
-            animate={{ opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)' }}
-            exit={{ opacity: 0, y: -8, clipPath: 'inset(0 0 100% 0)' }}
+            // `round 12px` matches `rounded-xl` so clip-path doesn’t square the shadow.
+            initial={{ opacity: 0, y: -10, clipPath: 'inset(0 0 100% 0 round 12px)' }}
+            animate={{ opacity: 1, y: 0, clipPath: 'inset(0 round 12px)' }}
+            exit={{ opacity: 0, y: -8, clipPath: 'inset(0 0 100% 0 round 12px)' }}
             transition={{ duration: 0.24, ease: PANEL_EASE }}
             className={cn(
               'fixed min-w-[180px] overflow-y-auto overscroll-contain',

@@ -12,7 +12,7 @@ export function ProductHero({ subtitle }: ProductHeroProps) {
   const tabs = productTabsForPath(pathname)
 
   return (
-    <header className="flex flex-col items-center text-center">
+    <header className="flex flex-col items-center gap-2 text-center">
       <nav
         aria-label="Product"
         className="flex items-center gap-8 font-louize text-[32px] leading-10 tracking-[-0.64px] text-[#474747] md:text-[40px] md:tracking-[-0.8px]"

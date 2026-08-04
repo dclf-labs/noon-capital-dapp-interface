@@ -23,7 +23,7 @@ export const SIDEBAR_RAIL_PX = 63
 /** Expanded overlay width (Motion animates between rail ↔ expanded). */
 export const SIDEBAR_EXPANDED_PX = 190
 
-/** Fixed sidebar insets from the viewport edges. */
+/** Fixed sidebar insets from the AppShell column edges (not raw viewport). */
 export const SIDEBAR_INSET_TOP_PX = 4
 export const SIDEBAR_INSET_LEFT_PX = 5
 
@@ -46,9 +46,8 @@ export const SHELL_SELECTION_SPRING = {
   damping: 30,
 }
 
-/** Sidebar / header APY info tip. */
-export const APY_TIP =
-  'Estimated annual percentage yield for Noon protocols over the selected period.'
+/** Sidebar / header APY info tip — trailing average, same idea as landing APY chart. */
+export const APY_TIP = 'Trailing average daily APY for Noon protocols over the selected period.'
 
 /**
  * Wait for the selection pill spring to settle before closing a dropdown /
@@ -62,7 +61,7 @@ export const SHELL_SELECTION_CLOSE_MS = 260
  * Do not apply when the option is selected (selected uses the black pill).
  */
 export const LIST_OPTION_IDLE =
-  'text-stone-700 transition-colors hover:bg-stone-100 hover:text-stone-900 focus-visible:bg-stone-100 focus-visible:text-stone-900'
+  'text-stone-700 transition-colors hover:bg-stone-100 hover:text-primary focus-visible:bg-stone-100 focus-visible:text-primary'
 
 /** Selected option text — sits above the shared black `bg-primary` pill. */
 export const LIST_OPTION_ACTIVE = 'text-white'
@@ -71,7 +70,7 @@ export const LIST_OPTION_ACTIVE = 'text-white'
 export const LIST_OPTION_ACTIVE_PILL = 'absolute inset-0 rounded-lg bg-primary'
 
 /** Vertical rhythm between stacked options inside dropdown / menu panels. */
-export const LIST_OPTION_STACK = 'flex flex-col gap-1.5 p-1.5'
+export const LIST_OPTION_STACK = 'flex flex-col gap-1 p-1.5'
 
 /** Shared modal motion curve (same family as shell / panel springs). */
 export const MODAL_EASE = [0.22, 1, 0.36, 1] as const
@@ -87,7 +86,7 @@ export const MODAL_PANEL_TRANSITION = { duration: 0.18, ease: MODAL_EASE }
  * White tile, 0.67px #E7E5E4 border, soft indigo shadow, 8px pad, 16px icon.
  */
 export const SHELL_ICON_BUTTON =
-  'flex shrink-0 items-center rounded-[5.33px] border-[0.67px] border-[#E7E5E4] bg-white p-2 text-primary shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-colors hover:text-primary/80'
+  'flex shrink-0 items-center rounded-[5.33px] border-[0.67px] border-[#E7E5E4] bg-white p-2 text-primary shadow-[0_2.67px_1.33px_rgba(111,125,185,0.05)] transition-colors hover:text-primary'
 
 /** Modal / drawer dismiss control — same bordered tile as the menu chrome. */
 export const MODAL_CLOSE_BUTTON = SHELL_ICON_BUTTON
@@ -97,6 +96,18 @@ export const MODAL_CLOSE_BUTTON = SHELL_ICON_BUTTON
  * below modals / AppKit (1000).
  */
 export const NETWORK_SELECTOR_Z_INDEX = 500
+
+/**
+ * HoverCard / Popover tips — above shell chrome, network dropdown, and modals
+ * so tips remain readable from drawers and dialogs.
+ */
+export const TIP_Z_INDEX = 1100
+
+/**
+ * Tip collision inset from the viewport — matches mobile shell gutters (`px-3`).
+ * Without this, Radix clamps tips flush to the screen edge.
+ */
+export const TIP_COLLISION_PADDING_PX = 12
 
 export const SHELL_NAV: Omit<ShellNavItem, 'active'>[] = [
   { id: 'home', label: 'Home', icon: NavDashboardIcon, href: '/', enabled: true },

@@ -47,7 +47,7 @@ export function WalletAvatarButton({
       className={cn(
         'flex items-center justify-center gap-1.5 bg-white',
         'border-[1.29px] border-[#E7E5E4]',
-        'text-stone-900 transition-colors hover:text-primary focus-visible:text-primary',
+        'text-primary transition-colors hover:text-primary focus-visible:text-primary',
         'ring-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none',
         showLabel ? 'rounded-xl py-2 pr-3 pl-2' : cn('rounded-xl', s.button),
         className,

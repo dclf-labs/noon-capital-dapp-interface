@@ -35,7 +35,7 @@ Thin route screens live under `src/pages/<surface>/`; presentational panels unde
 | `src/features/stake-unstake/` | Stake/unstake CTA + submit-args + withdraw-claim (pure)            |
 | `src/features/bridge/`        | Route rules, CTA, Hyperlane/LZ libs + family providers             |
 | `src/pages/`                  | Route shells + flows (wire hooks → UI props)                       |
-| `src/mock/`                   | Presentational panels / styles; `/mock` gallery                    |
+| `src/mock/`                   | Presentational panels / styles                                     |
 | `src/hooks/connection/`       | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession` |
 | `src/hooks/on-chain/`         | Balances / allowances / gas (return `0` when disabled)             |
 | `src/hooks/query/`            | `useChainQuery` / `useApiQuery` envelopes                          |

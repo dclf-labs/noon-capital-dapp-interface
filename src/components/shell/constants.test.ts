@@ -6,6 +6,8 @@ import {
   FOOTER_SOCIALS,
   NETWORK_SELECTOR_Z_INDEX,
   shellNavForPath,
+  TIP_COLLISION_PADDING_PX,
+  TIP_Z_INDEX,
 } from '@/components/shell/constants'
 import { safeExternalHref } from '@/lib/safe-external-href'
 
@@ -13,6 +15,19 @@ describe('NETWORK_SELECTOR_Z_INDEX', () => {
   it('stacks above shell chrome and below modals / AppKit', () => {
     expect(NETWORK_SELECTOR_Z_INDEX).toBeGreaterThan(100)
     expect(NETWORK_SELECTOR_Z_INDEX).toBeLessThan(1000)
+  })
+})
+
+describe('TIP_Z_INDEX', () => {
+  it('stacks above shell chrome, network dropdown, and modals', () => {
+    expect(TIP_Z_INDEX).toBeGreaterThan(NETWORK_SELECTOR_Z_INDEX)
+    expect(TIP_Z_INDEX).toBeGreaterThan(1000)
+  })
+})
+
+describe('TIP_COLLISION_PADDING_PX', () => {
+  it('matches mobile shell gutters (px-3)', () => {
+    expect(TIP_COLLISION_PADDING_PX).toBe(12)
   })
 })
 

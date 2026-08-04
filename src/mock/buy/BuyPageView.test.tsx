@@ -63,11 +63,12 @@ describe('BuyPageView', () => {
     useIsMobileMock.mockReturnValue(false)
   })
 
-  it('renders the Buy hero with a default 0 buy-token amount', () => {
+  it('renders the Buy hero with an empty buy-token amount', () => {
     renderBuy()
 
     expect(screen.getByRole('navigation', { name: /product/i })).toBeInTheDocument()
-    expect(screen.getByLabelText(/usn amount/i)).toHaveValue('0')
+    expect(screen.getByLabelText(/usn amount/i)).toHaveValue('')
+    expect(screen.getByLabelText(/usn amount/i)).toHaveAttribute('placeholder', '0')
     expect(screen.queryByText(/≈/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /enter amount/i })).toBeDisabled()
   })

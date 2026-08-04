@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import type { Token } from '@/config/token'
 import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
+  formatTradeReceiveDisplay,
   isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
@@ -13,7 +14,6 @@ import {
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 import type { MintRedeemMode } from '@/features/mint-redeem'
-import { down } from '@/lib/format'
 import { SafeExplorerLink } from '@/mock/_shared'
 import { TokenDropdown } from '@/mock/buy/TokenDropdown'
 import * as styles from '@/mock/mint-redeem/mint-redeem-styles'
@@ -160,8 +160,7 @@ export function MintRedeemPanel({
     )
   }
 
-  const receiveDisplay =
-    amountOutValue != null ? down(amountOutValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
+  const receiveDisplay = amountOutValue != null ? formatTradeReceiveDisplay(amountOutValue) : ''
   const isReceiveLoading = isFetchingQuote && amountOutValue == null
   const variableToken = mode === 'mint' ? tokenIn : tokenOut
   const fixedToken = mode === 'mint' ? tokenOut : tokenIn
@@ -183,7 +182,7 @@ export function MintRedeemPanel({
           <NumericFormat
             style={styles.input}
             inputMode="decimal"
-            placeholder="0.00"
+            placeholder="0"
             decimalScale={TRADE_PAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
@@ -262,7 +261,7 @@ export function MintRedeemPanel({
             style={{ ...styles.input, opacity: 0.85 }}
             className={isReceiveLoading ? 'animate-pulse' : undefined}
             readOnly
-            placeholder="0.00"
+            placeholder="0"
             decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
             thousandSeparator
             allowNegative={false}

@@ -1,6 +1,6 @@
 import { formatConfirmAmount } from '@/features/_shared/trade-display'
 import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
-import { ExplorerActions, PanelChrome } from '@/mock/_shared'
+import { ExplorerActions, PanelChrome, StepPanelHeader } from '@/mock/_shared'
 import { BRIDGE_SUCCESS_NOTE } from '@/mock/bridge/constants'
 import { StatusCallout } from '@/mock/bridge/StatusCallout'
 import type { BridgeSuccessPanelProps } from '@/mock/bridge/types'
@@ -17,6 +17,8 @@ export function BridgeSuccessPanel({
 
   return (
     <PanelChrome>
+      <StepPanelHeader title="You have successfully bridged" />
+
       <div className="flex min-h-60 w-full flex-col items-center justify-center gap-1 px-2">
         <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-success-soft">
           <img
@@ -27,10 +29,6 @@ export function BridgeSuccessPanel({
             className="size-6"
           />
         </div>
-
-        <h2 className="text-center font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900 md:text-[36px] md:leading-[44px] md:tracking-[-1.8px]">
-          You have successfully bridged
-        </h2>
 
         <TokenSymbolMark
           symbol={token?.symbol}

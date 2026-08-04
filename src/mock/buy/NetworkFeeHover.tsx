@@ -1,4 +1,5 @@
-import { GasPumpIcon, InfoIcon } from '@/assets/icons'
+import { GasPumpIcon } from '@/assets/icons'
+import { InfoTipIcon } from '@/components/ui/info-tip-icon'
 import { ResponsiveTip } from '@/components/ui/responsive-tip'
 import { NETWORK_FEE_TIP } from '@/mock/buy/constants'
 
@@ -27,15 +28,7 @@ export function NetworkFeeHover({
           aria-hidden
         />
         <span className="text-sm leading-5 font-book text-stone-500">Network fee (gas)</span>
-        <ResponsiveTip
-          label="About network fee"
-          content={NETWORK_FEE_TIP}
-          side="top"
-          align="start"
-          contentClassName="max-w-[240px] whitespace-normal"
-        >
-          <InfoIcon width={12} height={12} className="size-3 shrink-0 text-stone-400" aria-hidden />
-        </ResponsiveTip>
+        <InfoTipIcon content={NETWORK_FEE_TIP} label="About network fee" size={12} />
       </div>
 
       {showValueLoading ? (

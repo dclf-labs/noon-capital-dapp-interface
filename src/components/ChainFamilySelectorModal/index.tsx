@@ -125,7 +125,7 @@ export default function ChainFamilySelectorModal({
               </p>
             </div>
 
-            <div className="grid gap-1.5">
+            <div className="grid gap-1">
               {CHAIN_FAMILY_OPTIONS.map((option) => {
                 const selected = option.family === activeFamily
                 return (

@@ -15,10 +15,10 @@ import {
 } from '@/features/_shared/trade-input-format'
 
 describe('trade input format constants', () => {
-  it('keeps pay precision at 6dp and receive display at 2dp', () => {
+  it('keeps pay and receive display precision at 6dp', () => {
     expect(TRADE_PAY_DECIMALS).toBe(6)
     expect(TRADE_PAY_DECIMALS).toBe(TRADE_INPUT_DECIMALS)
-    expect(TRADE_RECEIVE_DISPLAY_DECIMALS).toBe(2)
+    expect(TRADE_RECEIVE_DISPLAY_DECIMALS).toBe(TRADE_PAY_DECIMALS)
   })
 })
 
@@ -72,22 +72,23 @@ describe('formatTradePayDisplay', () => {
 })
 
 describe('formatTradeReceiveDisplay', () => {
-  it('shows at most 2 decimal places with thousand separators', () => {
-    expect(formatTradeReceiveDisplay(1234.567891)).toBe('1,234.56')
+  it('matches pay: up to 6dp, thousand separators, omit trailing zeros', () => {
+    expect(formatTradeReceiveDisplay(1234.567891)).toBe('1,234.567891')
     expect(formatTradeReceiveDisplay(10.1)).toBe('10.1')
     expect(formatTradeReceiveDisplay(10)).toBe('10')
+    expect(formatTradeReceiveDisplay(1.123456789)).toBe('1.123456')
   })
 
-  it('truncates (does not round up) to 2dp for display', () => {
-    expect(formatTradeReceiveDisplay(12.345678)).toBe('12.34')
-    expect(formatTradeReceiveDisplay(12.349999)).toBe('12.34')
+  it('truncates (does not round up) to 6dp for display', () => {
+    expect(formatTradeReceiveDisplay(12.3456789)).toBe('12.345678')
+    expect(formatTradeReceiveDisplay(12.3499999)).toBe('12.349999')
   })
 
   it('does not change the stored 6dp value used for trading', () => {
     const raw = 99.999999
     const stored = toTradeReceiveStoredAmount(raw)
     expect(stored).toBe(99.999999)
-    expect(formatTradeReceiveDisplay(raw)).toBe('99.99')
+    expect(formatTradeReceiveDisplay(raw)).toBe('99.999999')
     // stored value remains full precision after display formatting
     expect(stored).toBe(99.999999)
   })

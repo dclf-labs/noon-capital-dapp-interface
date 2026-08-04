@@ -77,13 +77,13 @@ describe('trade display formatters', () => {
 })
 
 describe('trade pay/receive display pairing', () => {
-  it('keeps pay display precise and receive display short', () => {
+  it('keeps pay and receive input display at the same ≤6dp scale', () => {
     const amount = 1234567.891234
     expect(formatTradePayDisplay(amount)).toBe('1,234,567.891234')
-    expect(formatTradeReceiveDisplay(amount)).toBe('1,234,567.89')
+    expect(formatTradeReceiveDisplay(amount)).toBe('1,234,567.891234')
   })
 
-  it('matches confirm-row pairing: pay@6dp label vs receive@2dp label', () => {
+  it('matches confirm-row pairing for pay and receive labels', () => {
     const amountIn = 1000.123456
     const amountOut = 999.654321
     expect(formatTokenAmount(amountIn, 'USDC', TRADE_PAY_DECIMALS)).toBe('1,000.1 USDC')

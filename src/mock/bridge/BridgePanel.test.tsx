@@ -72,7 +72,7 @@ describe('BridgePanel behaviour', () => {
     expect(payInput().value).toBe(formatTradePayDisplay(amount))
     expect(payInput().value).toBe('12.345678')
     expect(receiveInput().value).toBe(formatTradeReceiveDisplay(amount))
-    expect(receiveInput().value).toBe('12.34')
+    expect(receiveInput().value).toBe('12.345678')
     expect(screen.getByText(formatUsd(12.3456789))).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Next' }))

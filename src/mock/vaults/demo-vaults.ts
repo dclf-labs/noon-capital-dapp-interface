@@ -1,6 +1,6 @@
 import type { VaultListItem } from '@/mock/vaults/types'
 
-/** Stub rows for `/mock` gallery — live product vaults come from `useProductVaults`. */
+/** Stub vault rows for tests / local fixtures — live product vaults come from `useProductVaults`. */
 export const DEMO_VAULTS: VaultListItem[] = [
   {
     id: 'usdc-mon',

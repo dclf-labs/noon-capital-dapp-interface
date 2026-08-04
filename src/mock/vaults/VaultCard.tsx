@@ -56,11 +56,7 @@ export function VaultCard({ vault }: VaultCardProps) {
   return (
     <div className="group/card relative flex w-full flex-col gap-2 md:gap-0">
       {linkProps ? (
-        <a
-          {...linkProps}
-          className="block w-full rounded-2xl transition-opacity hover:opacity-95"
-          aria-label={`Open ${vault.name}`}
-        >
+        <a {...linkProps} className="block w-full rounded-2xl" aria-label={`Open ${vault.name}`}>
           <VaultCardBody vault={vault} />
         </a>
       ) : (
@@ -114,7 +110,7 @@ export function VaultCard({ vault }: VaultCardProps) {
 
 function VaultCardBody({ vault }: { vault: VaultListItem }) {
   return (
-    <article className="flex w-full flex-col gap-6 rounded-2xl border border-stone-200 bg-white/70 p-4 backdrop-blur-[11.7px] md:gap-4">
+    <article className="flex w-full flex-col gap-6 rounded-2xl border border-stone-200 bg-white p-4 md:gap-4">
       {/* Title row — APY sits on the right on desktop only. */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">

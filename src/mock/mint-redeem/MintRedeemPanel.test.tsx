@@ -58,11 +58,11 @@ function renderPanel(overrides: Partial<MintRedeemPanelProps> = {}) {
 }
 
 function payInput() {
-  return screen.getAllByPlaceholderText('0.00')[0] as HTMLInputElement
+  return screen.getAllByPlaceholderText('0')[0] as HTMLInputElement
 }
 
 function receiveInput() {
-  const inputs = screen.getAllByPlaceholderText('0.00')
+  const inputs = screen.getAllByPlaceholderText('0')
   return inputs[inputs.length - 1] as HTMLInputElement
 }
 
@@ -100,18 +100,18 @@ describe('MintRedeemPanel behaviour', () => {
     expect(last).toBe(1.123456)
   })
 
-  it('displays receive amount with at most 2 decimals while storing 6dp in title', () => {
+  it('displays receive amount with up to 6 decimals while storing 6dp in title', () => {
     const amountOut = 98765.432198
     renderPanel({ amountOut })
 
     expect(receiveInput().value).toBe(formatTradeReceiveDisplay(amountOut))
-    expect(receiveInput().value).toBe('98,765.43')
+    expect(receiveInput().value).toBe('98,765.432198')
     expect(receiveInput()).toHaveAttribute('title', String(toTradeReceiveStoredAmount(amountOut)))
   })
 
   it('pulses the receive field when fetching and no receive amount yet', () => {
     renderPanel({ isFetchingQuote: true, amountOut: undefined })
-    expect(receiveInput()).toHaveAttribute('placeholder', '0.00')
+    expect(receiveInput()).toHaveAttribute('placeholder', '0')
     expect(receiveInput()).toHaveClass('animate-pulse')
   })
 

@@ -1,7 +1,6 @@
 import { formatConfirmAmount } from '@/features/_shared/trade-display'
 import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
-import { cn } from '@/lib/utils'
-import { FOCUS_RESET, PanelChrome, preventMouseDownFocus, PrimaryCtaButton } from '@/mock/_shared'
+import { PanelChrome, PrimaryCtaButton, StepPanelHeader } from '@/mock/_shared'
 import { NetworkFeeHover } from '@/mock/buy/NetworkFeeHover'
 import { TokenSymbolMark } from '@/mock/buy/TokenSymbolMark'
 import type { BuyConfirmPanelProps } from '@/mock/buy/types'
@@ -57,27 +56,9 @@ export function BuyConfirmPanel({
 
   return (
     <PanelChrome>
-      {onBack ? (
-        <button
-          type="button"
-          aria-label="Back"
-          onMouseDown={preventMouseDownFocus}
-          onClick={onBack}
-          className={cn(
-            'flex w-fit items-center rounded-md bg-stone-100 p-1.5',
-            'transition-opacity hover:opacity-80',
-            FOCUS_RESET,
-          )}
-        >
-          <img src="/assets/buy/arrow-back.svg" alt="" width={24} height={24} className="size-6" />
-        </button>
-      ) : null}
+      <StepPanelHeader title="Confirm your buy transaction" onBack={onBack} />
 
       <div className="flex min-h-60 w-full flex-col items-center justify-center gap-4">
-        <h2 className="px-2 text-center font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900 md:text-[36px] md:leading-[44px] md:tracking-[-1.8px]">
-          Confirm your buy transaction
-        </h2>
-
         <div className="flex w-full flex-col items-center gap-2 px-2 md:flex-row md:gap-0 md:px-1">
           <TokenAmountColumn
             label="Swapping"

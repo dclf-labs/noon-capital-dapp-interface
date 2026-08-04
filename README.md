@@ -124,7 +124,6 @@ Surfaces are separate shells/routes — do not fold mint/redeem, stake/unstake, 
 | Mint / Redeem           | `/mint`, `/redeem`                |
 | Stake / Unstake / Claim | `/stake`, `/unstake`, `/withdraw` |
 | Bridge                  | `/bridge`                         |
-| UI mock gallery         | `/mock`                           |
 
 ## Project structure
 
@@ -138,7 +137,7 @@ src/
     stake-unstake/    # Pure stake/unstake CTA + submit-args + claims
     bridge/           # Route rules, CTA, Hyperlane / LayerZero
   pages/              # Route shells + flows (wire hooks → UI)
-  mock/               # Presentational panels / styles (+ /mock gallery)
+  mock/               # Presentational panels / styles
   hooks/
     connection/       # useWalletSession / read-only / WalletQuerySync
     on-chain/         # balances, allowances, gas
@@ -175,7 +174,7 @@ See:
 - `src/wallet/README.md` — wallet provider stack (EVM / Starknet / Sui)
 - `src/features/README.md` — domain modules
 - `src/pages/README.md` — route shells / flows
-- `src/mock/README.md` — presentational UI + gallery
+- `src/mock/README.md` — presentational UI panels
 - `src/features/_shared/README.md` — shared trade primitives
 
 ## Extending for protocol work

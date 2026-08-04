@@ -4,6 +4,7 @@ export { PanelChrome } from '@/mock/_shared/PanelChrome'
 export { PrimaryCtaButton } from '@/mock/_shared/PrimaryCtaButton'
 export { ProductStepShell } from '@/mock/_shared/ProductStepShell'
 export { SafeExplorerLink } from '@/mock/_shared/SafeExplorerLink'
+export { StepPanelHeader } from '@/mock/_shared/StepPanelHeader'
 export {
   accentCtaClassName,
   BRIDGE_PANEL_SHELL,

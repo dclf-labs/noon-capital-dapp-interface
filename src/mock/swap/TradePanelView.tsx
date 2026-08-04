@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import type { Token } from '@/config/token'
 import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
+  formatTradeReceiveDisplay,
   isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
@@ -172,7 +173,7 @@ export function TradePanelView({
   }
 
   const receiveDisplayValue =
-    amountOutValue != null ? down(amountOutValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
+    amountOutValue != null ? formatTradeReceiveDisplay(amountOutValue) : ''
   const isReceiveLoading = isFetchingQuote && amountOutValue == null
 
   return (
@@ -186,7 +187,7 @@ export function TradePanelView({
           <NumericFormat
             style={styles.input}
             inputMode="decimal"
-            placeholder="0.00"
+            placeholder="0"
             decimalScale={TRADE_PAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
@@ -257,12 +258,11 @@ export function TradePanelView({
             style={{ ...styles.input, opacity: 0.85 }}
             className={isReceiveLoading ? 'animate-pulse' : undefined}
             readOnly
-            placeholder="0.00"
+            placeholder="0"
             decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
             value={receiveDisplayValue}
-            // Field shows ≤2dp; title keeps full stored 6dp for hover/debug.
             title={amountOutValue != null ? String(amountOutValue) : undefined}
           />
           <TokenDropdown

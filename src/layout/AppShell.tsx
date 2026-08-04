@@ -18,8 +18,9 @@ import { resolveConnectorIconSrc } from '@/wallet/connector-icon'
 import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 /**
- * Shared app chrome: background, max-width column, header (network + wallet),
- * hover-expand sidebar (desktop) / mobile nav drawer, footer.
+ * Shared app chrome — navbar, body, and footer live inside `APP_SHELL_MAX_PX`
+ * (`mx-auto`). The desktop sidebar is viewport-fixed but left-aligned to that
+ * same centered column so ultrawide screens keep chrome capped together.
  */
 export function AppShell() {
   const location = useLocation()
@@ -51,7 +52,7 @@ export function AppShell() {
 
   return (
     <div
-      className="relative m-0 mx-auto flex min-h-dvh w-full flex-col border-0 p-0 font-suisse text-[#111]"
+      className="relative mx-auto flex min-h-dvh w-full flex-col border-0 p-0 font-suisse text-[#111]"
       style={{
         maxWidth: APP_SHELL_MAX_PX,
         backgroundImage:

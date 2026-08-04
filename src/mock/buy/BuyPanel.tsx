@@ -86,11 +86,9 @@ export function BuyPanel({
     onBuyAmountChange?.(next)
   }
 
-  const displayValue = amountDraft.displayValue(buyAmount ?? 0, 0)
+  const displayValue = amountDraft.displayValue(buyAmount)
   const fitText =
-    typeof displayValue === 'string'
-      ? displayValue || '0'
-      : formatTradePayDisplay(displayValue) || '0'
+    typeof displayValue === 'string' ? displayValue : formatTradePayDisplay(displayValue)
   const amountFontSize = useFitAmountFontSize(fitText, amountBoxRef)
 
   const selectedPresetUsd = BUY_USD_PRESETS.find((usd) => {
@@ -144,6 +142,7 @@ export function BuyPanel({
               thousandSeparator
               allowNegative={false}
               allowedDecimalSeparators={['.']}
+              placeholder="0"
               value={displayValue}
               onFocus={amountDraft.onFocus}
               onBlur={amountDraft.onBlur}
@@ -184,7 +183,7 @@ export function BuyPanel({
                       isFetchingQuote && hasBuyAmount && 'animate-pulse',
                     )}
                   >
-                    {amountInValue != null ? formatTradePayDisplay(amountInValue) : '0'}
+                    {amountInValue != null ? formatTradePayDisplay(amountInValue) : ''}
                   </span>
                   <TokenDropdown
                     token={tokenIn}

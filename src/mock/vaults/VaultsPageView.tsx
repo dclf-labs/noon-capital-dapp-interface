@@ -41,7 +41,7 @@ export function VaultsPageView({ vaults, onSortClick, onFilterClick }: VaultsPag
         <VaultsHero />
 
         {/* Centered vault column — hover Earn Now panel can still paint outside to the right. */}
-        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 overflow-visible lg:max-w-[70%] lg:min-w-[45%]">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 overflow-visible lg:max-w-[88%] lg:min-w-[60%]">
           <VaultsToolbar onSortClick={onSortClick} onFilterClick={onFilterClick} />
 
           <div className="flex w-full flex-col gap-8 overflow-visible">

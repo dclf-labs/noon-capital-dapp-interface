@@ -135,15 +135,23 @@ export function MobileNavDrawer({
                 <CloseIcon width={16} height={16} className="size-4" aria-hidden />
               </button>
 
-              <div className="min-w-0 flex-1">
-                <img
+              <div className="flex min-w-0 flex-1 items-center">
+                <Link
                   id={titleId}
-                  src="/assets/shell/sidebar-logo-open.svg"
-                  alt="NOON"
-                  width={68}
-                  height={24}
-                  className="h-6 w-auto"
-                />
+                  to="/"
+                  aria-label="Go to home page"
+                  className="inline-flex items-center"
+                  onClick={onClose}
+                >
+                  <img
+                    src="/assets/shell/sidebar-logo-open.svg"
+                    alt=""
+                    width={68}
+                    height={24}
+                    className="h-6 w-auto"
+                    aria-hidden
+                  />
+                </Link>
               </div>
 
               <div className="flex shrink-0 items-center gap-4">
@@ -180,8 +188,8 @@ export function MobileNavDrawer({
                   active
                     ? 'text-white'
                     : enabled
-                      ? 'text-[#111] hover:bg-stone-100 hover:text-stone-900'
-                      : 'cursor-not-allowed text-[#111] opacity-50',
+                      ? 'text-stone-500 hover:bg-stone-100 hover:text-primary focus-visible:bg-stone-100 focus-visible:text-primary'
+                      : 'pointer-events-none cursor-not-allowed text-stone-400 opacity-40',
                 )
 
                 const content = (

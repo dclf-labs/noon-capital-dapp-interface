@@ -1,9 +1,11 @@
 import { useId, useMemo, useState } from 'react'
 
 import { motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 
 import { DividerIcon } from '@/assets/icons'
 import {
+  APP_SHELL_MAX_PX,
   APY_TIP,
   SHELL_SELECTION_SPRING,
   SIDEBAR_CONTENT_TRANSITION,
@@ -29,12 +31,17 @@ function SidebarLogo() {
   const { open } = useSidebar()
 
   return (
-    <div className="relative h-5 w-full shrink-0 overflow-hidden">
+    <Link
+      to="/"
+      aria-label="Go to home page"
+      className="relative block h-5 w-full shrink-0 overflow-hidden"
+    >
       <motion.img
         src="/assets/shell/sidebar-logo.svg"
-        alt="NOON"
+        alt=""
         width={30}
         height={20}
+        aria-hidden
         className="absolute top-0 left-1/2 h-5 w-[30px] -translate-x-1/2"
         initial={false}
         animate={{ opacity: open ? 0 : 1 }}
@@ -51,7 +58,7 @@ function SidebarLogo() {
         animate={{ opacity: open ? 1 : 0 }}
         transition={SIDEBAR_CONTENT_TRANSITION}
       />
-    </div>
+    </Link>
   )
 }
 
@@ -193,6 +200,10 @@ export function AppSidebar({
     [navItems],
   )
 
+  // Fixed to the viewport, but `left` is offset so the rail lines up with the
+  // centered `APP_SHELL_MAX_PX` column (not the raw viewport edge on ultrawide).
+  const shellAlignedLeft = `max(${SIDEBAR_INSET_LEFT_PX}px, calc((100vw - ${APP_SHELL_MAX_PX}px) / 2 + ${SIDEBAR_INSET_LEFT_PX}px))`
+
   return (
     <>
       {/* In-flow spacer — keeps main content clear of the fixed rail. */}
@@ -201,7 +212,7 @@ export function AppSidebar({
         className="fixed z-30 h-[min(701px,calc(100dvh-8px))]"
         style={{
           top: SIDEBAR_INSET_TOP_PX,
-          left: SIDEBAR_INSET_LEFT_PX,
+          left: shellAlignedLeft,
           width: SIDEBAR_RAIL_PX,
         }}
       >

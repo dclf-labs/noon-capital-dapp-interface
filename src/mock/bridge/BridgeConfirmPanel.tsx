@@ -3,7 +3,7 @@ import { formatConfirmAmount } from '@/features/_shared/trade-display'
 import { safeExternalHref } from '@/lib/safe-external-href'
 import { tokenChainIconSrc, tokenIconSrc } from '@/lib/token-icon'
 import { cn, truncateAddress } from '@/lib/utils'
-import { FOCUS_RESET, PanelChrome, preventMouseDownFocus, PrimaryCtaButton } from '@/mock/_shared'
+import { FOCUS_RESET, PanelChrome, PrimaryCtaButton, StepPanelHeader } from '@/mock/_shared'
 import { BridgingFeesCollapsible } from '@/mock/bridge/BridgingFeesCollapsible'
 import { BRIDGE_ETA_LABEL, DEFAULT_BRIDGE_FEE_LABEL } from '@/mock/bridge/constants'
 import { resolveBridgeStatusNotice } from '@/mock/bridge/status-notice'
@@ -38,7 +38,7 @@ function ExplorerAddressLink({ address, explorerUrl }: { address?: string; explo
       className={cn(
         'group inline-flex items-center justify-center gap-0.5',
         'text-sm leading-5 font-book text-stone-500 transition-colors',
-        'hover:text-stone-900',
+        'hover:text-primary',
         FOCUS_RESET,
       )}
     >
@@ -46,7 +46,7 @@ function ExplorerAddressLink({ address, explorerUrl }: { address?: string; explo
       <ArrowUpRightIcon
         width={20}
         height={20}
-        className="size-5 shrink-0 text-stone-400 transition-colors group-hover:text-stone-900"
+        className="size-5 shrink-0 text-stone-400 transition-colors group-hover:text-primary"
         aria-hidden
       />
     </a>
@@ -148,27 +148,9 @@ export function BridgeConfirmPanel({
 
   return (
     <PanelChrome>
-      {onBack ? (
-        <button
-          type="button"
-          aria-label="Back"
-          onMouseDown={preventMouseDownFocus}
-          onClick={onBack}
-          className={cn(
-            'flex w-fit items-center rounded-md bg-stone-100 p-1.5',
-            'transition-opacity hover:opacity-80',
-            FOCUS_RESET,
-          )}
-        >
-          <img src="/assets/buy/arrow-back.svg" alt="" width={24} height={24} className="size-6" />
-        </button>
-      ) : null}
+      <StepPanelHeader title="Confirm your bridge transaction" onBack={onBack} />
 
       <div className="flex min-h-60 w-full flex-col items-center justify-center gap-4">
-        <h2 className="px-2 text-center font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900 md:text-[36px] md:leading-[44px] md:tracking-[-1.8px]">
-          Confirm your bridge transaction
-        </h2>
-
         {/* Desktop: left ↔ right. Mobile: top ↕ bottom. */}
         <div className="flex w-full flex-col items-center gap-2 px-2 md:flex-row md:gap-0 md:px-1">
           <BridgeAmountColumn

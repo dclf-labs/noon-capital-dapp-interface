@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 import { MenuIcon } from '@/assets/icons'
 import { ConnectWalletButton } from '@/components/shell/ConnectWalletButton'
 import { APY_TIP, SHELL_ICON_BUTTON } from '@/components/shell/constants'
@@ -65,14 +67,17 @@ export function AppHeader({
             <MenuIcon width={16} height={16} className="size-4" aria-hidden />
           </button>
 
-          <div className="min-w-0 flex-1">
-            <img
-              src="/assets/shell/sidebar-logo.svg"
-              alt="NOON"
-              width={35}
-              height={24}
-              className="h-6 w-auto"
-            />
+          <div className="flex min-w-0 flex-1 items-center">
+            <Link to="/" aria-label="Go to home page" className="inline-flex items-center">
+              <img
+                src="/assets/shell/sidebar-logo.svg"
+                alt=""
+                width={35}
+                height={24}
+                className="h-6 w-auto"
+                aria-hidden
+              />
+            </Link>
           </div>
 
           <div className="flex shrink-0 items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-1.5">

@@ -60,12 +60,12 @@ function renderTrade(overrides: Partial<TradePanelViewProps> = {}) {
 }
 
 function payInput() {
-  return screen.getAllByPlaceholderText('0.00')[0] as HTMLInputElement
+  return screen.getAllByPlaceholderText('0')[0] as HTMLInputElement
 }
 
 function receiveInput() {
-  // Receive and pay both use "0.00" as placeholder — pick the last.
-  const inputs = screen.getAllByPlaceholderText('0.00')
+  // Receive and pay both use "0" as placeholder — pick the last.
+  const inputs = screen.getAllByPlaceholderText('0')
   return inputs[inputs.length - 1] as HTMLInputElement
 }
 
@@ -102,7 +102,7 @@ describe('TradePanelView input formatting', () => {
 
     // Re-render with committed value and assert grouped display
     renderTrade({ amountIn: 1234.56 })
-    expect(screen.getAllByPlaceholderText('0.00')[0]).toHaveValue('1,234.56')
+    expect(screen.getAllByPlaceholderText('0')[0]).toHaveValue('1,234.56')
   })
 
   it('clears pay amount when the field is emptied', async () => {
@@ -114,27 +114,27 @@ describe('TradePanelView input formatting', () => {
     expect(onAmountInChange).toHaveBeenCalledWith(undefined)
   })
 
-  it('displays receive amount with at most 2 decimals and thousand separators', () => {
+  it('displays receive amount with up to 6 decimals and thousand separators', () => {
     const amountOut = 98765.432198
     renderTrade({ amountOut })
 
     expect(receiveInput().value).toBe(formatTradeReceiveDisplay(amountOut))
-    expect(receiveInput().value).toBe('98,765.43')
+    expect(receiveInput().value).toBe('98,765.432198')
   })
 
-  it('keeps full 6dp receive value in the title while showing 2dp', () => {
+  it('shows significant ≤6dp in the receive field and keeps stored value in the title', () => {
     const amountOut = 12.345678
     renderTrade({ amountOut })
 
     const stored = toTradeReceiveStoredAmount(amountOut)
     expect(stored).toBe(12.345678)
-    expect(receiveInput().value).toBe('12.34')
+    expect(receiveInput().value).toBe('12.345678')
     expect(receiveInput()).toHaveAttribute('title', '12.345678')
   })
 
   it('pulses the receive field when fetching and no receive amount yet', () => {
     const { rerender } = renderTrade({ isFetchingQuote: true, amountOut: undefined })
-    expect(receiveInput()).toHaveAttribute('placeholder', '0.00')
+    expect(receiveInput()).toHaveAttribute('placeholder', '0')
     expect(receiveInput()).toHaveClass('animate-pulse')
     expect(receiveInput().value).toBe('')
 
@@ -164,7 +164,7 @@ describe('TradePanelView input formatting', () => {
         }}
       />,
     )
-    expect(receiveInput().value).toBe('1.23')
+    expect(receiveInput().value).toBe('1.234567')
     expect(receiveInput()).not.toHaveClass('animate-pulse')
   })
 

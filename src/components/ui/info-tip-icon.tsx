@@ -19,7 +19,7 @@ export function InfoTipIcon({ content, label, size = 12, className }: InfoTipIco
       align="start"
       contentClassName="max-w-[240px] whitespace-normal"
       triggerClassName={cn(
-        'rounded-sm text-stone-500 transition-colors hover:text-stone-700',
+        'rounded-sm text-stone-500 transition-colors hover:text-primary',
         className,
       )}
     >

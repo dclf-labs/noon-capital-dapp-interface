@@ -7,7 +7,6 @@ Thin route wiring for product surfaces. **Presentational panels live in `src/moc
 | Path(s)                           | Shell               | Notes                                      |
 | --------------------------------- | ------------------- | ------------------------------------------ |
 | `/`                               | `AppShell`          | Product vaults (same as `/vaults`)         |
-| `/mock`                           | `AppShell`          | Stubbed gallery of `src/mock/*` panels     |
 | `/swap/buy`, `/swap/sell`         | `AppShell` + swap   | DEX buy/sell — **not** mint/redeem         |
 | `/mint`, `/redeem`                | `AppShell` + mint   | DirectMinter / DirectRedeemer (Ethereum)   |
 | `/stake`, `/unstake`, `/withdraw` | `AppShell` + stake  | USN ↔ sUSN vault + claim after cooldown    |
@@ -42,7 +41,7 @@ src/mock/<surface>/
 
 ## Related docs
 
-- `src/mock/README.md` — panel inventory + gallery
+- `src/mock/README.md` — panel inventory
 - `docs/ARCHITECTURE.md` — product surface map + conventions
 - `docs/TESTING.md` — panel / calculation test expectations
 - `src/features/README.md` — domain modules

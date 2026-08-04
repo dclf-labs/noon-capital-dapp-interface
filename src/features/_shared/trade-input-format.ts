@@ -5,11 +5,14 @@ import {
 } from '@/features/_shared/trade-amounts'
 import { down, toNum } from '@/lib/format'
 
-/** Pay input: up to 6 fraction digits (product NumericFormat scale). */
+/** Pay / receive input: up to 6 fraction digits (product NumericFormat scale). */
 export const TRADE_PAY_DECIMALS = TRADE_INPUT_DECIMALS
 
-/** Receive field display: at most 2 fraction digits; stored value stays at 6. */
-export const TRADE_RECEIVE_DISPLAY_DECIMALS = 2
+/**
+ * Receive field display scale — same 6dp cap as pay.
+ * Formatters omit trailing zeros so only significant places are shown.
+ */
+export const TRADE_RECEIVE_DISPLAY_DECIMALS = TRADE_PAY_DECIMALS
 
 /**
  * Clip a pay amount to trade input precision.
@@ -21,9 +24,7 @@ export function toTradePayAmount(value: number | string | undefined): number | u
   return clipped > 0 ? clipped : undefined
 }
 
-/**
- * Stored receive amount keeps full trade precision (6dp), even when the UI shows 2dp.
- */
+/** Stored receive amount — same 6dp clip as pay (UI shows significant digits only). */
 export function toTradeReceiveStoredAmount(value: number | string | undefined): number | undefined {
   return toTradePayAmount(value)
 }
@@ -43,9 +44,8 @@ export function formatTradePayDisplay(amount: number | string | undefined): stri
 }
 
 /**
- * Format receive amount for display: commas + at most 2 fraction digits.
- * Truncates via `down` (does not round up). Stored 6dp value is unchanged —
- * panels also put the full amount in the input `title` tooltip.
+ * Format receive amount for display — same rules as pay (≤6dp, no trailing zeros).
+ * Truncates via `down` (does not round up); stored 6dp value is unchanged.
  */
 export function formatTradeReceiveDisplay(amount: number | string | undefined): string {
   const stored = toTradeReceiveStoredAmount(amount)

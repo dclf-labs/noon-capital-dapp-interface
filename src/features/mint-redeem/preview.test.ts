@@ -15,7 +15,7 @@ describe('mint preview quote', () => {
   })
 
   it('keeps fractional mint quotes stable for UI receive binding', () => {
-    // 1,234.567891 USDC @ $0.999 → receive amountOut that panels show @ 2dp.
+    // 1,234.567891 USDC @ $0.999 → receive amountOut shown ≤6dp (no trailing zeros).
     const amountOut = computeMintPreviewAmountOut(1234.567891, 0.999)
     expect(amountOut).toBeCloseTo(1234.567891 * 0.999, 10)
     expect(formatTradeReceiveDisplay(amountOut)).toBe(
@@ -41,10 +41,10 @@ describe('redeem preview quote', () => {
   })
 
   it('keeps fractional redeem quotes stable for UI receive binding', () => {
-    // 100 USN ÷ $1.0025 USDT → collateral out shown @ 2dp in receive field.
+    // 100 USN ÷ $1.0025 USDT → collateral out shown with significant ≤6dp.
     const amountOut = computeRedeemPreviewAmountOut(100, 1.0025)
     expect(amountOut).toBeCloseTo(100 / 1.0025, 10)
-    expect(formatTradeReceiveDisplay(amountOut)).toBe('99.75')
+    expect(formatTradeReceiveDisplay(amountOut)).toBe('99.750623')
   })
 
   it('guards divide-by-zero when tokenOutPrice is 0', () => {

@@ -11,16 +11,11 @@ src/mock/
   stake-unstake/    StakeUnstakePanel, WithdrawClaimsPanel, styles
   bridge/           BridgePanel, BridgeNetworkSwitcher, bridge-styles
   vaults/           Vaults list content (hero + cards) — chrome in AppShell
-  MockGalleryPage.tsx   /mock route — stubbed visual gallery
   index.ts          Public re-exports
 ```
 
 Shared chrome: `src/layout/AppShell` + `src/components/shell` (sidebar, header, footer).
 See `src/mock/vaults/README.md` for the vaults content module.
-
-## Gallery
-
-Open **`/mock`** to preview panels with fake amounts — no wallet required for the presentational forms.
 
 `WithdrawClaimsPanel` is also stored here but still uses live withdraw hooks when mounted from `/withdraw`.
 

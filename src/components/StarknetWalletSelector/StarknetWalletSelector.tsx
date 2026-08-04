@@ -141,7 +141,7 @@ export function StarknetWalletSelector({
               </button>
             </div>
 
-            <div className="flex w-full flex-col gap-1.5">
+            <div className="flex w-full flex-col gap-1">
               {connectors.length ? (
                 connectors.map((connector) => {
                   const selected = Boolean(isConnected && connectedConnector?.id === connector.id)

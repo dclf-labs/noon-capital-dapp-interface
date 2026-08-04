@@ -72,7 +72,13 @@ describe('MobileNavDrawer', () => {
 
   it('disables unshipped nav destinations', () => {
     renderDrawer()
-    expect(screen.getByTitle(/Noon Points — coming soon/i)).toHaveAttribute('aria-disabled', 'true')
+    const disabled = screen.getByTitle(/Noon Points — coming soon/i)
+    expect(disabled).toHaveAttribute('aria-disabled', 'true')
+    expect(disabled.tagName).toBe('SPAN')
+    expect(screen.queryByRole('link', { name: 'Noon Points' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Dashboard' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '$NOON' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Noon League' })).not.toBeInTheDocument()
   })
 
   it('closes when Escape is pressed', async () => {

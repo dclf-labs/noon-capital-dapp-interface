@@ -56,11 +56,11 @@ function renderPanel(overrides: Partial<StakeUnstakePanelProps> = {}) {
 }
 
 function payInput() {
-  return screen.getAllByPlaceholderText('0.00')[0] as HTMLInputElement
+  return screen.getAllByPlaceholderText('0')[0] as HTMLInputElement
 }
 
 function receiveInput() {
-  const inputs = screen.getAllByPlaceholderText('0.00')
+  const inputs = screen.getAllByPlaceholderText('0')
   return inputs[inputs.length - 1] as HTMLInputElement
 }
 
@@ -80,7 +80,7 @@ describe('StakeUnstakePanel behaviour', () => {
     expect(payInput().value).toBe(formatTradePayDisplay(1234.5678912))
     expect(payInput().value).toBe('1,234.567891')
     expect(receiveInput().value).toBe(formatTradeReceiveDisplay(1234.5678912))
-    expect(receiveInput().value).toBe('1,234.56')
+    expect(receiveInput().value).toBe('1,234.567891')
     expect(receiveInput()).toHaveAttribute(
       'title',
       String(toTradeReceiveStoredAmount(1234.5678912)),

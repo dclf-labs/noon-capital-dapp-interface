@@ -73,8 +73,7 @@ export function BridgePanel({
 
   const payDraft = usePayAmountDraft({ onAmountChange })
   const displayPay = payDraft.displayValue(amountValue ?? '')
-  const displayReceive =
-    amountValue != null ? formatTradeReceiveDisplay(amountValue) : formatTradeReceiveDisplay(0)
+  const displayReceive = amountValue != null ? formatTradeReceiveDisplay(amountValue) : ''
   const hasAmount = amountValue != null && amountValue > 0
   const canFlip = Boolean(onFlipNetworks && sourceChainId && destinationChainId)
   const notice = resolveBridgeStatusNotice(warning)
@@ -127,7 +126,7 @@ export function BridgePanel({
                 thousandSeparator
                 allowNegative={false}
                 allowedDecimalSeparators={['.']}
-                placeholder="0.00"
+                placeholder="0"
                 value={displayPay}
                 onFocus={payDraft.onFocus}
                 onBlur={payDraft.onBlur}
@@ -237,6 +236,7 @@ export function BridgePanel({
               <input
                 id={receiveId}
                 readOnly
+                placeholder="0"
                 value={displayReceive}
                 className={cn(
                   'w-full bg-transparent text-left font-suisse text-2xl leading-8 font-medium text-stone-600 tabular-nums',

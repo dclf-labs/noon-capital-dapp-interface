@@ -5,6 +5,7 @@ import { NumericFormat } from 'react-number-format'
 import type { Token } from '@/config/token'
 import { formatTokenAmount, formatUsd } from '@/features/_shared/trade-display'
 import {
+  formatTradeReceiveDisplay,
   isTradePayInputAllowed,
   parseTradePayInput,
   toTradePayAmount,
@@ -13,7 +14,6 @@ import {
   TRADE_RECEIVE_DISPLAY_DECIMALS,
 } from '@/features/_shared/trade-input-format'
 import type { StakeUnstakeMode } from '@/features/stake-unstake'
-import { down } from '@/lib/format'
 import { SafeExplorerLink } from '@/mock/_shared'
 import * as styles from '@/mock/stake-unstake/stake-unstake-styles'
 
@@ -161,8 +161,7 @@ export function StakeUnstakePanel({
     )
   }
 
-  const receiveDisplay =
-    amountOutValue != null ? down(amountOutValue, TRADE_RECEIVE_DISPLAY_DECIMALS) : ''
+  const receiveDisplay = amountOutValue != null ? formatTradeReceiveDisplay(amountOutValue) : ''
   const isReceiveLoading = isFetchingQuote && amountOutValue == null
 
   return (
@@ -176,7 +175,7 @@ export function StakeUnstakePanel({
           <NumericFormat
             style={styles.input}
             inputMode="decimal"
-            placeholder="0.00"
+            placeholder="0"
             decimalScale={TRADE_PAY_DECIMALS}
             thousandSeparator
             allowNegative={false}
@@ -245,7 +244,7 @@ export function StakeUnstakePanel({
             style={{ ...styles.input, opacity: 0.85 }}
             className={isReceiveLoading ? 'animate-pulse' : undefined}
             readOnly
-            placeholder="0.00"
+            placeholder="0"
             decimalScale={TRADE_RECEIVE_DISPLAY_DECIMALS}
             thousandSeparator
             allowNegative={false}

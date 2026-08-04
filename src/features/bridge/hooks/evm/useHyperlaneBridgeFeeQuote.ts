@@ -28,6 +28,7 @@ const useHyperlaneBridgeFeeQuote = (
   destinationConnection: EVMConnection | undefined,
 ) => {
   const isQueryEnabled = useMemo(() => {
+    // `quoteDispatch` encodes recipient + amount in the message body — both required.
     return (
       isAddressValid(tokenIn?.contractAddress) &&
       !!connection.config?.id &&
@@ -36,9 +37,12 @@ const useHyperlaneBridgeFeeQuote = (
       !!connection.config?.hyperlaneDomain &&
       !!destinationConnection?.config?.hyperlaneDomain &&
       isAddressValid(connection.config?.hyperlaneMailbox) &&
-      !!receiverAddress
+      !!receiverAddress &&
+      !!amount &&
+      amount > 0
     )
   }, [
+    amount,
     connection.config?.hyperlaneDomain,
     connection.config?.hyperlaneMailbox,
     connection.config?.id,
@@ -165,7 +169,8 @@ const useHyperlaneBridgeFeeQuote = (
     return {
       isLoading,
       isError: isError,
-      data: data,
+      /** Native gas-token amount; `undefined` until a positive quote is ready. */
+      data: data != null && data > 0 ? data : undefined,
       isFetching: isFetching,
     }
   }, [data, isError, isLoading, isFetching])

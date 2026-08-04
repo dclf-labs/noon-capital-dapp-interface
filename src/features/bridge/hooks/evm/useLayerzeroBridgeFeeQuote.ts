@@ -27,6 +27,7 @@ const useLayerzeroBridgeFeeQuote = (
   destinationConnection: EVMConnection | undefined,
 ) => {
   const isQueryEnabled = useMemo(() => {
+    // `quoteSend` encodes amountLD / minAmountLD / recipient — all required.
     return (
       isAddressValid(tokenIn?.contractAddress) &&
       isAddressValid(tokenOut?.contractAddress) &&
@@ -34,9 +35,12 @@ const useLayerzeroBridgeFeeQuote = (
       !!destinationConnection?.config?.id &&
       !!connection.config?.layerzeroOftEid &&
       !!destinationConnection?.config?.layerzeroOftEid &&
-      isAddressValid(receiverAddress)
+      isAddressValid(receiverAddress) &&
+      !!amount &&
+      amount > 0
     )
   }, [
+    amount,
     connection.config?.id,
     connection.config?.layerzeroOftEid,
     destinationConnection?.config?.id,
@@ -145,7 +149,8 @@ const useLayerzeroBridgeFeeQuote = (
     return {
       isLoading,
       isError: isError,
-      data: data,
+      /** Native gas-token amount; `undefined` until a positive quote is ready. */
+      data: data != null && data > 0 ? data : undefined,
       isFetching: isFetching,
     }
   }, [data, isError, isLoading, isFetching])

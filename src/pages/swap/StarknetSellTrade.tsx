@@ -9,7 +9,7 @@ import {
 } from '@/features/_shared'
 import {
   formatBalanceLabel,
-  formatNativeFee,
+  formatSubmitFeeLabels,
   formatUnitRate,
 } from '@/features/_shared/trade-display'
 import {
@@ -156,9 +156,8 @@ export function StarknetSellTrade() {
       )}
       unitRateLabel={unitRate !== undefined ? formatUnitRate(unitRate) : undefined}
       feeLabel={
-        submitFee.data !== undefined
-          ? formatNativeFee(submitFee.data, connection.config?.defaultGasToken?.symbol || 'ETH')
-          : undefined
+        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'STRK')
+          .feeLabel
       }
       isFetchingQuote={isFetchingQuote}
       isInsufficientBalance={isInsufficientBalance}

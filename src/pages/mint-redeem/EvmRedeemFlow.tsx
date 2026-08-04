@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useTradeAmountHandlers, useTradeInputModel } from '@/features/_shared'
 import {
   formatBalanceLabel,
-  formatNativeFee,
+  formatSubmitFeeLabels,
   formatUnitRate,
 } from '@/features/_shared/trade-display'
 import { getMintRedeemPrimaryAction } from '@/features/mint-redeem'
@@ -169,9 +169,8 @@ export function EvmRedeemFlow() {
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
       feeLabel={
-        submitFee.data !== undefined
-          ? formatNativeFee(submitFee.data, connection.config?.defaultGasToken?.symbol || 'ETH')
-          : undefined
+        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'ETH')
+          .feeLabel
       }
       isFetchingQuote={isFetchingQuote}
       isInsufficientBalance={isInsufficientBalance}

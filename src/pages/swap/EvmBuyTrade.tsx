@@ -7,8 +7,7 @@ import {
 } from '@/features/_shared'
 import {
   formatBalanceLabel,
-  formatFeeUsd,
-  formatNativeFeeDetail,
+  formatSubmitFeeLabels,
   formatUnitRate,
 } from '@/features/_shared/trade-display'
 import useGeckoPrice from '@/features/api/hooks/useGeckoPrice'
@@ -169,10 +168,10 @@ export function EvmBuyTrade() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
-  const liveFeeLabel = submitFee.isReady ? formatFeeUsd(submitFee.data) : undefined
-  const liveFeeNativeLabel = submitFee.isReady
-    ? formatNativeFeeDetail(submitFee.native, connection.config?.defaultGasToken?.symbol || 'ETH')
-    : undefined
+  const { feeLabel: liveFeeLabel, feeNativeLabel: liveFeeNativeLabel } = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'ETH',
+  )
   const feeLabel = useStickyValue(liveFeeLabel)
   const feeNativeLabel = useStickyValue(liveFeeNativeLabel)
   // Don't paint a mismatched symbol/amount while the prior query is used as placeholder.

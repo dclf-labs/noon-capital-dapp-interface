@@ -7,6 +7,7 @@ import {
   formatNativeFee,
   formatNativeFeeDetail,
   formatPercent,
+  formatSubmitFeeLabels,
   formatTokenAmount,
   formatUnitRate,
   formatUsd,
@@ -58,6 +59,21 @@ describe('trade display formatters', () => {
     expect(formatNativeFeeDetail(0.000042, 'ETH')).toBe('<0.1 ETH')
     expect(formatNativeFeeDetail(0.2, 'SOPH')).toBe('0.2 SOPH')
     expect(formatNativeFeeDetail(0, 'ETH')).toBe('0 ETH')
+  })
+
+  it('formats submit fees as USD + native only when ready', () => {
+    expect(formatSubmitFeeLabels({ isReady: false, data: 1.2, native: 0.01 }, 'ETH')).toEqual({
+      feeLabel: undefined,
+      feeNativeLabel: undefined,
+    })
+    expect(formatSubmitFeeLabels({ isReady: true, data: 1.2, native: 0.01 }, 'ETH')).toEqual({
+      feeLabel: '$1.2',
+      feeNativeLabel: '<0.1 ETH',
+    })
+    expect(formatSubmitFeeLabels({ isReady: true, data: 0, native: 0.01 }, 'STRK')).toEqual({
+      feeLabel: undefined,
+      feeNativeLabel: undefined,
+    })
   })
 
   it('formats percentages with max 2dp and no trailing zeros', () => {

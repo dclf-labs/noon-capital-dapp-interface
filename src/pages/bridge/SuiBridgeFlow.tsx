@@ -185,9 +185,9 @@ export function SuiBridgeFlow() {
   const gasSymbol = connection.config?.defaultGasToken?.symbol || 'SUI'
   const feeRouteKey = `${inputs.sourceChainId ?? ''}:${inputs.destinationChainId ?? ''}:${inputs.token?.contractAddress ?? ''}`
 
-  // Gas fee = LZ bridge quote; network fee = Sui submit gas proxy (also native → USD).
+  // Bridge fee = LZ `quoteSend` native fee (SUI → USD). Network = PTB gas when estimated.
   const liveGasFeeUsd = useBridgeFeeUsd(feeQuote.data, connection.config?.id, gasSymbol)
-  const liveNetworkFeeUsd = useBridgeFeeUsd(submitFee.data, connection.config?.id, gasSymbol)
+  const liveNetworkFeeUsd = submitFee.isReady ? submitFee.data : undefined
   const liveTotalFeeUsd = sumBridgeFeeUsd(liveNetworkFeeUsd, liveGasFeeUsd)
 
   const feeLabel = useStickyValue(
@@ -203,9 +203,7 @@ export function SuiBridgeFlow() {
     feeRouteKey,
   )
   const networkFeeNativeLabel = useStickyValue(
-    submitFee.data != null && submitFee.data > 0
-      ? formatNativeFeeDetail(submitFee.data, gasSymbol)
-      : undefined,
+    submitFee.isReady ? formatNativeFeeDetail(submitFee.native, gasSymbol) : undefined,
     feeRouteKey,
   )
   const gasFeeNativeLabel = useStickyValue(
@@ -283,8 +281,8 @@ export function SuiBridgeFlow() {
                 }
               : BRIDGE_RECEIVER_NOTICE
         }
-        isFetchingFee={feeQuote.isLoading}
-        isLoadingFee={!feeLabel && feeQuote.isLoading}
+        isFetchingFee={feeQuote.isLoading || submitFee.isLoading}
+        isLoadingFee={!feeLabel && (feeQuote.isLoading || submitFee.isLoading)}
         isInsufficientBalance={isInsufficientBalance}
         primaryLabel={primary.label}
         primaryDisabled={primary.disabled || !isApproved}

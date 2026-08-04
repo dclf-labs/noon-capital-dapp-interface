@@ -7,10 +7,13 @@ export { BridgeSuccessPanel } from '@/mock/bridge/BridgeSuccessPanel'
 export { BridgingFeesCollapsible } from '@/mock/bridge/BridgingFeesCollapsible'
 export {
   BRIDGE_ETA_LABEL,
+  BRIDGE_FEE_TIP,
   BRIDGE_HERO_SUBTITLE,
+  BRIDGE_NETWORK_FEE_TIP,
   BRIDGE_RECEIVER_NOTICE,
   BRIDGE_SUCCESS_NOTE,
   DEFAULT_BRIDGE_FEE_LABEL,
+  PROTOCOL_FEE_TIP,
 } from '@/mock/bridge/constants'
 export { StatusCallout } from '@/mock/bridge/StatusCallout'
 export type {

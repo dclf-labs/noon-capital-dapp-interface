@@ -14,6 +14,16 @@ export const DEFAULT_GAS_TRACKER_API_RESPONSE = {
     price: '2103.25',
     ethPrice: '2103.25',
   },
+  /** zkSync — ETH-gas L2 (shares ETH USD). */
+  324: {
+    gasPrice: '6508000000',
+    price: '2103.25',
+  },
+  /** Base — ETH-gas L2 (shares ETH USD). */
+  8453: {
+    gasPrice: '93597989',
+    price: '2103.25',
+  },
   50104: {
     gasPrice: '10000000000000',
     price: '0.008294',
@@ -22,10 +32,6 @@ export const DEFAULT_GAS_TRACKER_API_RESPONSE = {
     gasPrice: '450000000000',
     price: '0.003574',
   },
-  324: {
-    gasPrice: '6508000000',
-    price: '2103.25',
-  },
   starknet: {
     gasPrice: '6508000000',
     price: '0.0326',
@@ -33,6 +39,21 @@ export const DEFAULT_GAS_TRACKER_API_RESPONSE = {
   999: {
     gasPrice: '100000000',
     price: '36.26',
+  },
+  /** Sui mainnet (`SUI_MAINNET_CHAIN_ID` / LZ EID). */
+  30378: {
+    gasPrice: '1000',
+    price: '0.70',
+  },
+  /** Berachain mainnet (`berachain.id`). */
+  80094: {
+    gasPrice: '1000000000',
+    price: '0.80',
+  },
+  /** Citrea mainnet — pays gas in cBTC. */
+  4114: {
+    gasPrice: '1000000000',
+    price: '95000',
   },
   cacheTimestamp: Date.now(),
 } as unknown as GasTrackerApiResponse
@@ -156,6 +177,36 @@ const useGasAndEthPrice = () => {
           gasPrice: coalescePositive(
             data?.['starknet']?.gasPrice ?? data?.['ethereum']?.gasPrice,
             DEFAULT_GAS_TRACKER_API_RESPONSE?.['starknet']?.gasPrice,
+          ),
+        },
+        30378: {
+          price: coalescePositive(
+            data?.['sui']?.price ?? data?.['30378']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[30378]?.price,
+          ),
+          gasPrice: coalescePositive(
+            data?.['sui']?.gasPrice ?? data?.['30378']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[30378]?.gasPrice,
+          ),
+        },
+        80094: {
+          price: coalescePositive(
+            data?.['berachain']?.price ?? data?.['bera']?.price ?? data?.['80094']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[80094]?.price,
+          ),
+          gasPrice: coalescePositive(
+            data?.['berachain']?.gasPrice ?? data?.['bera']?.gasPrice ?? data?.['80094']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[80094]?.gasPrice,
+          ),
+        },
+        4114: {
+          price: coalescePositive(
+            data?.['citrea']?.price ?? data?.['cbtc']?.price ?? data?.['4114']?.price,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[4114]?.price,
+          ),
+          gasPrice: coalescePositive(
+            data?.['citrea']?.gasPrice ?? data?.['cbtc']?.gasPrice ?? data?.['4114']?.gasPrice,
+            DEFAULT_GAS_TRACKER_API_RESPONSE?.[4114]?.gasPrice,
           ),
         },
       }

@@ -4,26 +4,26 @@ Used by mint / redeem / stake / unstake / buy / sell / bridge providers and pane
 
 Import from `@/features/_shared`.
 
-| Export                                                      | Role                                                   |
-| ----------------------------------------------------------- | ------------------------------------------------------ |
-| `useTradeFormController`                                    | step, inputs, debounce, txnUrl                         |
-| `getQuoteSourceKey`                                         | amount/token identity for debounce (ignores amountOut) |
-| `useSyncAmountOut`                                          | numeric (EVM) quote → `amountOut` while not debouncing |
-| `useSyncPreviewOut`                                         | Starknet `{ quote, route }` → `amountOut` + `route`    |
-| `useResetOnSessionChange`                                   | clear amounts / step / txn on address·chain·disconnect |
-| `getInsufficientBalance` / `getIsApproved`                  | balance / allowance gates                              |
-| `getAmountUsd` / `normalizeTradeAmount` / `getPresetAmount` | amount math for UI                                     |
-| `normalizePreviewQuote` / `normalizePreviewRoute`           | preview shape normalization                            |
-| `TRADE_PAY_DECIMALS` / `TRADE_RECEIVE_DISPLAY_DECIMALS`     | 6dp pay / 2dp receive display                          |
-| `formatTradePayDisplay` / `formatTradeReceiveDisplay`       | Controlled input display strings                       |
-| `toTradePayAmount` / `toTradeReceiveStoredAmount`           | Clip helpers (receive store stays 6dp)                 |
-| `parseTradePayInput` / `getTradeMaxAmount`                  | NumericFormat parse + Max with native gas reserve      |
-| `formatUsd` / `formatTokenAmount` / `formatNativeFee` / …   | Confirm / USD / fee / balance labels                   |
-| `getTradePrimaryAction`                                     | Shared buy/sell-style CTA helper                       |
-| `useTradeInputModel`                                        | Input-ready labels, half/max, USD                      |
-| `useTradePriceModel`                                        | Optional rate / fee / USD labels                       |
-| `useTradeAmountHandlers`                                    | Half/Max handlers (Max reserves native gas)            |
-| `createTradeFormContexts` / hooks                           | optional Form/Balance/Price/Txn factory                |
+| Export                                                      | Role                                                           |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| `useTradeFormController`                                    | step, inputs, debounce, txnUrl                                 |
+| `getQuoteSourceKey`                                         | amount/token identity for debounce (ignores amountOut)         |
+| `useSyncAmountOut`                                          | numeric (EVM) quote → `amountOut` while not debouncing         |
+| `useSyncPreviewOut`                                         | Starknet `{ quote, route }` → `amountOut` + `route`            |
+| `useResetOnSessionChange`                                   | clear amounts / step / txn on address·chain·disconnect         |
+| `getInsufficientBalance` / `getIsApproved`                  | balance / allowance gates                                      |
+| `getAmountUsd` / `normalizeTradeAmount` / `getPresetAmount` | amount math for UI                                             |
+| `normalizePreviewQuote` / `normalizePreviewRoute`           | preview shape normalization                                    |
+| `TRADE_PAY_DECIMALS` / `TRADE_RECEIVE_DISPLAY_DECIMALS`     | 6dp pay / 2dp receive display                                  |
+| `formatTradePayDisplay` / `formatTradeReceiveDisplay`       | Controlled input display strings                               |
+| `toTradePayAmount` / `toTradeReceiveStoredAmount`           | Clip helpers (receive store stays 6dp)                         |
+| `parseTradePayInput` / `getTradeMaxAmount`                  | NumericFormat parse + Max with native gas reserve              |
+| `formatUsd` / `formatFeeUsd` / `formatSubmitFeeLabels` / …  | Confirm / USD / fee / balance labels (`submitFee.data` is USD) |
+| `getTradePrimaryAction`                                     | Shared buy/sell-style CTA helper                               |
+| `useTradeInputModel`                                        | Input-ready labels, half/max, USD                              |
+| `useTradePriceModel`                                        | Optional rate / fee / USD labels                               |
+| `useTradeAmountHandlers`                                    | Half/Max handlers (Max reserves native gas)                    |
+| `createTradeFormContexts` / hooks                           | optional Form/Balance/Price/Txn factory                        |
 
 ## Rules for UI
 

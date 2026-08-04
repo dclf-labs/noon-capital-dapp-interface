@@ -2,10 +2,16 @@ import { useState } from 'react'
 
 import { AnimatePresence, motion } from 'motion/react'
 
+import { InfoTipIcon } from '@/components/ui/info-tip-icon'
 import { ResponsiveTip } from '@/components/ui/responsive-tip'
 import { cn } from '@/lib/utils'
 import { FOCUS_RESET, preventMouseDownFocus } from '@/mock/_shared'
-import { DEFAULT_BRIDGE_FEE_LABEL } from '@/mock/bridge/constants'
+import {
+  BRIDGE_FEE_TIP,
+  BRIDGE_NETWORK_FEE_TIP,
+  DEFAULT_BRIDGE_FEE_LABEL,
+  PROTOCOL_FEE_TIP,
+} from '@/mock/bridge/constants'
 
 const PROTOCOL_FEE_LABEL = '$0'
 
@@ -16,17 +22,21 @@ const COLLAPSE_DURATION = 0.18
 type FeeLineProps = {
   label: string
   value: string
+  /** Explains the fee line (info icon next to the label). */
+  infoTip: string
+  infoTipLabel: string
   /** Native-unit tip on the USD value (buy-page network fee pattern). */
   tipLabel?: string
   tipAriaLabel: string
 }
 
-function FeeLine({ label, value, tipLabel, tipAriaLabel }: FeeLineProps) {
+function FeeLine({ label, value, infoTip, infoTipLabel, tipLabel, tipAriaLabel }: FeeLineProps) {
   const canShowTip = Boolean(tipLabel && tipLabel !== '—' && value !== '—')
 
   return (
     <div className="flex w-full items-center gap-1">
-      <span className="min-w-0 flex-1 text-sm leading-5 font-book text-stone-500">{label}</span>
+      <span className="text-sm leading-5 font-book text-stone-500">{label}</span>
+      <InfoTipIcon content={infoTip} label={infoTipLabel} size={12} />
       {canShowTip ? (
         <ResponsiveTip
           label={tipAriaLabel}
@@ -49,7 +59,7 @@ function FeeLine({ label, value, tipLabel, tipAriaLabel }: FeeLineProps) {
 }
 
 export type BridgingFeesCollapsibleProps = {
-  /** Total bridging fees (protocol + network + gas). */
+  /** Total bridging fees (bridge + network + protocol). */
   totalLabel?: string
   /** Always `$0` for Noon bridge routes. */
   protocolFeeLabel?: string
@@ -57,16 +67,16 @@ export type BridgingFeesCollapsibleProps = {
   /** Source-chain submit gas, in USD. */
   networkFeeLabel?: string
   networkFeeNativeLabel?: string
-  /** Destination / bridge quote (LZ/Hyperlane), in USD. */
+  /** Cross-chain delivery quote (LZ/Hyperlane), in USD — Bridge fee row. */
   gasFeeLabel?: string
   gasFeeNativeLabel?: string
   isLoading?: boolean
 }
 
 /**
- * Bridging fees row — collapsed total with chevron; expands to gas / network / protocol.
- * Breakdown USD values tip the native amount (total stays plain).
- * Figma: Noon-Capital-v2 `4819:60448` (collapsed) → `4819:60722` (expanded).
+ * Bridging fees row — collapsed total with chevron; expands to bridge / network / protocol.
+ * Breakdown labels use `InfoTipIcon` (stone → primary on hover); Total fees has no info tip.
+ * Breakdown USD values tip the native amount (buy-page network fee pattern).
  */
 export function BridgingFeesCollapsible({
   totalLabel = DEFAULT_BRIDGE_FEE_LABEL,
@@ -98,7 +108,7 @@ export function BridgingFeesCollapsible({
           height={20}
           className="size-5 shrink-0"
         />
-        <span className="text-sm leading-5 font-book text-stone-500">Bridging fees</span>
+        <span className="text-sm leading-5 font-book text-stone-500">Total fees</span>
         <motion.img
           src="/assets/shell/chevron-down.svg"
           alt=""
@@ -141,20 +151,26 @@ export function BridgingFeesCollapsible({
           >
             <div className="flex w-full flex-col gap-2 pt-2 pl-6">
               <FeeLine
-                label="Gas fee"
+                label="Bridge fee"
                 value={gasFeeLabel}
+                infoTip={BRIDGE_FEE_TIP}
+                infoTipLabel="About bridge fee"
                 tipLabel={gasFeeNativeLabel}
-                tipAriaLabel="Gas fee details"
+                tipAriaLabel="Bridge fee details"
               />
               <FeeLine
                 label="Network fee"
                 value={networkFeeLabel}
+                infoTip={BRIDGE_NETWORK_FEE_TIP}
+                infoTipLabel="About network fee"
                 tipLabel={networkFeeNativeLabel}
                 tipAriaLabel="Network fee details"
               />
               <FeeLine
                 label="Protocol fee"
                 value={protocolFeeLabel}
+                infoTip={PROTOCOL_FEE_TIP}
+                infoTipLabel="About protocol fee"
                 tipLabel={protocolFeeNativeLabel}
                 tipAriaLabel="Protocol fee details"
               />

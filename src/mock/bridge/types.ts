@@ -43,9 +43,9 @@ export type BridgePanelProps = {
   networkFeeLabel?: string
   /** Native-unit tip for the network fee USD value. */
   networkFeeNativeLabel?: string
-  /** Destination / bridge quote in USD (Gas fee row). */
+  /** Cross-chain delivery quote in USD (Bridge fee row). */
   gasFeeLabel?: string
-  /** Native-unit tip for the gas fee USD value. */
+  /** Native-unit tip for the bridge fee USD value. */
   gasFeeNativeLabel?: string
   /** Always `$0` — Protocol fee row. */
   protocolFeeLabel?: string
@@ -85,8 +85,9 @@ export type BridgeConfirmPanelProps = {
   destinationAddressExplorerUrl?: string
   networkFeeLabel?: string
   networkFeeNativeLabel?: string
-  /** Destination / bridge quote in USD (Gas fee). */
+  /** Cross-chain delivery quote in USD (Bridge fee row). */
   gasFeeLabel?: string
+  /** Native-unit tip for the bridge fee USD value. */
   gasFeeNativeLabel?: string
   protocolFeeLabel?: string
   protocolFeeNativeLabel?: string

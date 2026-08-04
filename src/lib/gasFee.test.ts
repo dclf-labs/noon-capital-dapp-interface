@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { STARKNET_MAINNET_CHAIN_ID } from '@/config/chain-id'
 import {
   evmGetGasFee,
   evmGetGasFeeBreakdown,
@@ -81,6 +82,30 @@ describe('gas fee USD integration', () => {
         { allowMainnetEthFallback: false },
       ),
     ).toBeCloseTo(0.0326, 6)
+
+    // Protocol config uses numeric Starknet chain id; gas-tracker keys `'starknet'`.
+    expect(
+      resolveNativeGasUsdPrice(
+        { starknet: { gasPrice: 0, price: 0.0326 }, '1': { gasPrice: 0, price: 2000 } },
+        STARKNET_MAINNET_CHAIN_ID,
+        { allowMainnetEthFallback: false },
+      ),
+    ).toBeCloseTo(0.0326, 6)
+
+    // Non-ETH natives use dedicated gas-tracker entries (never ETH USD fallback).
+    for (const chainKey of [30378, 80094, 4114, 'starknet'] as const) {
+      expect(
+        resolveNativeGasUsdPrice({ '1': { gasPrice: 0, price: 2000 } }, chainKey, {
+          allowMainnetEthFallback: false,
+        }),
+      ).toBeGreaterThan(0)
+    }
+    // Base (8453) can use ETH USD fallback when its own entry is missing from a live map.
+    expect(
+      resolveNativeGasUsdPrice({ '1': { gasPrice: 0, price: 2000 } }, 8453, {
+        allowMainnetEthFallback: true,
+      }),
+    ).toBe(2000)
 
     // Sophon missing from live map → bundled DEFAULT sophon USD (not ETH).
     const sophonDefault = resolveNativeGasUsdPrice({ '1': { gasPrice: 0, price: 2000 } }, 50104, {

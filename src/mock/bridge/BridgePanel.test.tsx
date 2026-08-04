@@ -117,7 +117,7 @@ describe('BridgePanel behaviour', () => {
     expect(onOpenReceiverModal).toHaveBeenCalledTimes(2)
   })
 
-  it('exposes half/max and collapsible bridging fees', async () => {
+  it('exposes half/max and collapsible bridging fees with breakdown tips', async () => {
     const user = userEvent.setup()
     renderPanel({
       feeLabel: '$0.3',
@@ -127,13 +127,17 @@ describe('BridgePanel behaviour', () => {
     })
     expect(screen.getByRole('button', { name: 'HALF' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'MAX' })).toBeInTheDocument()
-    expect(screen.getByText('Bridging fees')).toBeInTheDocument()
+    expect(screen.getByText('Total fees')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'About total fees' })).not.toBeInTheDocument()
     expect(screen.getByText('$0.3')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /bridging fees details/i }))
-    expect(screen.getByText('Protocol fee')).toBeInTheDocument()
+    expect(screen.getByText('Bridge fee')).toBeInTheDocument()
     expect(screen.getByText('Network fee')).toBeInTheDocument()
-    expect(screen.getByText('Gas fee')).toBeInTheDocument()
+    expect(screen.getByText('Protocol fee')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'About bridge fee' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'About network fee' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'About protocol fee' })).toBeInTheDocument()
     expect(screen.getByText('$0')).toBeInTheDocument()
     expect(screen.getByText('$0.1')).toBeInTheDocument()
     expect(screen.getByText('$0.2')).toBeInTheDocument()

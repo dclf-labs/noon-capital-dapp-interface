@@ -100,7 +100,8 @@ const useLayerzeroBridgeFeeQuote = (
       isLoading,
       isError,
       isFetching,
-      data: data || 0,
+      /** Native SUI amount; `undefined` until the quote is ready (not `0`). */
+      data: data != null && data > 0 ? data : undefined,
     }),
     [isLoading, isError, isFetching, data],
   )

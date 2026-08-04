@@ -169,7 +169,7 @@ export function BridgePanel({
         {/* Flip — Figma uses horizontal swap icon rotated -90° so arrows read up/down. */}
         <div
           id="bridge-flip-button"
-          className="absolute top-1/2 left-1/2 z-10 flex size-9 -translate-x-[32.5%] -translate-y-[32.5%] items-center justify-center md:size-11"
+          className="absolute top-1/2 left-1/2 z-10 flex size-9 -translate-x-1/2 -translate-y-1/4 items-center justify-center md:size-11"
         >
           <button
             type="button"

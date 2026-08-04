@@ -18,9 +18,11 @@ export {
   formatNativeFee,
   formatNativeFeeDetail,
   formatPercent,
+  formatSubmitFeeLabels,
   formatTokenAmount,
   formatUnitRate,
   formatUsd,
+  type SubmitFeeDisplayInput,
 } from './trade-display'
 export type { TradeFormContexts } from './trade-form-context'
 export { createTradeFormContexts, createTradeFormHooks } from './trade-form-context'

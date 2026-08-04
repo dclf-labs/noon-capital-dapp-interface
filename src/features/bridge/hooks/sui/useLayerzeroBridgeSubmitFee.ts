@@ -4,16 +4,19 @@ import { type Address } from 'viem'
 
 import { type Token } from '@/config/token'
 import { type EVMConnection, type SuiConnection } from '@/lib/connection'
-import { toNum } from '@/lib/format'
 
-/** Sui gas is paid with the LZ native fee + PTB gas; surface LZ fee as submit fee proxy. */
+/**
+ * Sui PTB execution gas is not estimated yet.
+ * UI “Bridge fee” comes from the LZ `quoteSend` native fee; do not reuse that
+ * quote here or the UI double-counts it as both Bridge and Network.
+ */
 const useLayerzeroBridgeSubmitFee = (
   _connection: SuiConnection,
   _tokenIn: Token | undefined,
   _tokenOut: Token | undefined,
   _amount: number | undefined,
   _receiverAddress: Address | undefined,
-  nativeFee: number | undefined,
+  _nativeFee: number | undefined,
   _destinationConnection: EVMConnection | undefined,
 ) => {
   return useMemo(
@@ -21,10 +24,13 @@ const useLayerzeroBridgeSubmitFee = (
       isLoading: false,
       isError: false,
       isFetching: false,
-      data: toNum(nativeFee),
+      /** USD notional — unavailable until PTB gas is estimated. */
+      data: 0,
+      native: 0,
       gasUsed: 0n,
+      isReady: false,
     }),
-    [nativeFee],
+    [],
   )
 }
 

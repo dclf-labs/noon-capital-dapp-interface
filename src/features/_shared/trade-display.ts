@@ -16,6 +16,32 @@ export function formatFeeUsd(amount: number | string | bigint | undefined): stri
   return toIntlStr(amount, 1, 0, '$', '', 1)
 }
 
+/** Shared submit-fee envelope from EVM / Starknet `useGasFee` (and bridge stubs). */
+export type SubmitFeeDisplayInput = {
+  isReady?: boolean
+  /** USD notional. */
+  data?: number
+  /** Native gas-token amount. */
+  native?: number
+}
+
+/**
+ * Canonical fee labels: USD primary + native tip.
+ * Use everywhere `useGasFee` / submit-fee hooks are displayed.
+ */
+export function formatSubmitFeeLabels(
+  fee: SubmitFeeDisplayInput | undefined,
+  symbol: string,
+): { feeLabel?: string; feeNativeLabel?: string } {
+  if (!fee?.isReady || fee.data == null || !(fee.data > 0)) {
+    return { feeLabel: undefined, feeNativeLabel: undefined }
+  }
+  return {
+    feeLabel: formatFeeUsd(fee.data),
+    feeNativeLabel: formatNativeFeeDetail(fee.native, symbol),
+  }
+}
+
 export function formatTokenAmount(
   amount: number | string | bigint | undefined,
   symbol?: string,

@@ -1,10 +1,21 @@
 import type { ProtocolChainId } from '@/config/chain-id'
+import { STARKNET_MAINNET_CHAIN_ID } from '@/config/chain-id'
 import type useGasAndEthPrice from '@/features/api/hooks/useGasAndEthPrice'
 import {
   DEFAULT_GAS_TRACKER_API_RESPONSE,
   type GasTrackerApiResponse,
 } from '@/features/api/hooks/useGasAndEthPrice'
 import { bnToStr, toBn, toNum, toStr } from '@/lib/format'
+
+/**
+ * Gas-tracker map keys Starknet under `'starknet'`, while protocol config uses the
+ * numeric `STARKNET_MAINNET_CHAIN_ID`. Normalize so either form resolves STRK USD.
+ */
+function gasTrackerChainKey(chainKey: ProtocolChainId | string): string {
+  const key = toStr(chainKey)
+  if (key === 'starknet' || key === toStr(STARKNET_MAINNET_CHAIN_ID)) return 'starknet'
+  return key
+}
 
 export const GAS_LIMIT_MULTIPLIER_NUMERATOR_IN_BN = BigInt(115)
 export const GAS_LIMIT_MULTIPLIER_DENOMINATOR_IN_BN = BigInt(100)
@@ -58,7 +69,7 @@ export function resolveNativeGasUsdPrice(
   chainKey: ProtocolChainId | string,
   options?: { allowMainnetEthFallback?: boolean },
 ): number {
-  const key = toStr(chainKey)
+  const key = gasTrackerChainKey(chainKey)
   // Prefer live chain price, then live mainnet (ETH-gas only), then bundled defaults.
   return firstPositive(
     priceMapEntry(ethAndGasPrice, key)?.price,

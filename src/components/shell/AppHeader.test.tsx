@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactElement } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const selectActiveChain = vi.fn()
@@ -22,13 +24,17 @@ vi.mock('@/components/shell/network', async () => {
 
 import { AppHeader } from '@/components/shell/AppHeader'
 
+function renderHeader(ui: ReactElement) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>)
+}
+
 describe('AppHeader', () => {
   beforeEach(() => {
     selectActiveChain.mockReset()
   })
 
   it('shows Connect wallet in the navbar when disconnected', () => {
-    render(
+    renderHeader(
       <AppHeader
         isConnected={false}
         apy="6.94%"
@@ -44,7 +50,7 @@ describe('AppHeader', () => {
   })
 
   it('shows the connected wallet chip when connected', () => {
-    render(
+    renderHeader(
       <AppHeader
         isConnected
         walletLabel="0x1234…abcd"
@@ -61,7 +67,7 @@ describe('AppHeader', () => {
   it('opens the mobile menu from the hamburger control', async () => {
     const user = userEvent.setup()
     const onMenuClick = vi.fn()
-    render(
+    renderHeader(
       <AppHeader
         isConnected={false}
         apy="6.94%"
@@ -75,7 +81,7 @@ describe('AppHeader', () => {
   })
 
   it('shows APY and TVL on the closed mobile bar', () => {
-    render(
+    renderHeader(
       <AppHeader
         isConnected={false}
         apy="6.94%"
@@ -91,7 +97,7 @@ describe('AppHeader', () => {
   })
 
   it('exposes a network selector on desktop (not the closed mobile bar)', () => {
-    render(
+    renderHeader(
       <AppHeader
         isConnected={false}
         apy="6.94%"

@@ -62,13 +62,15 @@ describe('BuyFlowView', () => {
     connectWalletFamily.mockReset().mockResolvedValue(undefined)
   })
 
-  it('renders Figma buy step 0 with default 0', () => {
+  it('renders Figma buy step 0 with empty amount and placeholder 0', () => {
     render(
       <MemoryRouter initialEntries={['/swap/buy']}>
         <BuyFlowView {...baseProps} />
       </MemoryRouter>,
     )
-    expect(screen.getByLabelText(/usn amount/i)).toHaveValue('0')
+    const amount = screen.getByLabelText(/usn amount/i)
+    expect(amount).toHaveValue('')
+    expect(amount).toHaveAttribute('placeholder', '0')
     expect(screen.queryByText(/≈/)).not.toBeInTheDocument()
   })
 

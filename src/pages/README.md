@@ -13,7 +13,9 @@ Thin route wiring for product surfaces. **Presentational panels live in `src/moc
 | `/bridge`                         | `AppShell` + bridge | Hyperlane / LayerZero (EVM, Starknet, Sui) |
 | `/vaults`                         | `AppShell`          | Vaults list content from `src/mock/vaults` |
 
-Shared chrome (sidebar, network + wallet header, footer, max-width **1440px**) is `src/layout/AppShell` + `src/components/shell`.
+Shared chrome (sidebar, network + wallet header, footer, max-width **1600px**) is `src/layout/AppShell` + `src/components/shell`.
+
+Desktop layout: in-flow sidebar sits **beside** the header+main column (not under the header, not `position: fixed`), inset **4px** from the shell top and **5px** from the left (`SIDEBAR_INSET_*`). Hover expand overlays from a reserved rail width so the main column does not reflow. Footer stays below the content row.
 
 ## Layout per surface
 

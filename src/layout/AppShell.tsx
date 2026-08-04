@@ -19,8 +19,8 @@ import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 /**
  * Shared app chrome — navbar, body, and footer live inside `APP_SHELL_MAX_PX`
- * (`mx-auto`). The desktop sidebar is viewport-fixed but left-aligned to that
- * same centered column so ultrawide screens keep chrome capped together.
+ * (`mx-auto`). Desktop sidebar is in-flow beside the header column (4px top /
+ * 5px left insets) and scrolls with the page.
  */
 export function AppShell() {
   const location = useLocation()
@@ -68,17 +68,9 @@ export function AppShell() {
       </div>
 
       <div className="relative z-10 flex min-h-dvh w-full min-w-0 flex-1 flex-col">
-        <AppHeader
-          walletLabel={walletLabel}
-          walletIconSrc={walletIconSrc}
-          isConnected={isConnected}
-          apy={sidebarApy}
-          tvl={sidebarTvl}
-          onMenuClick={() => setMobileMenuOpen(true)}
-          onConnectClick={openWallet}
-        />
-
-        <div className="flex flex-1 gap-4 px-4 pb-16 lg:pr-5 lg:pl-[5px]">
+        {/* Desktop: sidebar beside header+main so 4px top inset is from the shell top.
+            Mobile: sidebar hidden; header stays above main inside the column. */}
+        <div className="flex flex-1 gap-4 px-4 pb-16 lg:pr-5 lg:pl-0">
           <div className="hidden lg:contents">
             <AppSidebar
               apy={sidebarApy}
@@ -89,12 +81,24 @@ export function AppShell() {
             />
           </div>
 
-          <main className="flex min-w-0 flex-1 flex-col items-center">
-            {/* Full width on mobile/tablet; 60% beside the sidebar from lg up. */}
-            <div className="flex w-full min-w-0 flex-1 flex-col lg:w-[60%]">
-              <Outlet />
-            </div>
-          </main>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <AppHeader
+              walletLabel={walletLabel}
+              walletIconSrc={walletIconSrc}
+              isConnected={isConnected}
+              apy={sidebarApy}
+              tvl={sidebarTvl}
+              onMenuClick={() => setMobileMenuOpen(true)}
+              onConnectClick={openWallet}
+            />
+
+            <main className="flex min-w-0 flex-1 flex-col items-center">
+              {/* Full width on mobile/tablet; 60% beside the sidebar from lg up. */}
+              <div className="flex w-full min-w-0 flex-1 flex-col lg:w-[60%]">
+                <Outlet />
+              </div>
+            </main>
+          </div>
         </div>
 
         <AppFooter />

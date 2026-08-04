@@ -18,12 +18,19 @@ import { SITE_URLS } from '@/config/site-urls'
 /** Outer content column — keeps the layout centered on wide / zoomed-out screens. */
 export const APP_SHELL_MAX_PX = 1600
 
-/** Collapsed sidebar rail — layout always reserves this so expand never reflows. */
+/**
+ * Collapsed sidebar rail width reserved in the content row.
+ * Expand overlays from this rail (absolute) so the main column does not reflow.
+ */
 export const SIDEBAR_RAIL_PX = 63
 /** Expanded overlay width (Motion animates between rail ↔ expanded). */
 export const SIDEBAR_EXPANDED_PX = 190
 
-/** Fixed sidebar insets from the AppShell column edges (not raw viewport). */
+/**
+ * In-flow sidebar insets from the AppShell edges (Figma: 4px top, 5px left).
+ * Applied as margins on `AppSidebar`. Desktop row uses `lg:pl-0` so the left
+ * inset is not doubled by shell padding.
+ */
 export const SIDEBAR_INSET_TOP_PX = 4
 export const SIDEBAR_INSET_LEFT_PX = 5
 

@@ -21,7 +21,8 @@ type AppHeaderProps = {
 }
 
 /**
- * Desktop (lg+): network selector + connect CTA or connected wallet chip.
+ * Desktop (lg+): network selector + connect CTA or connected wallet chip —
+ * rendered in the column beside `AppSidebar` (see `AppShell`).
  * Mobile / tablet closed bar (Figma Side Bar Closed):
  * hamburger · mark · APY/TVL · wallet — network lives in the open drawer.
  */

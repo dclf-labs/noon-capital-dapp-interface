@@ -25,29 +25,31 @@ Thin route screens live under `src/pages/<surface>/`; presentational panels unde
 
 ## Layout conventions
 
-| Path                          | Responsibility                                                     |
-| ----------------------------- | ------------------------------------------------------------------ |
-| `src/chains/`                 | Chain metadata + AppKit network objects                            |
-| `src/config/`                 | Protocol deployments (contracts, tokens, pools)                    |
-| `src/features/<domain>/`      | Domain hooks, providers, libs (co-located)                         |
-| `src/features/_shared/`       | Trade form controller, amounts, display, pay/receive precision     |
-| `src/features/mint-redeem/`   | Mint/redeem preview + CTA + submit-args (pure)                     |
-| `src/features/stake-unstake/` | Stake/unstake CTA + submit-args + withdraw-claim (pure)            |
-| `src/features/bridge/`        | Route rules, CTA, Hyperlane/LZ libs + family providers             |
-| `src/pages/`                  | Route shells + flows (wire hooks → UI props)                       |
-| `src/mock/`                   | Presentational panels / styles                                     |
-| `src/hooks/connection/`       | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession` |
-| `src/hooks/on-chain/`         | Balances / allowances / gas (return `0` when disabled)             |
-| `src/hooks/query/`            | `useChainQuery` / `useApiQuery` envelopes                          |
-| `src/lib/wallet-session.ts`   | Pure chain resolution + connection builders                        |
-| `src/lib/format.ts`           | Display clip / Intl / `toTruncatedTokenUnits` for calldata         |
-| `src/lib/env/`                | Zod-validated env → grouped `appEnv`                               |
-| `src/lib/query-keys.ts`       | Central TanStack Query key factory                                 |
-| `src/lib/evm-submit.ts`       | Shared EVM write + receipt (`canWriteSession` gated)               |
-| `src/lib/abis/`               | Contract ABIs (`evm/` / `starknet/`)                               |
-| `src/state/`                  | Zustand stores                                                     |
-| `src/wallet/<family>/`        | `config`, `provider`, `reader` (see `src/wallet/README.md`)        |
-| `src/providers/`              | `AppProviders` (+ `WalletQuerySync`)                               |
+| Path                          | Responsibility                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| `src/chains/`                 | Chain metadata + AppKit network objects                                            |
+| `src/config/`                 | Protocol deployments (contracts, tokens, pools)                                    |
+| `src/features/<domain>/`      | Domain hooks, providers, libs (co-located)                                         |
+| `src/features/_shared/`       | Trade form controller, amounts, display, pay/receive precision                     |
+| `src/features/mint-redeem/`   | Mint/redeem preview + CTA + submit-args (pure)                                     |
+| `src/features/stake-unstake/` | Stake/unstake CTA + submit-args + withdraw-claim (pure)                            |
+| `src/features/bridge/`        | Route rules, CTA, Hyperlane/LZ libs + family providers                             |
+| `src/layout/AppShell`         | Shared chrome (max-width 1600px): in-flow sidebar beside header+main, footer below |
+| `src/components/shell/`       | Shell chrome (`AppSidebar` 4px/5px insets, header, footer, network, …)             |
+| `src/pages/`                  | Route shells + flows (wire hooks → UI props)                                       |
+| `src/mock/`                   | Presentational panels / styles                                                     |
+| `src/hooks/connection/`       | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession`                 |
+| `src/hooks/on-chain/`         | Balances / allowances / gas (return `0` when disabled)                             |
+| `src/hooks/query/`            | `useChainQuery` / `useApiQuery` envelopes                                          |
+| `src/lib/wallet-session.ts`   | Pure chain resolution + connection builders                                        |
+| `src/lib/format.ts`           | Display clip / Intl / `toTruncatedTokenUnits` for calldata                         |
+| `src/lib/env/`                | Zod-validated env → grouped `appEnv`                                               |
+| `src/lib/query-keys.ts`       | Central TanStack Query key factory                                                 |
+| `src/lib/evm-submit.ts`       | Shared EVM write + receipt (`canWriteSession` gated)                               |
+| `src/lib/abis/`               | Contract ABIs (`evm/` / `starknet/`)                                               |
+| `src/state/`                  | Zustand stores                                                                     |
+| `src/wallet/<family>/`        | `config`, `provider`, `reader` (see `src/wallet/README.md`)                        |
+| `src/providers/`              | `AppProviders` (+ `WalletQuerySync`)                                               |
 
 ## Wallet sessions
 

@@ -46,7 +46,7 @@ function ExplorerAddressLink({ address, explorerUrl }: { address?: string; explo
       <ArrowUpRightIcon
         width={20}
         height={20}
-        className="size-5 shrink-0 text-stone-400 transition-colors group-hover:text-primary"
+        className="size-4 shrink-0 text-stone-400 transition-colors group-hover:text-primary"
         aria-hidden
       />
     </a>
@@ -96,20 +96,17 @@ function BridgeAmountColumn({
 }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+      {/* Label → network → token+amount → explorer address */}
       <p className="text-base leading-6 font-medium text-stone-500">{label}</p>
-      <div className="flex w-full flex-col items-center gap-1.5">
-        <p className="max-w-full truncate font-denton text-[40px] leading-none text-stone-900 tabular-nums md:text-[56px]">
-          {amount}
-        </p>
-        <TokenSymbolMark
-          symbol={tokenSymbol}
-          iconSrc={tokenIcon}
-          chainIconSrc={chainIcon}
-          size="sm"
-        />
-        {networkName ? <ChainNameMark name={networkName} iconSrc={networkIconSrc} /> : null}
-        <ExplorerAddressLink address={address} explorerUrl={addressExplorerUrl} />
-      </div>
+      {networkName ? <ChainNameMark name={networkName} iconSrc={networkIconSrc} /> : null}
+      <TokenSymbolMark
+        symbol={tokenSymbol}
+        iconSrc={tokenIcon}
+        chainIconSrc={chainIcon}
+        size="lg"
+        middle={amount}
+      />
+      <ExplorerAddressLink address={address} explorerUrl={addressExplorerUrl} />
     </div>
   )
 }
@@ -157,7 +154,7 @@ export function BridgeConfirmPanel({
         {/* Desktop: left ↔ right. Mobile: top ↕ bottom. */}
         <div className="flex w-full flex-col items-center gap-2 px-2 md:flex-row md:gap-0 md:px-1">
           <BridgeAmountColumn
-            label="Bridging"
+            label="Bridge from"
             amount={displayAmount}
             tokenSymbol={token?.symbol}
             tokenIcon={tokenIcon}
@@ -179,7 +176,7 @@ export function BridgeConfirmPanel({
           </div>
 
           <BridgeAmountColumn
-            label="To Receive"
+            label="Bridge to"
             amount={displayAmount}
             tokenSymbol={token?.symbol}
             tokenIcon={tokenIcon}

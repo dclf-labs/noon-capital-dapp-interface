@@ -40,7 +40,7 @@ export function StepPanelHeader({ title, onBack, leading }: StepPanelHeaderProps
 
       <h2
         className={cn(
-          'm-0 mt-2 min-w-0 flex-1 text-center font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900',
+          'm-0 mt-2.5 min-w-0 flex-1 text-center font-louize text-[28px] leading-9 tracking-[-1.4px] text-stone-900',
           'md:text-[36px] md:leading-[44px] md:tracking-[-1.8px]',
         )}
       >

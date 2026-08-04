@@ -28,6 +28,7 @@ describe('BridgeSuccessPanel', () => {
     )
 
     expect(screen.getByText(/successfully bridged/i)).toBeInTheDocument()
+    expect(document.querySelector('img[src="/assets/buy/check-circle.svg"]')).toBeTruthy()
     expect(screen.getByText(BRIDGE_SUCCESS_NOTE)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /view explorer/i })).toHaveAttribute(
       'href',

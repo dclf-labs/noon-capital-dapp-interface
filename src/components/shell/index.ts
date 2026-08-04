@@ -6,6 +6,8 @@ export {
   APP_SHELL_MAX_PX,
   shellNavForPath,
   SIDEBAR_EXPANDED_PX,
+  SIDEBAR_INSET_LEFT_PX,
+  SIDEBAR_INSET_TOP_PX,
   SIDEBAR_RAIL_PX,
   SIDEBAR_TRANSITION,
 } from '@/components/shell/constants'

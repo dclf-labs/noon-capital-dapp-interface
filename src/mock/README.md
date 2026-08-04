@@ -6,15 +6,18 @@ Live wallet/quote wiring stays in `src/pages/*` and `src/features/*`. This folde
 
 ```text
 src/mock/
+  _shared/          PanelChrome, SuccessCheckIcon, ExplorerActions, CTAs, …
+  buy/              Buy step 0 + BuySuccessPanel (final step check)
   swap/             TradePanelView, NetworkSwitcher, trade-styles
   mint-redeem/      MintRedeemPanel, mint-redeem-styles
   stake-unstake/    StakeUnstakePanel, WithdrawClaimsPanel, styles
-  bridge/           BridgePanel, BridgeNetworkSwitcher, bridge-styles
+  bridge/           BridgePanel, BridgeSuccessPanel, BridgeNetworkSwitcher, …
   vaults/           Vaults list content (hero + cards) — chrome in AppShell
   index.ts          Public re-exports
 ```
 
-Shared chrome: `src/layout/AppShell` + `src/components/shell` (sidebar, header, footer).
+Shared chrome: `src/layout/AppShell` + `src/components/shell` (in-flow sidebar beside header, footer below).
+Buy / bridge success steps share `SuccessCheckIcon` (animated check asset; Figma `4819:60244`).
 See `src/mock/vaults/README.md` for the vaults content module.
 
 `WithdrawClaimsPanel` is also stored here but still uses live withdraw hooks when mounted from `/withdraw`.

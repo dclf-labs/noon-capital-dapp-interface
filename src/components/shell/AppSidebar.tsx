@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 
 import { DividerIcon } from '@/assets/icons'
 import {
-  APP_SHELL_MAX_PX,
   APY_TIP,
   SHELL_SELECTION_SPRING,
   SIDEBAR_CONTENT_TRANSITION,
@@ -167,7 +166,10 @@ function SidebarStats({
 
 /**
  * Noon shell sidebar built on Aceternity UI's hover-expand Sidebar.
- * Rail width stays fixed so the page never reflows.
+ * In document flow (scrolls with the page). `AppShell` mounts this beside the
+ * header+main column so `SIDEBAR_INSET_TOP_PX` (4) is from the shell top and
+ * `SIDEBAR_INSET_LEFT_PX` (5) from the shell left — not under the header.
+ * Rail width is reserved so hover expand overlays without reflowing main.
  */
 export function AppSidebar({
   apy = '—',
@@ -200,39 +202,31 @@ export function AppSidebar({
     [navItems],
   )
 
-  // Fixed to the viewport, but `left` is offset so the rail lines up with the
-  // centered `APP_SHELL_MAX_PX` column (not the raw viewport edge on ultrawide).
-  const shellAlignedLeft = `max(${SIDEBAR_INSET_LEFT_PX}px, calc((100vw - ${APP_SHELL_MAX_PX}px) / 2 + ${SIDEBAR_INSET_LEFT_PX}px))`
-
   return (
-    <>
-      {/* In-flow spacer — keeps main content clear of the fixed rail. */}
-      <div className="shrink-0" style={{ width: SIDEBAR_RAIL_PX }} aria-hidden />
-      <div
-        className="fixed z-30 h-[min(701px,calc(100dvh-8px))]"
-        style={{
-          top: SIDEBAR_INSET_TOP_PX,
-          left: shellAlignedLeft,
-          width: SIDEBAR_RAIL_PX,
-        }}
-      >
-        <Sidebar open={open} setOpen={setOpen}>
-          <SidebarBody className="gap-6">
-            <SidebarLogo />
-            <nav className="flex w-full flex-1 flex-col gap-2" aria-label="Primary">
-              {links.map((link) => (
-                <SidebarLink key={link.href + link.label} link={link} />
-              ))}
-            </nav>
-            <SidebarStats
-              apy={apy}
-              tvl={tvl}
-              apyPeriod={apyPeriod}
-              onApyPeriodChange={onApyPeriodChange}
-            />
-          </SidebarBody>
-        </Sidebar>
-      </div>
-    </>
+    <div
+      className="relative z-30 h-[min(701px,calc(100dvh-8px))] shrink-0"
+      style={{
+        width: SIDEBAR_RAIL_PX,
+        marginTop: SIDEBAR_INSET_TOP_PX,
+        marginLeft: SIDEBAR_INSET_LEFT_PX,
+      }}
+    >
+      <Sidebar open={open} setOpen={setOpen}>
+        <SidebarBody className="gap-6">
+          <SidebarLogo />
+          <nav className="flex w-full flex-1 flex-col gap-2" aria-label="Primary">
+            {links.map((link) => (
+              <SidebarLink key={link.href + link.label} link={link} />
+            ))}
+          </nav>
+          <SidebarStats
+            apy={apy}
+            tvl={tvl}
+            apyPeriod={apyPeriod}
+            onApyPeriodChange={onApyPeriodChange}
+          />
+        </SidebarBody>
+      </Sidebar>
+    </div>
   )
 }

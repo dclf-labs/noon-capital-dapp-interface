@@ -27,6 +27,7 @@ describe('BuySuccessPanel', () => {
     )
 
     expect(screen.getByText(/successfully bought/i)).toBeInTheDocument()
+    expect(document.querySelector('img[src="/assets/buy/check-circle.svg"]')).toBeTruthy()
     expect(screen.getByRole('link', { name: /view explorer/i })).toHaveAttribute(
       'href',
       'https://etherscan.io/tx/0xabc',

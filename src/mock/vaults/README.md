@@ -1,6 +1,6 @@
 # Vaults UI
 
-Presentational vaults **content** (hero + cards). Shared chrome (sidebar, header, footer) lives in `src/components/shell` and is mounted by `src/layout/AppShell`.
+Presentational vaults **content** (hero + cards). Shared chrome (in-flow sidebar beside header, footer) lives in `src/components/shell` and is mounted by `src/layout/AppShell`.
 
 ```text
 constants.ts       Product tabs (Vaults / Buy / Bridge) + path helpers

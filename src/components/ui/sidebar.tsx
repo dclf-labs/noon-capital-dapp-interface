@@ -76,6 +76,11 @@ export function SidebarBody(props: ComponentProps<typeof motion.div>) {
   return <DesktopSidebar {...props} />
 }
 
+/**
+ * Hover-expand panel. Absolutely positioned inside `AppSidebar`'s in-flow rail
+ * (beside the header column in `AppShell`) so width animation overlays
+ * neighboring content instead of pushing the layout.
+ */
 export function DesktopSidebar({
   className,
   children,

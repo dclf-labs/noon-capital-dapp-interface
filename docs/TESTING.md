@@ -25,20 +25,22 @@ Heavy React submit/approve hooks and wallet SDK glue stay **outside** the thresh
 
 ## Key suites
 
-| Area            | Specs                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| Env             | `src/lib/env/index.test.ts` (Infura / explicit URL → Starknet RPC)                          |
-| Production CSP  | `src/lib/env/vercel-csp.test.ts` (`connect-src` Infura, Noon API, Blast, …)                 |
-| Format / units  | `src/lib/format.test.ts`, `src/lib/format.display.test.ts`                                  |
-| Wallet session  | `wallet-session`, `wallet-query-sync`, `evm-submit`, `active-network.scenarios`             |
-| Wallet chrome   | `shell-wallet-chrome`, `connector-icon`, shell header / drawer                              |
-| Trade forms     | `_shared/use-trade-form-controller`, `trade-amounts`, `trade-input-format`, `trade-display` |
-| Buy / sell UI   | `mock/swap/TradePanelView.test.tsx`                                                         |
-| Mint / redeem   | `features/mint-redeem/*`, `mock/mint-redeem/MintRedeemPanel.test.tsx`                       |
-| Stake / unstake | `features/stake-unstake/*`, `mock/stake-unstake/*Panel*.test.tsx`                           |
-| Bridge          | `features/bridge/*`, `mock/bridge/BridgePanel.test.tsx`, `pages/bridge/bridge-networks`     |
-| Zustand         | `state/active-chain`, `points-estimator-assumptions`                                        |
-| Protocol config | `src/config/index.test.ts`                                                                  |
+| Area            | Specs                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| Env             | `src/lib/env/index.test.ts` (Infura / explicit URL → Starknet RPC)                           |
+| Production CSP  | `src/lib/env/vercel-csp.test.ts` (`connect-src` Infura, Noon API, Blast, …)                  |
+| Format / units  | `src/lib/format.test.ts`, `src/lib/format.display.test.ts`                                   |
+| Wallet session  | `wallet-session`, `wallet-query-sync`, `evm-submit`, `active-network.scenarios`              |
+| Wallet chrome   | `shell-wallet-chrome`, `connector-icon`, shell header / drawer                               |
+| Shell layout    | `AppShell` (sidebar beside header), `AppSidebar` (in-flow + 4/5px insets), `shell/constants` |
+| Trade forms     | `_shared/use-trade-form-controller`, `trade-amounts`, `trade-input-format`, `trade-display`  |
+| Shared mock UI  | `SuccessCheckIcon`, `ExplorerActions`, `PrimaryCtaButton`, `ui-classes`                      |
+| Buy / sell UI   | `mock/swap/TradePanelView.test.tsx`, `mock/buy/BuySuccessPanel.test.tsx`                     |
+| Mint / redeem   | `features/mint-redeem/*`, `mock/mint-redeem/MintRedeemPanel.test.tsx`                        |
+| Stake / unstake | `features/stake-unstake/*`, `mock/stake-unstake/*Panel*.test.tsx`                            |
+| Bridge          | `features/bridge/*`, `mock/bridge/BridgePanel*.test.tsx`, `pages/bridge/bridge-networks`     |
+| Zustand         | `state/active-chain`, `points-estimator-assumptions`                                         |
+| Protocol config | `src/config/index.test.ts`                                                                   |
 
 ## UI value conventions under test
 

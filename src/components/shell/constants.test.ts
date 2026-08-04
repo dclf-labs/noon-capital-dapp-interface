@@ -1,15 +1,40 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  APP_SHELL_MAX_PX,
   FOOTER_LEFT_LINKS,
   FOOTER_RIGHT_LINKS,
   FOOTER_SOCIALS,
   NETWORK_SELECTOR_Z_INDEX,
   shellNavForPath,
+  SIDEBAR_EXPANDED_PX,
+  SIDEBAR_INSET_LEFT_PX,
+  SIDEBAR_INSET_TOP_PX,
+  SIDEBAR_RAIL_PX,
   TIP_COLLISION_PADDING_PX,
   TIP_Z_INDEX,
 } from '@/components/shell/constants'
 import { safeExternalHref } from '@/lib/safe-external-href'
+
+describe('APP_SHELL_MAX_PX', () => {
+  it('caps the shared chrome column', () => {
+    expect(APP_SHELL_MAX_PX).toBe(1600)
+  })
+})
+
+describe('sidebar rail widths', () => {
+  it('keeps the collapsed rail narrower than the hover-expanded overlay', () => {
+    expect(SIDEBAR_RAIL_PX).toBe(63)
+    expect(SIDEBAR_EXPANDED_PX).toBeGreaterThan(SIDEBAR_RAIL_PX)
+  })
+})
+
+describe('sidebar insets', () => {
+  it('matches Figma 4px top and 5px left', () => {
+    expect(SIDEBAR_INSET_TOP_PX).toBe(4)
+    expect(SIDEBAR_INSET_LEFT_PX).toBe(5)
+  })
+})
 
 describe('NETWORK_SELECTOR_Z_INDEX', () => {
   it('stacks above shell chrome and below modals / AppKit', () => {

@@ -35,6 +35,11 @@ describe('BridgeConfirmPanel', () => {
     )
 
     expect(screen.getByText(/confirm your bridge transaction/i)).toBeInTheDocument()
+    expect(screen.getByText('Bridge from')).toBeInTheDocument()
+    expect(screen.getByText('Bridge to')).toBeInTheDocument()
+    expect(screen.getByText('Ethereum')).toBeInTheDocument()
+    expect(screen.getByText('zkSync')).toBeInTheDocument()
+    expect(screen.getAllByText('sUSN').length).toBeGreaterThanOrEqual(2)
 
     const links = screen.getAllByRole('link')
     expect(links).toHaveLength(1)

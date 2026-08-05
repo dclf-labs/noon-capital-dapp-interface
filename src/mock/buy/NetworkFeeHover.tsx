@@ -1,6 +1,7 @@
 import { GasPumpIcon } from '@/assets/icons'
 import { InfoTipIcon } from '@/components/ui/info-tip-icon'
 import { ResponsiveTip } from '@/components/ui/responsive-tip'
+import { cn } from '@/lib/utils'
 import { NETWORK_FEE_TIP } from '@/mock/buy/constants'
 
 type NetworkFeeHoverProps = {
@@ -16,7 +17,10 @@ export function NetworkFeeHover({
   isLoading = false,
 }: NetworkFeeHoverProps) {
   const canShowNative = Boolean(nativeLabel && nativeLabel !== '—' && usdLabel !== '—')
-  const showValueLoading = isLoading && usdLabel === '—'
+  const valueClassName = cn(
+    'text-right text-base leading-6 font-semibold text-stone-600 tabular-nums',
+    isLoading && 'animate-pulse',
+  )
 
   return (
     <div className="flex w-full items-center gap-6">
@@ -31,12 +35,7 @@ export function NetworkFeeHover({
         <InfoTipIcon content={NETWORK_FEE_TIP} label="About network fee" size={12} />
       </div>
 
-      {showValueLoading ? (
-        <span
-          aria-label="Estimating network fee"
-          className="ml-auto inline-block h-6 w-14 animate-pulse rounded-md bg-stone-200"
-        />
-      ) : canShowNative ? (
+      {canShowNative ? (
         <ResponsiveTip
           label="Network fee details"
           content={
@@ -46,14 +45,10 @@ export function NetworkFeeHover({
           align="end"
           triggerClassName="ml-auto"
         >
-          <span className="text-right text-base leading-6 font-semibold text-stone-600">
-            {usdLabel}
-          </span>
+          <span className={valueClassName}>{usdLabel}</span>
         </ResponsiveTip>
       ) : (
-        <p className="ml-auto text-right text-base leading-6 font-semibold text-stone-600">
-          {usdLabel}
-        </p>
+        <p className={cn('ml-auto', valueClassName)}>{usdLabel}</p>
       )}
     </div>
   )

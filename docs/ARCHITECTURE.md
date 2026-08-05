@@ -37,7 +37,7 @@ Thin route screens live under `src/pages/<surface>/`; presentational panels unde
 | `src/layout/AppShell`         | Shared chrome (max-width 1600px): in-flow sidebar beside header+main, footer below |
 | `src/components/shell/`       | Shell chrome (`AppSidebar` 4px/5px insets, header, footer, network, …)             |
 | `src/pages/`                  | Route shells + flows (wire hooks → UI props)                                       |
-| `src/mock/`                   | Presentational panels / styles                                                     |
+| `src/mock/`                   | Presentational panels; `_shared` product tabs + `StandardTradeFlowView`            |
 | `src/hooks/connection/`       | Wallet sessions — prefer `useWalletSession` / `useReadOnlySession`                 |
 | `src/hooks/on-chain/`         | Balances / allowances / gas (return `0` when disabled)                             |
 | `src/hooks/query/`            | `useChainQuery` / `useApiQuery` envelopes                                          |

@@ -56,7 +56,7 @@ export function getMintRedeemPrimaryAction({
   submitFailed,
 }: MintRedeemPrimaryParams): MintRedeemPrimaryAction {
   if (!isConnected) {
-    return { label: 'Connect wallet', disabled: true, loading: false }
+    return { label: 'Connect wallet', disabled: false, loading: false }
   }
   if (isBalanceLoading || isAllowanceLoading || isWhitelistLoading) {
     return { label: 'Loading', disabled: true, loading: true }

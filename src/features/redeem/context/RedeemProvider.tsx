@@ -76,7 +76,7 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useSyncAmountOut(
     setInputs,
-    preview.isLoading || preview.isError ? undefined : preview.data,
+    preview.isLoading || preview.isFetching || preview.isError ? undefined : preview.data,
     isDebouncing || step > 0,
   )
 
@@ -135,7 +135,7 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       price,
       tokenOutPrice,
       amountInUsd,
-      isFetchingQuote: preview.isLoading || isDebouncing || pricePending,
+      isFetchingQuote: preview.isLoading || preview.isFetching || isDebouncing || pricePending,
       isQuoteError: preview.isError || priceUnavailable,
     }
   }, [
@@ -144,6 +144,7 @@ export const RedeemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     isDebouncing,
     price,
     preview.isError,
+    preview.isFetching,
     preview.isLoading,
     tokenOutPrice,
   ])

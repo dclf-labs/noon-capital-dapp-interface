@@ -7,15 +7,20 @@ export type SidebarProtocolMetricsInput = {
   twentyEightDayApy: number | string | undefined
   tvl: number | string | undefined
   statsLoading: boolean
+  /** Refetch / period update — pulses the APY value without clearing it. */
+  statsFetching?: boolean
   statsError: boolean
   statsReady: boolean
   tvlLoading: boolean
+  tvlFetching?: boolean
   tvlError: boolean
 }
 
 export type SidebarProtocolMetricsView = {
   apy: string
   tvl: string
+  isApyLoading: boolean
+  isTvlLoading: boolean
   isLoading: boolean
   isError: boolean
 }
@@ -33,6 +38,8 @@ export function formatSidebarProtocolMetrics(
   return {
     apy: apyReady ? toIntlCompactStr(apyRaw, 2, true, 0, '', '%', 2) : '—',
     tvl: tvlReady ? toIntlCompactStr(input.tvl, 1, true, 0, '', '', 1) : '—',
+    isApyLoading: Boolean(input.statsLoading || input.statsFetching),
+    isTvlLoading: Boolean(input.tvlLoading || input.tvlFetching),
     isLoading: input.statsLoading || input.tvlLoading,
     isError: input.statsError || input.tvlError,
   }

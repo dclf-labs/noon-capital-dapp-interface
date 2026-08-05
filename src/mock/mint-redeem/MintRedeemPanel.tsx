@@ -161,7 +161,7 @@ export function MintRedeemPanel({
   }
 
   const receiveDisplay = amountOutValue != null ? formatTradeReceiveDisplay(amountOutValue) : ''
-  const isReceiveLoading = isFetchingQuote && amountOutValue == null
+  const isReceiveLoading = Boolean(isFetchingQuote)
   const variableToken = mode === 'mint' ? tokenIn : tokenOut
   const fixedToken = mode === 'mint' ? tokenOut : tokenIn
 

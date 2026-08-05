@@ -56,7 +56,7 @@ export function getTradePrimaryAction({
   submitFailed = false,
 }: TradePrimaryParams): TradePrimaryAction {
   if (!isConnected) {
-    return { label: 'Connect wallet', disabled: true, loading: false }
+    return { label: 'Connect wallet', disabled: false, loading: false }
   }
   if (isBalanceLoading || isAllowanceLoading) {
     return { label: 'Loading', disabled: true, loading: true }

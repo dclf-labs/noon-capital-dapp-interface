@@ -182,7 +182,10 @@ function isShellNavActive(id: string, pathname: string): boolean {
     case 'vaults':
       return pathname === '/vaults' || pathname.startsWith('/vaults/')
     case 'usn':
+      // Full USN / sUSN cluster: mint, redeem, stake, unstake, withdraw.
       return (
+        pathname.startsWith('/mint') ||
+        pathname.startsWith('/redeem') ||
         pathname.startsWith('/stake') ||
         pathname.startsWith('/unstake') ||
         pathname.startsWith('/withdraw')

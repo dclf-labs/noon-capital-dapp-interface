@@ -66,7 +66,7 @@ const useWithdrawRequests = (connection: EVMConnection, token: Token | undefined
     ],
   )
 
-  const { isLoading, isError, data, isFetching, refetch } = useQuery({
+  const { isLoading, isError, data, isFetching, refetch } = useQuery<WithdrawRequestView[]>({
     queryKey,
     enabled: isEnabled,
     refetchOnMount: true,
@@ -74,7 +74,7 @@ const useWithdrawRequests = (connection: EVMConnection, token: Token | undefined
     refetchOnWindowFocus: false,
     refetchIntervalInBackground: false,
     refetchInterval: connection.config?.dataRefreshInterval,
-    queryFn: async (): Promise<WithdrawRequestView[]> => {
+    queryFn: async () => {
       if (!connection.config?.id || !connection.address || !token) {
         throw new Error('Connection not found')
       }
@@ -117,10 +117,16 @@ const useWithdrawRequests = (connection: EVMConnection, token: Token | undefined
   })
 
   return useMemo(
-    () => ({
+    (): {
+      isLoading: boolean
+      isError: boolean
+      data: WithdrawRequestView[]
+      isFetching: boolean
+      refetch: typeof refetch
+    } => ({
       isLoading,
       isError,
-      data: data || [],
+      data: data ?? [],
       isFetching,
       refetch,
     }),

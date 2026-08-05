@@ -66,7 +66,8 @@ describe('BuyPageView', () => {
   it('renders the Buy hero with an empty buy-token amount', () => {
     renderBuy()
 
-    expect(screen.getByRole('navigation', { name: /product/i })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Product' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Product actions' })).toBeInTheDocument()
     expect(screen.getByLabelText(/usn amount/i)).toHaveValue('')
     expect(screen.getByLabelText(/usn amount/i)).toHaveAttribute('placeholder', '0')
     expect(screen.queryByText(/≈/)).not.toBeInTheDocument()

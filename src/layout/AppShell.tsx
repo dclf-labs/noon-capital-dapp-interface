@@ -41,7 +41,12 @@ export function AppShell() {
   const connectWalletFamily = useConnectWalletFamily()
   const [apyPeriod, setApyPeriod] = useState<SidebarApyPeriod>('7d')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { apy: sidebarApy, tvl: sidebarTvl } = useSidebarProtocolMetrics(apyPeriod)
+  const {
+    apy: sidebarApy,
+    tvl: sidebarTvl,
+    isApyLoading: sidebarApyLoading,
+    isTvlLoading: sidebarTvlLoading,
+  } = useSidebarProtocolMetrics(apyPeriod)
 
   const navItems = useMemo(() => shellNavForPath(location.pathname), [location.pathname])
 
@@ -75,6 +80,8 @@ export function AppShell() {
             <AppSidebar
               apy={sidebarApy}
               tvl={sidebarTvl}
+              isApyLoading={sidebarApyLoading}
+              isTvlLoading={sidebarTvlLoading}
               apyPeriod={apyPeriod}
               onApyPeriodChange={setApyPeriod}
               navItems={navItems}
@@ -88,6 +95,8 @@ export function AppShell() {
               isConnected={isConnected}
               apy={sidebarApy}
               tvl={sidebarTvl}
+              isApyLoading={sidebarApyLoading}
+              isTvlLoading={sidebarTvlLoading}
               onMenuClick={() => setMobileMenuOpen(true)}
               onConnectClick={openWallet}
             />
@@ -110,6 +119,8 @@ export function AppShell() {
         navItems={navItems}
         apy={sidebarApy}
         tvl={sidebarTvl}
+        isApyLoading={sidebarApyLoading}
+        isTvlLoading={sidebarTvlLoading}
         isConnected={isConnected}
         walletLabel={walletLabel}
         walletIconSrc={walletIconSrc}

@@ -19,7 +19,18 @@ import {
 } from '@/features/unstake'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import { queryKeys } from '@/lib/query-keys'
-import { StakeUnstakePanel } from '@/mock/stake-unstake/StakeUnstakePanel'
+import { StandardTradeFlowView } from '@/mock/_shared/StandardTradeFlowView'
+import { StatusCallout } from '@/mock/bridge/StatusCallout'
+import { UNSTAKE_COOLDOWN_NOTICE } from '@/mock/stake-unstake/constants'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
+
+const unstakeCooldownCallout = (
+  <StatusCallout
+    type={UNSTAKE_COOLDOWN_NOTICE.type}
+    title={UNSTAKE_COOLDOWN_NOTICE.title}
+    description={UNSTAKE_COOLDOWN_NOTICE.description}
+  />
+)
 
 export function EvmUnstakeFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn, tokenOut } = useUnstakeForm()
@@ -29,6 +40,7 @@ export function EvmUnstakeFlow() {
   const { setAmountIn } = useUpdateUnstake()
   const submit = useUnstakeSubmit()
   const queryClient = useQueryClient()
+  const connectWalletFamily = useConnectWalletFamily()
 
   const [submitStatus, setSubmitStatus] = useState<SubmitTxnStatus>(SubmitTxnStatus.IDLE)
 
@@ -85,6 +97,10 @@ export function EvmUnstakeFlow() {
   )
 
   const onPrimary = useCallback(() => {
+    if (!connection.isConnected) {
+      void connectWalletFamily('evm')
+      return
+    }
     if (step === 0) {
       setStep(1)
       return
@@ -103,6 +119,7 @@ export function EvmUnstakeFlow() {
       setTxnUrl,
     )
   }, [
+    connectWalletFamily,
     connection,
     inputs.amountOut,
     queryClient,
@@ -122,12 +139,21 @@ export function EvmUnstakeFlow() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
+  const feeLabels = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'ETH',
+  )
+
   return (
-    <StakeUnstakePanel
-      mode="unstake"
+    <StandardTradeFlowView
       step={step}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
+      payLabel="You're unstaking"
+      receiveLabel="You're receiving"
+      confirmTitle="Confirm your unstake transaction"
+      successHeadline="You have successfully unstaked"
+      moreLabel="Unstake more"
+      notice={unstakeCooldownCallout}
+      confirmNotice={unstakeCooldownCallout}
       tokenIn={tokenIn}
       tokenOut={tokenOut}
       amountIn={inputs.amountIn}
@@ -140,20 +166,24 @@ export function EvmUnstakeFlow() {
         tokenOut?.decimals,
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
-      feeLabel={
-        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'ETH')
-          .feeLabel
-      }
+      feeLabel={feeLabels.feeLabel || '—'}
+      feeNativeLabel={feeLabels.feeNativeLabel}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       isFetchingQuote={isFetchingQuote}
-      isInsufficientBalance={isInsufficientBalance}
-      isApproved
-      requiresApproval={false}
       primaryLabel={primary.label}
-      primaryDisabled={primary.disabled}
+      primaryDisabled={primary.disabled || Boolean(connection.unsupported)}
       primaryLoading={primary.loading}
-      statusMessage={submitStatus === SubmitTxnStatus.TXN_FAILURE ? 'Unstake failed' : undefined}
+      statusMessage={
+        connection.unsupported
+          ? 'Unstake is only available on Ethereum mainnet.'
+          : submitStatus === SubmitTxnStatus.TXN_FAILURE
+            ? 'Unstake failed'
+            : undefined
+      }
       txnUrl={txnUrl}
-      presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+      presetsDisabled={
+        inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
+      }
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}

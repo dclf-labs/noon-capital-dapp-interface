@@ -69,7 +69,7 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useSyncAmountOut(
     setInputs,
-    preview.isLoading || preview.isError ? undefined : preview.data,
+    preview.isLoading || preview.isFetching || preview.isError ? undefined : preview.data,
     isDebouncing || step > 0,
   )
 
@@ -126,10 +126,18 @@ export const SellProvider: React.FC<{ children: React.ReactNode }> = ({ children
       price,
       tokenPrice,
       amountInUsd,
-      isFetchingQuote: preview.isLoading || isDebouncing,
+      isFetchingQuote: preview.isLoading || preview.isFetching || isDebouncing,
       isQuoteError: preview.isError,
     }),
-    [amountInUsd, price, tokenPrice, preview.isLoading, preview.isError, isDebouncing],
+    [
+      amountInUsd,
+      price,
+      tokenPrice,
+      preview.isLoading,
+      preview.isFetching,
+      preview.isError,
+      isDebouncing,
+    ],
   )
 
   const txnValue = useMemo(

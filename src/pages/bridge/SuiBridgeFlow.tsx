@@ -282,7 +282,9 @@ export function SuiBridgeFlow() {
               : BRIDGE_RECEIVER_NOTICE
         }
         isFetchingFee={feeQuote.isLoading || submitFee.isLoading}
-        isLoadingFee={!feeLabel && (feeQuote.isLoading || submitFee.isLoading)}
+        isLoadingFee={
+          feeQuote.isLoading || submitFee.isLoading || feeQuote.isFetching || submitFee.isFetching
+        }
         isInsufficientBalance={isInsufficientBalance}
         primaryLabel={primary.label}
         primaryDisabled={primary.disabled || !isApproved}

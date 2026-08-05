@@ -18,7 +18,8 @@ import { getStakeUnstakePrimaryAction } from '@/features/stake-unstake'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { StakeUnstakePanel } from '@/mock/stake-unstake/StakeUnstakePanel'
+import { StandardTradeFlowView } from '@/mock/_shared/StandardTradeFlowView'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 export function EvmStakeFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn, tokenOut } = useStakeForm()
@@ -29,6 +30,7 @@ export function EvmStakeFlow() {
   const { setAmountIn } = useUpdateStake()
   const approve = useApprove()
   const submit = useStakeSubmit()
+  const connectWalletFamily = useConnectWalletFamily()
 
   const [approveStatus, setApproveStatus] = useState<ApproveTxnStatus>('IDLE')
   const [submitStatus, setSubmitStatus] = useState<SubmitTxnStatus>(SubmitTxnStatus.IDLE)
@@ -93,6 +95,10 @@ export function EvmStakeFlow() {
   )
 
   const onPrimary = useCallback(() => {
+    if (!connection.isConnected) {
+      void connectWalletFamily('evm')
+      return
+    }
     if (step === 0 && !isApproved) {
       void approve(
         connection,
@@ -119,6 +125,7 @@ export function EvmStakeFlow() {
     )
   }, [
     approve,
+    connectWalletFamily,
     connection,
     inputs.amountIn,
     isApproved,
@@ -140,12 +147,20 @@ export function EvmStakeFlow() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
+  const feeLabels = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'ETH',
+  )
+
   return (
-    <StakeUnstakePanel
-      mode="stake"
+    <StandardTradeFlowView
       step={step}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
+      payLabel="You're staking"
+      receiveLabel="You're receiving"
+      confirmTitle="Confirm your stake transaction"
+      successHeadline="You have successfully staked"
+      moreLabel="Stake more"
+      successNote={undefined}
       tokenIn={tokenIn}
       tokenOut={tokenOut}
       amountIn={inputs.amountIn}
@@ -158,20 +173,24 @@ export function EvmStakeFlow() {
         tokenOut?.decimals,
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
-      feeLabel={
-        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'ETH')
-          .feeLabel
-      }
+      feeLabel={feeLabels.feeLabel || '—'}
+      feeNativeLabel={feeLabels.feeNativeLabel}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       isFetchingQuote={isFetchingQuote}
-      isInsufficientBalance={isInsufficientBalance}
-      isApproved={isApproved}
-      requiresApproval
       primaryLabel={primary.label}
-      primaryDisabled={primary.disabled}
+      primaryDisabled={primary.disabled || Boolean(connection.unsupported)}
       primaryLoading={primary.loading}
-      statusMessage={submitStatus === SubmitTxnStatus.TXN_FAILURE ? 'Stake failed' : undefined}
+      statusMessage={
+        connection.unsupported
+          ? 'Stake is only available on Ethereum mainnet.'
+          : submitStatus === SubmitTxnStatus.TXN_FAILURE
+            ? 'Stake failed'
+            : undefined
+      }
       txnUrl={txnUrl}
-      presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+      presetsDisabled={
+        inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
+      }
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}

@@ -162,7 +162,7 @@ export function StakeUnstakePanel({
   }
 
   const receiveDisplay = amountOutValue != null ? formatTradeReceiveDisplay(amountOutValue) : ''
-  const isReceiveLoading = isFetchingQuote && amountOutValue == null
+  const isReceiveLoading = Boolean(isFetchingQuote)
 
   return (
     <section style={{ display: 'grid', gap: 12 }}>

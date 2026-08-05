@@ -46,7 +46,7 @@ export const config: ProtocolChainConfig = {
   permit2: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
   gasLimits: {
     mint: 125148,
-    redeem: 0,
+    redeem: 125148,
     swap: 210682,
     bridge: 90246,
     stake: 125148,

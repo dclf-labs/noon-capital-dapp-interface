@@ -196,7 +196,7 @@ export function StarknetBuyTrade() {
       unitRateLabel={unitRate !== undefined ? formatUnitRate(unitRate) : undefined}
       feeLabel={feeLabel}
       feeNativeLabel={feeNativeLabel}
-      isLoadingFee={!feeLabel && (submitFee.isLoading || submitFee.isFetching)}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       poweredBy={resolveBuyPoweredBy(connection.config)}
       isFetchingQuote={isFetchingQuote}
       isInsufficientBalance={isInsufficientBalance}

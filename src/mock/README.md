@@ -17,7 +17,9 @@ src/mock/
 ```
 
 Shared chrome: `src/layout/AppShell` + `src/components/shell` (in-flow sidebar beside header, footer below).
-Buy / bridge success steps share `SuccessCheckIcon` (animated check asset; Figma `4819:60244`).
+Product / action Louize tabs: `_shared/product-tabs.ts` + `ProductHero`.
+Standard trade surfaces (sell / mint / redeem / stake / unstake): `_shared/StandardTradeFlowView` + `TradeAmountCard`.
+Buy / bridge keep product-specific panels; success steps share `SuccessCheckIcon` (Figma `4819:60244`).
 See `src/mock/vaults/README.md` for the vaults content module.
 
 `WithdrawClaimsPanel` is also stored here but still uses live withdraw hooks when mounted from `/withdraw`.

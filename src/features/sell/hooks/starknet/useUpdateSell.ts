@@ -33,10 +33,10 @@ const useUpdateSell = () => {
 
   const setAmountIn = useCallback(
     (amountIn: number) => {
+      // Keep prior amountOut while the new quote loads; drop stale route only.
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         amountIn,
-        amountOut: undefined,
         route: [],
       }))
     },

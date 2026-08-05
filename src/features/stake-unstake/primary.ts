@@ -50,7 +50,7 @@ export function getStakeUnstakePrimaryAction({
   submitFailed,
 }: StakeUnstakePrimaryParams): StakeUnstakePrimaryAction {
   if (!isConnected) {
-    return { label: 'Connect wallet', disabled: true, loading: false }
+    return { label: 'Connect wallet', disabled: false, loading: false }
   }
   if (isBalanceLoading || (requiresApproval && isAllowanceLoading)) {
     return { label: 'Loading', disabled: true, loading: true }

@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils'
 type AppSidebarProps = {
   apy?: string
   tvl?: string
+  isApyLoading?: boolean
+  isTvlLoading?: boolean
   apyPeriod?: SidebarApyPeriod
   onApyPeriodChange?: (period: SidebarApyPeriod) => void
   navItems: ShellNavItem[]
@@ -68,11 +70,15 @@ function Divider() {
 function SidebarStats({
   apy,
   tvl,
+  isApyLoading = false,
+  isTvlLoading = false,
   apyPeriod,
   onApyPeriodChange,
 }: {
   apy: string
   tvl: string
+  isApyLoading?: boolean
+  isTvlLoading?: boolean
   apyPeriod: SidebarApyPeriod
   onApyPeriodChange?: (period: SidebarApyPeriod) => void
 }) {
@@ -95,12 +101,26 @@ function SidebarStats({
             <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
             <InfoTipIcon content={APY_TIP} label="About APY" size={12} />
           </div>
-          <span className="text-base leading-6 font-book text-stone-900">{apy}</span>
+          <span
+            className={cn(
+              'text-base leading-6 font-book text-stone-900',
+              isApyLoading && 'animate-pulse',
+            )}
+          >
+            {apy}
+          </span>
         </div>
         <Divider />
         <div className="flex flex-col items-center">
           <span className="text-xs leading-[18px] font-book text-stone-500">TVL</span>
-          <span className="text-base leading-6 font-book text-stone-900">{tvl}</span>
+          <span
+            className={cn(
+              'text-base leading-6 font-book text-stone-900',
+              isTvlLoading && 'animate-pulse',
+            )}
+          >
+            {tvl}
+          </span>
         </div>
       </motion.div>
 
@@ -150,14 +170,28 @@ function SidebarStats({
               })}
             </div>
           </div>
-          <p className="font-denton text-[36px] leading-none whitespace-nowrap text-black">{apy}</p>
+          <p
+            className={cn(
+              'font-denton text-[36px] leading-none whitespace-nowrap text-black',
+              isApyLoading && 'animate-pulse',
+            )}
+          >
+            {apy}
+          </p>
         </div>
 
         <Divider />
 
         <div className="flex flex-col items-start gap-1">
           <span className="text-xs leading-[18px] font-book text-stone-500">TVL</span>
-          <p className="font-denton text-xl leading-none whitespace-nowrap text-black">{tvl}</p>
+          <p
+            className={cn(
+              'font-denton text-xl leading-none whitespace-nowrap text-black',
+              isTvlLoading && 'animate-pulse',
+            )}
+          >
+            {tvl}
+          </p>
         </div>
       </motion.div>
     </div>
@@ -174,6 +208,8 @@ function SidebarStats({
 export function AppSidebar({
   apy = '—',
   tvl = '—',
+  isApyLoading = false,
+  isTvlLoading = false,
   apyPeriod = '7d',
   onApyPeriodChange,
   navItems,
@@ -222,6 +258,8 @@ export function AppSidebar({
           <SidebarStats
             apy={apy}
             tvl={tvl}
+            isApyLoading={isApyLoading}
+            isTvlLoading={isTvlLoading}
             apyPeriod={apyPeriod}
             onApyPeriodChange={onApyPeriodChange}
           />

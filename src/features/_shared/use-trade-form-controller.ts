@@ -104,7 +104,12 @@ type PreviewOutInputs<TRoute> = {
  */
 export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRoute>>(
   setInputs: Dispatch<SetStateAction<TInputs>>,
-  preview: { data?: PreviewQuoteData<TRoute>; isLoading?: boolean; isError?: boolean },
+  preview: {
+    data?: PreviewQuoteData<TRoute>
+    isLoading?: boolean
+    isFetching?: boolean
+    isError?: boolean
+  },
   isDebouncing: boolean,
 ) {
   useEffect(() => {
@@ -122,7 +127,8 @@ export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRout
       return
     }
 
-    if (preview.isLoading || preview.data === undefined) return
+    // Hold the prior receive amount while a new quote is in flight.
+    if (preview.isLoading || preview.isFetching || preview.data === undefined) return
     const amountOut = normalizePreviewQuote(preview.data)
     const route = normalizePreviewRoute(preview.data)
     setInputs((prev) => {
@@ -142,7 +148,14 @@ export function useSyncPreviewOut<TRoute, TInputs extends PreviewOutInputs<TRout
         route,
       }
     })
-  }, [isDebouncing, preview.data, preview.isError, preview.isLoading, setInputs])
+  }, [
+    isDebouncing,
+    preview.data,
+    preview.isError,
+    preview.isFetching,
+    preview.isLoading,
+    setInputs,
+  ])
 }
 
 export type SessionIdentity = {

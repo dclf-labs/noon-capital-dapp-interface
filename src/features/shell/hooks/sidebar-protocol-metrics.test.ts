@@ -48,7 +48,13 @@ describe('formatSidebarProtocolMetrics', () => {
         tvlLoading: true,
         tvlError: false,
       }),
-    ).toMatchObject({ apy: '—', tvl: '—', isLoading: true })
+    ).toMatchObject({
+      apy: '—',
+      tvl: '—',
+      isLoading: true,
+      isApyLoading: true,
+      isTvlLoading: true,
+    })
 
     expect(
       formatSidebarProtocolMetrics({

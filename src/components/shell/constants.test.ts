@@ -70,8 +70,8 @@ describe('shellNavForPath', () => {
     expect(shellNavForPath('/vaults').find((i) => i.id === 'home')?.active).toBe(false)
   })
 
-  it('marks USN active across stake / unstake / withdraw', () => {
-    for (const path of ['/stake', '/unstake', '/withdraw', '/stake/foo']) {
+  it('marks USN active across mint / redeem / stake / unstake / withdraw', () => {
+    for (const path of ['/mint', '/redeem', '/stake', '/unstake', '/withdraw', '/stake/foo']) {
       expect(shellNavForPath(path).find((i) => i.id === 'usn')?.active).toBe(true)
     }
   })

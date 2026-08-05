@@ -20,10 +20,10 @@ const useUpdateMint = () => {
 
   const setAmountIn = useCallback(
     (amountIn: number) => {
+      // Keep prior amountOut while the new quote loads (pulse + sticky receive).
       setInputs((prevState: FormInputs) => ({
         ...prevState,
         amountIn,
-        amountOut: undefined,
       }))
     },
     [setInputs],

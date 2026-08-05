@@ -8,6 +8,10 @@ export type VaultListItem = {
   assetIconSrc: string
   apyLabel: string
   tvlLabel: string
+  /** Pulse APY while the vault metrics query is loading / refetching. */
+  isApyLoading?: boolean
+  /** Pulse TVL while the vault metrics query is loading / refetching. */
+  isTvlLoading?: boolean
   iconSrc: string
   href?: string
 }

@@ -103,7 +103,7 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Freeze quote sync on confirm so the shown amounts cannot drift under the user.
   useSyncAmountOut(
     setInputs,
-    preview.isLoading || preview.isError ? undefined : preview.data,
+    preview.isLoading || preview.isFetching || preview.isError ? undefined : preview.data,
     isDebouncing || step > 0,
   )
 
@@ -173,7 +173,9 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tokenPrice,
       amountInUsd,
       // Avoid amount-field pulse while the new chain’s quote pipeline catches up.
-      isFetchingQuote: isEvmSwitchSettling ? false : preview.isLoading || isDebouncing,
+      isFetchingQuote: isEvmSwitchSettling
+        ? false
+        : preview.isLoading || preview.isFetching || isDebouncing,
       isQuoteError: isEvmSwitchSettling ? false : preview.isError,
     }),
     [
@@ -181,6 +183,7 @@ export const BuyProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       price,
       tokenPrice,
       preview.isLoading,
+      preview.isFetching,
       preview.isError,
       isDebouncing,
       isEvmSwitchSettling,

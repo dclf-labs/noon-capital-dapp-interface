@@ -19,7 +19,8 @@ import useUpdateRedeem from '@/features/redeem/hooks/useUpdateRedeem'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { MintRedeemPanel } from '@/mock/mint-redeem/MintRedeemPanel'
+import { StandardTradeFlowView } from '@/mock/_shared/StandardTradeFlowView'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 export function EvmRedeemFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn } = useRedeemForm()
@@ -28,6 +29,7 @@ export function EvmRedeemFlow() {
   const { amountInUsd, isFetchingQuote, isQuoteError, price } = useRedeemPrice()
   const { submitFee, txnUrl, setTxnUrl } = useRedeemTxn()
   const { setAmountIn, setTokenOut } = useUpdateRedeem()
+  const connectWalletFamily = useConnectWalletFamily()
   const whitelist = useIsWhitelisted(connection)
   const approve = useApprove()
   const submit = useRedeemSubmit()
@@ -100,6 +102,10 @@ export function EvmRedeemFlow() {
   )
 
   const onPrimary = useCallback(() => {
+    if (!connection.isConnected) {
+      void connectWalletFamily('evm')
+      return
+    }
     if (step === 0 && !isApproved) {
       void approve(
         connection,
@@ -127,6 +133,7 @@ export function EvmRedeemFlow() {
     )
   }, [
     approve,
+    connectWalletFamily,
     connection,
     inputs.amountIn,
     inputs.amountOut,
@@ -149,15 +156,23 @@ export function EvmRedeemFlow() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
+  const feeLabels = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'ETH',
+  )
+
   return (
-    <MintRedeemPanel
-      mode="redeem"
+    <StandardTradeFlowView
       step={step}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
+      payLabel="You're redeeming"
+      receiveLabel="You're receiving"
+      confirmTitle="Confirm your redeem transaction"
+      successHeadline="You have successfully redeemed"
+      moreLabel="Redeem more"
       tokenIn={tokenIn}
       tokenOut={inputs.tokenOut}
-      variableTokens={inputs.tokensOut}
+      tokensOut={inputs.tokensOut}
+      onTokenOutChange={setTokenOut}
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
@@ -168,24 +183,27 @@ export function EvmRedeemFlow() {
         inputs.tokenOut?.decimals,
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
-      feeLabel={
-        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'ETH')
-          .feeLabel
-      }
+      feeLabel={feeLabels.feeLabel || '—'}
+      feeNativeLabel={feeLabels.feeNativeLabel}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       isFetchingQuote={isFetchingQuote}
-      isInsufficientBalance={isInsufficientBalance}
-      isApproved={isApproved}
-      isWhitelisted={whitelist.data}
       primaryLabel={primary.label}
-      primaryDisabled={primary.disabled}
+      primaryDisabled={primary.disabled || Boolean(connection.unsupported)}
       primaryLoading={primary.loading}
-      statusMessage={submitStatus === SubmitTxnStatus.TXN_FAILURE ? 'Redeem failed' : undefined}
+      statusMessage={
+        connection.unsupported
+          ? 'Redeem is only available on Ethereum mainnet.'
+          : submitStatus === SubmitTxnStatus.TXN_FAILURE
+            ? 'Redeem failed'
+            : undefined
+      }
       txnUrl={txnUrl}
-      presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+      presetsDisabled={
+        inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
+      }
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}
-      onVariableTokenChange={setTokenOut}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

@@ -25,6 +25,8 @@ type MobileNavDrawerProps = {
   navItems: ShellNavItem[]
   apy: string
   tvl: string
+  isApyLoading?: boolean
+  isTvlLoading?: boolean
   isConnected?: boolean
   walletLabel?: string
   walletIconSrc?: string
@@ -42,6 +44,8 @@ export function MobileNavDrawer({
   navItems,
   apy,
   tvl,
+  isApyLoading = false,
+  isTvlLoading = false,
   isConnected = false,
   walletLabel,
   walletIconSrc,
@@ -160,13 +164,27 @@ export function MobileNavDrawer({
                     <span className="text-xs leading-[18px] font-book text-stone-500">APY</span>
                     <InfoTipIcon content={APY_TIP} label="About APY" size={16} />
                   </div>
-                  <p className="font-denton text-base leading-5 text-black">{apy}</p>
+                  <p
+                    className={cn(
+                      'font-denton text-base leading-5 text-black',
+                      isApyLoading && 'animate-pulse',
+                    )}
+                  >
+                    {apy}
+                  </p>
                 </div>
                 <div className="flex flex-col items-start justify-center">
                   <span className="mb-[-2px] text-xs leading-[18px] font-book text-stone-500">
                     TVL
                   </span>
-                  <p className="font-denton text-base leading-5 text-black">{tvl}</p>
+                  <p
+                    className={cn(
+                      'font-denton text-base leading-5 text-black',
+                      isTvlLoading && 'animate-pulse',
+                    )}
+                  >
+                    {tvl}
+                  </p>
                 </div>
               </div>
 

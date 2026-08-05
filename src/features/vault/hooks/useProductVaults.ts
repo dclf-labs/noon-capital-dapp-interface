@@ -48,8 +48,16 @@ export function useProductVaults() {
       },
     }
 
+    const sources: Record<ProductVaultId, { isLoading: boolean; isFetching: boolean }> = {
+      'usdc-mon': { isLoading: monad.isLoading, isFetching: monad.isFetching },
+      'tbtc-eth': { isLoading: ethereumTbtc.isLoading, isFetching: ethereumTbtc.isFetching },
+      'wcbtc-citrea': { isLoading: citreaWcbtc.isLoading, isFetching: citreaWcbtc.isFetching },
+    }
+
     const vaults: VaultListItem[] = PRODUCT_VAULT_DEFINITIONS.map((def) => {
       const m = metrics[def.id]
+      const source = sources[def.id]
+      const metricsBusy = source.isLoading || source.isFetching
       return {
         id: def.id,
         name: def.name,
@@ -62,6 +70,8 @@ export function useProductVaults() {
         href: def.href,
         apyLabel: formatApy(m.apy),
         tvlLabel: formatTvl(m.tvlUsd),
+        isApyLoading: metricsBusy,
+        isTvlLoading: metricsBusy,
       }
     })
 

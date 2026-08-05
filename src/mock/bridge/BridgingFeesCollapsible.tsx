@@ -28,10 +28,23 @@ type FeeLineProps = {
   /** Native-unit tip on the USD value (buy-page network fee pattern). */
   tipLabel?: string
   tipAriaLabel: string
+  isLoading?: boolean
 }
 
-function FeeLine({ label, value, infoTip, infoTipLabel, tipLabel, tipAriaLabel }: FeeLineProps) {
+function FeeLine({
+  label,
+  value,
+  infoTip,
+  infoTipLabel,
+  tipLabel,
+  tipAriaLabel,
+  isLoading = false,
+}: FeeLineProps) {
   const canShowTip = Boolean(tipLabel && tipLabel !== '—' && value !== '—')
+  const valueClassName = cn(
+    'text-right text-base leading-6 font-semibold text-stone-600 tabular-nums',
+    isLoading && 'animate-pulse',
+  )
 
   return (
     <div className="flex w-full items-center gap-1">
@@ -45,14 +58,10 @@ function FeeLine({ label, value, infoTip, infoTipLabel, tipLabel, tipAriaLabel }
           align="end"
           triggerClassName="ml-auto"
         >
-          <span className="text-right text-base leading-6 font-semibold text-stone-600 tabular-nums">
-            {value}
-          </span>
+          <span className={valueClassName}>{value}</span>
         </ResponsiveTip>
       ) : (
-        <p className="ml-auto text-base leading-6 font-semibold text-stone-600 tabular-nums">
-          {value}
-        </p>
+        <p className={cn('ml-auto', valueClassName)}>{value}</p>
       )}
     </div>
   )
@@ -89,7 +98,6 @@ export function BridgingFeesCollapsible({
   isLoading = false,
 }: BridgingFeesCollapsibleProps) {
   const [open, setOpen] = useState(false)
-  const showPulse = isLoading && totalLabel === DEFAULT_BRIDGE_FEE_LABEL
 
   return (
     <div className="flex w-full flex-col">
@@ -119,21 +127,14 @@ export function BridgingFeesCollapsible({
           transition={{ duration: COLLAPSE_DURATION, ease: COLLAPSE_EASE }}
           className="size-4 shrink-0"
         />
-        {showPulse ? (
-          <span
-            aria-label="Estimating bridge fee"
-            className="ml-auto inline-block h-6 w-14 animate-pulse rounded-md bg-stone-200"
-          />
-        ) : (
-          <p
-            className={cn(
-              'ml-auto text-base leading-6 font-semibold text-stone-600 tabular-nums',
-              isLoading && 'animate-pulse',
-            )}
-          >
-            {totalLabel}
-          </p>
-        )}
+        <p
+          className={cn(
+            'ml-auto text-base leading-6 font-semibold text-stone-600 tabular-nums',
+            isLoading && 'animate-pulse',
+          )}
+        >
+          {totalLabel}
+        </p>
       </button>
 
       <AnimatePresence initial={false}>
@@ -157,6 +158,7 @@ export function BridgingFeesCollapsible({
                 infoTipLabel="About bridge fee"
                 tipLabel={gasFeeNativeLabel}
                 tipAriaLabel="Bridge fee details"
+                isLoading={isLoading}
               />
               <FeeLine
                 label="Network fee"
@@ -165,6 +167,7 @@ export function BridgingFeesCollapsible({
                 infoTipLabel="About network fee"
                 tipLabel={networkFeeNativeLabel}
                 tipAriaLabel="Network fee details"
+                isLoading={isLoading}
               />
               <FeeLine
                 label="Protocol fee"
@@ -173,6 +176,7 @@ export function BridgingFeesCollapsible({
                 infoTipLabel="About protocol fee"
                 tipLabel={protocolFeeNativeLabel}
                 tipAriaLabel="Protocol fee details"
+                isLoading={isLoading}
               />
             </div>
           </motion.div>

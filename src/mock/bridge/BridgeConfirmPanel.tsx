@@ -55,20 +55,20 @@ function ExplorerAddressLink({ address, explorerUrl }: { address?: string; explo
 
 function ChainNameMark({ name, iconSrc }: { name: string; iconSrc?: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-sm leading-5 font-book text-stone-500">
+    <span className="text-sm leading-5 font-book whitespace-nowrap text-stone-500">
       {iconSrc ? (
-        <span className="size-4 shrink-0 overflow-hidden rounded-[3px] bg-stone-200">
+        <span className="mr-1.5 inline-block size-4 overflow-hidden rounded-[3px] bg-stone-200 align-middle">
           <img
             src={iconSrc}
             alt=""
             width={16}
             height={16}
-            className="size-full object-cover"
+            className="block size-full object-cover"
             draggable={false}
           />
         </span>
       ) : null}
-      <span>{name}</span>
+      <span className="inline-block align-middle">{name}</span>
     </span>
   )
 }

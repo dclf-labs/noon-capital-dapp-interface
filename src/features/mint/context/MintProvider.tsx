@@ -75,7 +75,7 @@ export const MintProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useSyncAmountOut(
     setInputs,
-    preview.isLoading || preview.isError ? undefined : preview.data,
+    preview.isLoading || preview.isFetching || preview.isError ? undefined : preview.data,
     isDebouncing || step > 0,
   )
 
@@ -134,7 +134,7 @@ export const MintProvider: React.FC<{ children: React.ReactNode }> = ({ children
       price,
       tokenPrice,
       amountInUsd,
-      isFetchingQuote: preview.isLoading || isDebouncing || pricePending,
+      isFetchingQuote: preview.isLoading || preview.isFetching || isDebouncing || pricePending,
       isQuoteError: preview.isError || priceUnavailable,
     }
   }, [
@@ -143,6 +143,7 @@ export const MintProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isDebouncing,
     price,
     preview.isError,
+    preview.isFetching,
     preview.isLoading,
     tokenPrice,
   ])

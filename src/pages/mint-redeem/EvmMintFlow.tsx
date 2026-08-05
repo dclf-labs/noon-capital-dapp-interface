@@ -19,7 +19,8 @@ import { getMintRedeemPrimaryAction } from '@/features/mint-redeem'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { MintRedeemPanel } from '@/mock/mint-redeem/MintRedeemPanel'
+import { StandardTradeFlowView } from '@/mock/_shared/StandardTradeFlowView'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 export function EvmMintFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenOut } = useMintForm()
@@ -31,6 +32,7 @@ export function EvmMintFlow() {
   const whitelist = useIsWhitelisted(connection)
   const approve = useApprove()
   const submit = useMintSubmit()
+  const connectWalletFamily = useConnectWalletFamily()
 
   const [approveStatus, setApproveStatus] = useState<ApproveTxnStatus>('IDLE')
   const [submitStatus, setSubmitStatus] = useState<SubmitTxnStatus>(SubmitTxnStatus.IDLE)
@@ -102,6 +104,10 @@ export function EvmMintFlow() {
   )
 
   const onPrimary = useCallback(() => {
+    if (!connection.isConnected) {
+      void connectWalletFamily('evm')
+      return
+    }
     if (step === 0 && !isApproved) {
       void approve(
         connection,
@@ -129,6 +135,7 @@ export function EvmMintFlow() {
     )
   }, [
     approve,
+    connectWalletFamily,
     connection,
     inputs.amountIn,
     inputs.amountOut,
@@ -151,15 +158,23 @@ export function EvmMintFlow() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
+  const feeLabels = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'ETH',
+  )
+
   return (
-    <MintRedeemPanel
-      mode="mint"
+    <StandardTradeFlowView
       step={step}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
+      payLabel="You're sending"
+      receiveLabel="You're minting"
+      confirmTitle="Confirm your mint transaction"
+      successHeadline="You have successfully minted"
+      moreLabel="Mint more"
       tokenIn={inputs.tokenIn}
       tokenOut={tokenOut}
-      variableTokens={inputs.tokensIn}
+      tokensIn={inputs.tokensIn}
+      onTokenInChange={setTokenIn}
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
@@ -170,24 +185,27 @@ export function EvmMintFlow() {
         tokenOut?.decimals,
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
-      feeLabel={
-        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'ETH')
-          .feeLabel
-      }
+      feeLabel={feeLabels.feeLabel || '—'}
+      feeNativeLabel={feeLabels.feeNativeLabel}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       isFetchingQuote={isFetchingQuote}
-      isInsufficientBalance={isInsufficientBalance}
-      isApproved={isApproved}
-      isWhitelisted={whitelist.data}
       primaryLabel={primary.label}
-      primaryDisabled={primary.disabled}
+      primaryDisabled={primary.disabled || Boolean(connection.unsupported)}
       primaryLoading={primary.loading}
-      statusMessage={submitStatus === SubmitTxnStatus.TXN_FAILURE ? 'Mint failed' : undefined}
+      statusMessage={
+        connection.unsupported
+          ? 'Mint is only available on Ethereum mainnet.'
+          : submitStatus === SubmitTxnStatus.TXN_FAILURE
+            ? 'Mint failed'
+            : undefined
+      }
       txnUrl={txnUrl}
-      presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
+      presetsDisabled={
+        inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
+      }
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}
-      onVariableTokenChange={setTokenIn}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

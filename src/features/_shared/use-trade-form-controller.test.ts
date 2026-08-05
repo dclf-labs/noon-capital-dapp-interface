@@ -183,6 +183,48 @@ describe('trade form helpers', () => {
     expect(result.current.inputs.route).toEqual(['a'])
   })
 
+  it('keeps amountOut while preview is fetching a newer quote', () => {
+    const { result, rerender } = renderHook(
+      ({
+        data,
+        isLoading,
+        isFetching,
+        isDebouncing,
+      }: {
+        data?: { quote: number; route: string[] }
+        isLoading: boolean
+        isFetching: boolean
+        isDebouncing: boolean
+      }) => {
+        const form = useTradeFormController<{ amountOut?: number; route?: string[] }>({
+          amountOut: 4,
+          route: ['a'],
+        })
+        useSyncPreviewOut(form.setInputs, { data, isLoading, isFetching }, isDebouncing)
+        return form
+      },
+      {
+        initialProps: {
+          data: { quote: 4, route: ['a'] },
+          isLoading: false,
+          isFetching: true,
+          isDebouncing: false,
+        },
+      },
+    )
+
+    expect(result.current.inputs.amountOut).toBe(4)
+
+    rerender({
+      data: { quote: 9, route: ['b'] },
+      isLoading: false,
+      isFetching: false,
+      isDebouncing: false,
+    })
+    expect(result.current.inputs.amountOut).toBe(9)
+    expect(result.current.inputs.route).toEqual(['b'])
+  })
+
   it('clears amountOut when preview quote is non-positive or route empty', () => {
     const { result, rerender } = renderHook(
       ({

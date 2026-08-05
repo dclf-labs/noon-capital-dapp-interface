@@ -206,7 +206,7 @@ export function EvmBuyTrade() {
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
       feeLabel={feeLabel}
       feeNativeLabel={feeNativeLabel}
-      isLoadingFee={!feeLabel && (submitFee.isLoading || submitFee.isFetching)}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       poweredBy={resolveBuyPoweredBy(connection.config)}
       isFetchingQuote={isFetchingQuote}
       isInsufficientBalance={isInsufficientBalance}

@@ -22,7 +22,8 @@ import { getSwapSpender } from '@/features/swap/lib/spender'
 import useApprove from '@/hooks/on-chain/evm/useApprove'
 import { TxnStatus as SubmitTxnStatus } from '@/lib/connection'
 import type { TxnStatus as ApproveTxnStatus } from '@/lib/types'
-import { TradePanelView } from '@/mock/swap/TradePanelView'
+import { StandardTradeFlowView } from '@/mock/_shared/StandardTradeFlowView'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 export function EvmSellTrade() {
   const { inputs, connection, step, setStep, setInputs } = useSellForm()
@@ -33,6 +34,7 @@ export function EvmSellTrade() {
   const { setAmountIn, setTokenIn, setTokenOut } = useUpdateSell()
   const approve = useApprove()
   const submit = useSellSubmit()
+  const connectWalletFamily = useConnectWalletFamily()
 
   const [approveStatus, setApproveStatus] = useState<ApproveTxnStatus>('IDLE')
   const [submitStatus, setSubmitStatus] = useState<SubmitTxnStatus>(SubmitTxnStatus.IDLE)
@@ -97,6 +99,10 @@ export function EvmSellTrade() {
   )
 
   const onPrimary = useCallback(() => {
+    if (!connection.isConnected) {
+      void connectWalletFamily('evm')
+      return
+    }
     if (step === 0 && !isApproved) {
       void approve(
         connection,
@@ -125,6 +131,7 @@ export function EvmSellTrade() {
     )
   }, [
     approve,
+    connectWalletFamily,
     connection,
     inputs.amountIn,
     inputs.amountOut,
@@ -148,16 +155,27 @@ export function EvmSellTrade() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl])
 
+  const feeLabels = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'ETH',
+  )
+
   return (
-    <TradePanelView
-      mode="sell"
+    <StandardTradeFlowView
       step={step}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
+      payLabel="You're selling"
+      receiveLabel="You're receiving"
+      confirmTitle="Confirm your sell transaction"
+      successHeadline="You have successfully sold"
+      moreLabel="Sell more"
+      payColumnLabel="Selling"
+      receiveColumnLabel="To receive"
       tokenIn={inputs.tokenIn}
       tokenOut={inputs.tokenOut}
       tokensIn={inputs.tokensIn}
       tokensOut={inputs.tokensOut}
+      onTokenInChange={setTokenIn}
+      onTokenOutChange={setTokenOut}
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
@@ -168,13 +186,10 @@ export function EvmSellTrade() {
         inputs.tokenOut?.decimals,
       )}
       unitRateLabel={typeof price.data === 'number' ? formatUnitRate(price.data) : undefined}
-      feeLabel={
-        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'ETH')
-          .feeLabel
-      }
+      feeLabel={feeLabels.feeLabel || '—'}
+      feeNativeLabel={feeLabels.feeNativeLabel}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       isFetchingQuote={isFetchingQuote}
-      isInsufficientBalance={isInsufficientBalance}
-      isApproved={isApproved}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
@@ -184,8 +199,6 @@ export function EvmSellTrade() {
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}
-      onTokenInChange={setTokenIn}
-      onTokenOutChange={setTokenOut}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

@@ -17,6 +17,11 @@ Shared chrome (sidebar, network + wallet header, footer, max-width **1600px**) i
 
 Desktop layout: in-flow sidebar sits **beside** the header+main column (not under the header, not `position: fixed`), inset **4px** from the shell top and **5px** from the left (`SIDEBAR_INSET_*`). Hover expand overlays from a reserved rail width so the main column does not reflow. Footer stays below the content row.
 
+**Home product tabs** (Louize): Vaults · Buy · Bridge — see `src/mock/_shared/product-tabs.ts`.  
+**USN / sUSN** (sidebar): Mint · Redeem · Stake · Unstake · Withdraw — no home strip.  
+**Swap**: home tabs + Buy|Sell actions.  
+**Trade UI**: Buy/Bridge keep their Figma cards; sell/mint/redeem/stake/unstake use shared `StandardTradeFlowView`.
+
 ## Layout per surface
 
 ```text

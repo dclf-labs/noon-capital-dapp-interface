@@ -19,13 +19,22 @@ function MetaChip({
   iconClassName?: string
 }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-sm tracking-[0.28px] text-[rgba(17,17,17,0.5)]">{label}</span>
-      <span className={cn('size-5 overflow-hidden rounded', iconClassName)}>
-        <img src={iconSrc} alt="" width={20} height={20} className="size-full object-cover" />
+    <p className="whitespace-nowrap">
+      <span className="mr-1.5 inline-block align-middle text-sm tracking-[0.28px] text-[rgba(17,17,17,0.5)]">
+        {label}
       </span>
-      <span className="text-base leading-6 font-book text-stone-900">{value}</span>
-    </div>
+      <span
+        className={cn(
+          'mr-1.5 inline-block size-5 overflow-hidden rounded align-middle',
+          iconClassName,
+        )}
+      >
+        <img src={iconSrc} alt="" width={20} height={20} className="block size-full object-cover" />
+      </span>
+      <span className="inline-block align-middle text-base leading-6 font-book text-stone-900">
+        {value}
+      </span>
+    </p>
   )
 }
 
@@ -133,7 +142,14 @@ function VaultCardBody({ vault }: { vault: VaultListItem }) {
 
         <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
           <p className="text-sm leading-5 font-book text-stone-500">APY, 7D</p>
-          <p className="font-denton text-[28px] leading-none text-black">{vault.apyLabel}</p>
+          <p
+            className={cn(
+              'font-denton text-[28px] leading-none text-black',
+              vault.isApyLoading && 'animate-pulse',
+            )}
+          >
+            {vault.apyLabel}
+          </p>
         </div>
       </div>
 
@@ -142,11 +158,25 @@ function VaultCardBody({ vault }: { vault: VaultListItem }) {
         <div className="flex w-full gap-2">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <p className="text-sm leading-5 font-book text-stone-500">APY, 7D</p>
-            <p className="font-denton text-[28px] leading-none text-black">{vault.apyLabel}</p>
+            <p
+              className={cn(
+                'font-denton text-[28px] leading-none text-black',
+                vault.isApyLoading && 'animate-pulse',
+              )}
+            >
+              {vault.apyLabel}
+            </p>
           </div>
           <div className="flex min-w-0 flex-1 flex-col justify-center">
             <p className="text-sm tracking-[0.28px] text-[rgba(17,17,17,0.5)]">TVL</p>
-            <p className="text-base leading-6 font-book text-stone-900">{vault.tvlLabel}</p>
+            <p
+              className={cn(
+                'text-base leading-6 font-book text-stone-900',
+                vault.isTvlLoading && 'animate-pulse',
+              )}
+            >
+              {vault.tvlLabel}
+            </p>
           </div>
         </div>
         <div className="flex w-full gap-2">
@@ -177,7 +207,14 @@ function VaultCardBody({ vault }: { vault: VaultListItem }) {
         </div>
         <div className="flex shrink-0 flex-col items-end">
           <p className="text-sm tracking-[0.28px] text-[rgba(17,17,17,0.5)]">TVL</p>
-          <p className="text-base leading-6 font-book text-stone-900">{vault.tvlLabel}</p>
+          <p
+            className={cn(
+              'text-base leading-6 font-book text-stone-900',
+              vault.isTvlLoading && 'animate-pulse',
+            )}
+          >
+            {vault.tvlLabel}
+          </p>
         </div>
       </div>
     </article>

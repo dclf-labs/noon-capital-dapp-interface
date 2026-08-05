@@ -132,7 +132,7 @@ describe('TradePanelView input formatting', () => {
     expect(receiveInput()).toHaveAttribute('title', '12.345678')
   })
 
-  it('pulses the receive field when fetching and no receive amount yet', () => {
+  it('pulses the receive field while fetching, including with a sticky prior amount', () => {
     const { rerender } = renderTrade({ isFetchingQuote: true, amountOut: undefined })
     expect(receiveInput()).toHaveAttribute('placeholder', '0')
     expect(receiveInput()).toHaveClass('animate-pulse')
@@ -165,6 +165,34 @@ describe('TradePanelView input formatting', () => {
       />,
     )
     expect(receiveInput().value).toBe('1.234567')
+    expect(receiveInput()).toHaveClass('animate-pulse')
+
+    rerender(
+      <TradePanelView
+        {...{
+          mode: 'buy',
+          step: 0,
+          isConnected: true,
+          tokenIn: usdc,
+          tokenOut: usn,
+          tokensIn: [usdc],
+          tokensOut: [usn],
+          amountInUsd: 0,
+          isFetchingQuote: false,
+          isInsufficientBalance: false,
+          isApproved: true,
+          primaryLabel: 'Next',
+          primaryDisabled: false,
+          onAmountInChange: vi.fn(),
+          onHalf: vi.fn(),
+          onMax: vi.fn(),
+          onTokenInChange: vi.fn(),
+          onTokenOutChange: vi.fn(),
+          onPrimary: vi.fn(),
+          amountOut: 1.234567,
+        }}
+      />,
+    )
     expect(receiveInput()).not.toHaveClass('animate-pulse')
   })
 

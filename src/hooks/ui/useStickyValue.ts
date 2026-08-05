@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 /**
  * Keep showing the last defined value while a newer value is temporarily
- * unavailable (e.g. fee/quote refetch on chain switch) — avoids `—` / skeleton flash.
+ * unavailable (e.g. fee/quote refetch on chain switch) — avoids `—` flash.
  *
  * Pass `resetKey` (route / token identity) so a real identity change drops the
  * previous sticky value instead of showing a stale fee from another route.

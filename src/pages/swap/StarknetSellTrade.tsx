@@ -20,14 +20,16 @@ import {
 } from '@/features/sell/hooks/starknet/useSell'
 import useSellSubmit from '@/features/sell/hooks/starknet/useSellSubmit'
 import useUpdateSell from '@/features/sell/hooks/starknet/useUpdateSell'
-import { TradePanelView } from '@/mock/swap/TradePanelView'
+import { StandardTradeFlowView } from '@/mock/_shared/StandardTradeFlowView'
+import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 
 export function StarknetSellTrade() {
   const { inputs, connection, step, setStep, setInputs } = useSellForm()
-  const { isApproved, isInsufficientBalance, tokenInBalance, tokenOutBalance } = useSellBalance()
+  const { isInsufficientBalance, tokenInBalance, tokenOutBalance } = useSellBalance()
   const { amountInUsd, isFetchingQuote, isQuoteError, price } = useSellPrice()
   const { submitFee, txnUrl, setTxnUrl } = useSellTxn()
   const { setAmountIn, setTokenIn, setTokenOut } = useUpdateSell()
+  const connectWalletFamily = useConnectWalletFamily()
 
   const submit = useSellSubmit(
     connection,
@@ -115,12 +117,16 @@ export function StarknetSellTrade() {
   )
 
   const onPrimary = useCallback(() => {
+    if (!connection.isConnected) {
+      void connectWalletFamily('starknet')
+      return
+    }
     if (step === 0) {
       setStep(1)
       return
     }
     submit.onSubmit()
-  }, [setStep, step, submit])
+  }, [connectWalletFamily, connection.isConnected, setStep, step, submit])
 
   const onBack = useCallback(() => setStep(0), [setStep])
   const onReset = useCallback(() => {
@@ -135,16 +141,27 @@ export function StarknetSellTrade() {
     setTxnUrl(undefined)
   }, [setInputs, setStep, setTxnUrl, submit.txnHash])
 
+  const feeLabels = formatSubmitFeeLabels(
+    submitFee,
+    connection.config?.defaultGasToken?.symbol || 'STRK',
+  )
+
   return (
-    <TradePanelView
-      mode="sell"
+    <StandardTradeFlowView
       step={step}
-      isConnected={connection.isConnected}
-      unsupported={connection.unsupported}
+      payLabel="You're selling"
+      receiveLabel="You're receiving"
+      confirmTitle="Confirm your sell transaction"
+      successHeadline="You have successfully sold"
+      moreLabel="Sell more"
+      payColumnLabel="Selling"
+      receiveColumnLabel="To receive"
       tokenIn={inputs.tokenIn}
       tokenOut={inputs.tokenOut}
       tokensIn={inputs.tokensIn}
       tokensOut={inputs.tokensOut}
+      onTokenInChange={setTokenIn}
+      onTokenOutChange={setTokenOut}
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
@@ -155,13 +172,10 @@ export function StarknetSellTrade() {
         inputs.tokenOut?.decimals,
       )}
       unitRateLabel={unitRate !== undefined ? formatUnitRate(unitRate) : undefined}
-      feeLabel={
-        formatSubmitFeeLabels(submitFee, connection.config?.defaultGasToken?.symbol || 'STRK')
-          .feeLabel
-      }
+      feeLabel={feeLabels.feeLabel || '—'}
+      feeNativeLabel={feeLabels.feeNativeLabel}
+      isLoadingFee={submitFee.isLoading || submitFee.isFetching}
       isFetchingQuote={isFetchingQuote}
-      isInsufficientBalance={isInsufficientBalance}
-      isApproved={isApproved}
       primaryLabel={primary.label}
       primaryDisabled={primary.disabled}
       primaryLoading={primary.loading}
@@ -171,8 +185,6 @@ export function StarknetSellTrade() {
       onAmountInChange={onAmountInChange}
       onHalf={onHalf}
       onMax={onMax}
-      onTokenInChange={setTokenIn}
-      onTokenOutChange={setTokenOut}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

@@ -44,7 +44,7 @@ export function EvmRedeemFlow() {
     tokenDecimals: tokenIn?.decimals,
   })
 
-  const { onAmountInChange, onHalf, onMax } = useTradeAmountHandlers({
+  const { onAmountInChange } = useTradeAmountHandlers({
     setInputs,
     setAmountIn,
     balance: tokenInBalance.data,
@@ -202,8 +202,6 @@ export function EvmRedeemFlow() {
         inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
       }
       onAmountInChange={onAmountInChange}
-      onHalf={onHalf}
-      onMax={onMax}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

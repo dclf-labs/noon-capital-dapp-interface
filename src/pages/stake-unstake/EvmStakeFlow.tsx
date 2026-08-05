@@ -25,7 +25,7 @@ export function EvmStakeFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn, tokenOut } = useStakeForm()
   const { isApproved, isInsufficientBalance, tokenInAllowance, tokenInBalance, tokenOutBalance } =
     useStakeBalance()
-  const { amountInUsd, isFetchingQuote, isQuoteError, price } = useStakePrice()
+  const { amountInUsd, isFetchingQuote, isQuoteError, price, tokenPrice } = useStakePrice()
   const { submitFee, txnUrl, setTxnUrl } = useStakeTxn()
   const { setAmountIn } = useUpdateStake()
   const approve = useApprove()
@@ -42,7 +42,7 @@ export function EvmStakeFlow() {
     tokenDecimals: tokenIn?.decimals,
   })
 
-  const { onAmountInChange, onHalf, onMax } = useTradeAmountHandlers({
+  const { onAmountInChange } = useTradeAmountHandlers({
     setInputs,
     setAmountIn,
     balance: tokenInBalance.data,
@@ -166,6 +166,7 @@ export function EvmStakeFlow() {
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
+      payTokenUsdPrice={tokenPrice.data}
       balanceInLabel={inputModel.balanceLabel}
       balanceOutLabel={formatBalanceLabel(
         tokenOutBalance.data,
@@ -192,8 +193,6 @@ export function EvmStakeFlow() {
         inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
       }
       onAmountInChange={onAmountInChange}
-      onHalf={onHalf}
-      onMax={onMax}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

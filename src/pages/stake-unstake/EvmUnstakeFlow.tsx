@@ -35,7 +35,7 @@ const unstakeCooldownCallout = (
 export function EvmUnstakeFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenIn, tokenOut } = useUnstakeForm()
   const { isInsufficientBalance, tokenInBalance, tokenOutBalance } = useUnstakeBalance()
-  const { amountInUsd, isFetchingQuote, isQuoteError, price } = useUnstakePrice()
+  const { amountInUsd, isFetchingQuote, isQuoteError, price, tokenPrice } = useUnstakePrice()
   const { submitFee, txnUrl, setTxnUrl } = useUnstakeTxn()
   const { setAmountIn } = useUpdateUnstake()
   const submit = useUnstakeSubmit()
@@ -51,7 +51,7 @@ export function EvmUnstakeFlow() {
     tokenDecimals: tokenIn?.decimals,
   })
 
-  const { onAmountInChange, onHalf, onMax } = useTradeAmountHandlers({
+  const { onAmountInChange } = useTradeAmountHandlers({
     setInputs,
     setAmountIn,
     balance: tokenInBalance.data,
@@ -159,6 +159,7 @@ export function EvmUnstakeFlow() {
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
+      payTokenUsdPrice={tokenPrice.data}
       balanceInLabel={inputModel.balanceLabel}
       balanceOutLabel={formatBalanceLabel(
         tokenOutBalance.data,
@@ -185,8 +186,6 @@ export function EvmUnstakeFlow() {
         inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
       }
       onAmountInChange={onAmountInChange}
-      onHalf={onHalf}
-      onMax={onMax}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

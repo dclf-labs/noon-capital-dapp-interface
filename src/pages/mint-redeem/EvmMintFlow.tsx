@@ -26,7 +26,7 @@ export function EvmMintFlow() {
   const { inputs, connection, step, setStep, setInputs, tokenOut } = useMintForm()
   const { isApproved, isInsufficientBalance, tokenInAllowance, tokenInBalance, tokenOutBalance } =
     useMintBalance()
-  const { amountInUsd, isFetchingQuote, isQuoteError, price } = useMintPrice()
+  const { amountInUsd, isFetchingQuote, isQuoteError, price, tokenPrice } = useMintPrice()
   const { submitFee, txnUrl, setTxnUrl } = useMintTxn()
   const { setAmountIn, setTokenIn } = useUpdateMint()
   const whitelist = useIsWhitelisted(connection)
@@ -44,7 +44,7 @@ export function EvmMintFlow() {
     tokenDecimals: inputs.tokenIn?.decimals,
   })
 
-  const { onAmountInChange, onHalf, onMax } = useTradeAmountHandlers({
+  const { onAmountInChange } = useTradeAmountHandlers({
     setInputs,
     setAmountIn,
     balance: tokenInBalance.data,
@@ -178,6 +178,7 @@ export function EvmMintFlow() {
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
+      payTokenUsdPrice={tokenPrice.data}
       balanceInLabel={inputModel.balanceLabel}
       balanceOutLabel={formatBalanceLabel(
         tokenOutBalance.data,
@@ -204,8 +205,6 @@ export function EvmMintFlow() {
         inputModel.isPresetDisabled || tokenInBalance.isLoading || Boolean(connection.unsupported)
       }
       onAmountInChange={onAmountInChange}
-      onHalf={onHalf}
-      onMax={onMax}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

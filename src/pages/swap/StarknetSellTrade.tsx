@@ -26,7 +26,7 @@ import { useConnectWalletFamily } from '@/wallet/useConnectWalletFamily'
 export function StarknetSellTrade() {
   const { inputs, connection, step, setStep, setInputs } = useSellForm()
   const { isInsufficientBalance, tokenInBalance, tokenOutBalance } = useSellBalance()
-  const { amountInUsd, isFetchingQuote, isQuoteError, price } = useSellPrice()
+  const { amountInUsd, isFetchingQuote, isQuoteError, price, tokenPrice } = useSellPrice()
   const { submitFee, txnUrl, setTxnUrl } = useSellTxn()
   const { setAmountIn, setTokenIn, setTokenOut } = useUpdateSell()
   const connectWalletFamily = useConnectWalletFamily()
@@ -56,7 +56,7 @@ export function StarknetSellTrade() {
     tokenDecimals: inputs.tokenIn?.decimals,
   })
 
-  const { onAmountInChange, onHalf, onMax } = useTradeAmountHandlers({
+  const { onAmountInChange } = useTradeAmountHandlers({
     setInputs,
     setAmountIn,
     balance: tokenInBalance.data,
@@ -165,6 +165,7 @@ export function StarknetSellTrade() {
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
+      payTokenUsdPrice={tokenPrice.data}
       balanceInLabel={inputModel.balanceLabel}
       balanceOutLabel={formatBalanceLabel(
         tokenOutBalance.data,
@@ -183,8 +184,6 @@ export function StarknetSellTrade() {
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountInChange={onAmountInChange}
-      onHalf={onHalf}
-      onMax={onMax}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

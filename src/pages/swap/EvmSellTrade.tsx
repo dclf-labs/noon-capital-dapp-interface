@@ -29,7 +29,7 @@ export function EvmSellTrade() {
   const { inputs, connection, step, setStep, setInputs } = useSellForm()
   const { isApproved, isInsufficientBalance, tokenInAllowance, tokenInBalance, tokenOutBalance } =
     useSellBalance()
-  const { amountInUsd, isFetchingQuote, isQuoteError, price } = useSellPrice()
+  const { amountInUsd, isFetchingQuote, isQuoteError, price, tokenPrice } = useSellPrice()
   const { submitFee, txnUrl, setTxnUrl } = useSellTxn()
   const { setAmountIn, setTokenIn, setTokenOut } = useUpdateSell()
   const approve = useApprove()
@@ -46,7 +46,7 @@ export function EvmSellTrade() {
     tokenDecimals: inputs.tokenIn?.decimals,
   })
 
-  const { onAmountInChange, onHalf, onMax } = useTradeAmountHandlers({
+  const { onAmountInChange } = useTradeAmountHandlers({
     setInputs,
     setAmountIn,
     balance: tokenInBalance.data,
@@ -179,6 +179,7 @@ export function EvmSellTrade() {
       amountIn={inputs.amountIn}
       amountOut={inputs.amountOut}
       amountInUsd={amountInUsd}
+      payTokenUsdPrice={tokenPrice.data}
       balanceInLabel={inputModel.balanceLabel}
       balanceOutLabel={formatBalanceLabel(
         tokenOutBalance.data,
@@ -197,8 +198,6 @@ export function EvmSellTrade() {
       txnUrl={txnUrl}
       presetsDisabled={inputModel.isPresetDisabled || tokenInBalance.isLoading}
       onAmountInChange={onAmountInChange}
-      onHalf={onHalf}
-      onMax={onMax}
       onPrimary={onPrimary}
       onBack={onBack}
       onReset={onReset}

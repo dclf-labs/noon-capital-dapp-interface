@@ -66,8 +66,9 @@ describe('BuyPageView', () => {
   it('renders the Buy hero with an empty buy-token amount', () => {
     renderBuy()
 
+    // Home Buy: Louize product tabs only (no Buy|Sell action strip).
     expect(screen.getByRole('navigation', { name: 'Product' })).toBeInTheDocument()
-    expect(screen.getByRole('navigation', { name: 'Product actions' })).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Product actions' })).not.toBeInTheDocument()
     expect(screen.getByLabelText(/usn amount/i)).toHaveValue('')
     expect(screen.getByLabelText(/usn amount/i)).toHaveAttribute('placeholder', '0')
     expect(screen.queryByText(/≈/)).not.toBeInTheDocument()
